@@ -1,0 +1,1098 @@
+/* css/main.css */
+
+/* Resets Básicos */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin: 0; 
+    background: #f1f5f9; 
+    color: #1e293b; 
+}
+
+* { 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+}
+
+/* -------------------------------------------
+   CONTROLE DAS TELAS (O SEGREDO DA NAVEGAÇÃO)
+-------------------------------------------- */
+.view-container { 
+    display: none; /* Esconde todas as telas por padrão */
+    padding: 15px; 
+    flex-direction: column; 
+    align-items: center; 
+}
+
+.active-view { 
+    display: flex !important; /* Mostra apenas a tela com essa classe */
+}
+
+/* -------------------------------------------
+   ESTILOS GLOBAIS (Header, Botões, Cards)
+-------------------------------------------- */
+.header { 
+    background: #e20613; 
+    color: white; 
+    padding: 15px; 
+    text-align: center; 
+    position: sticky; 
+    top: 0; 
+    z-index: 999; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    height: 60px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn-menu-top { 
+    position: absolute; 
+    left: 15px; 
+    background: rgba(255,255,255,0.2); 
+    color: white; 
+    border: none; 
+    padding: 8px 12px; 
+    border-radius: 8px; 
+    font-weight: 800; 
+    cursor: pointer; 
+}
+
+.card-internal { 
+    background: white; 
+    padding: 25px; 
+    border-radius: 20px; 
+    width: 100%; 
+    max-width: 450px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+    text-align: center; 
+    margin-bottom: 20px; 
+}
+
+input { 
+    width: 100%; 
+    padding: 15px; 
+    border-radius: 12px; 
+    border: 2px solid #eee; 
+    margin-bottom: 15px; 
+    text-align: center; 
+    font-weight: 800; 
+}
+
+.btn-main { 
+    background: #e20613; 
+    color: white; 
+    border: none; 
+    padding: 18px; 
+    border-radius: 15px; 
+    width: 100%; 
+    font-weight: 800; 
+    cursor: pointer; 
+    text-transform: uppercase; 
+}
+
+/* -------------------------------------------
+   MENU GRID E CARDS
+-------------------------------------------- */
+.home-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 12px; 
+    width: 100%; 
+    max-width: 450px; 
+}
+
+.home-card { 
+    background: white; 
+    padding: 20px; 
+    border-radius: 18px; 
+    text-align: center; 
+    cursor: pointer; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.home-card-large { 
+    grid-column: span 2; 
+}
+
+.card-icon { 
+    font-size: 2em; 
+    margin-bottom: 5px; 
+}
+
+/* -------------------------------------------
+   OVERLAY DE CARREGAMENTO (SPINNER)
+-------------------------------------------- */
+#overlay { 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(255,255,255,0.95); 
+    z-index: 10000; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+}
+
+.overlay-hidden { 
+    display: none !important; 
+}
+
+.spinner { 
+    width: 50px; 
+    height: 50px; 
+    border: 5px solid #f3f3f3; 
+    border-top: 5px solid #6200ee; 
+    border-radius: 50%; 
+    animation: spin 1s linear infinite; 
+}
+
+@keyframes spin { 
+    100% { transform: rotate(360deg); } 
+}
+/* ================================
+   TEMA NOVO - AZUL PETRÓLEO
+   Cole no FINAL do css/main.css
+================================ */
+
+:root {
+    --primary: #0f172a;
+    --primary-light: #1e293b;
+    --accent: #2563eb;
+    --accent-soft: #dbeafe;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+
+    --centauro-red: #2563eb;
+    --dark-blue: #0f172a;
+}
+
+body {
+    background: linear-gradient(180deg, #eef4ff, #f8fafc);
+    color: var(--text);
+}
+
+/* HEADER */
+.header {
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.22);
+}
+
+.header h1 {
+    letter-spacing: 0.3px;
+}
+
+/* BOTÃO MENU / VOLTAR */
+.btn-menu-top {
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 999px;
+    padding: 8px 14px;
+}
+
+/* CARDS INTERNOS */
+.card-internal {
+    border-radius: 24px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+/* INPUTS */
+input {
+    border: 2px solid #e2e8f0;
+    background: #f8fafc;
+    color: var(--text);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+/* BOTÕES PRINCIPAIS */
+.btn-main {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    border-radius: 16px;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+    transition: 0.2s ease;
+}
+
+.btn-main:active {
+    transform: scale(0.97);
+}
+
+/* MENU PRINCIPAL */
+.home-grid {
+    gap: 14px;
+}
+
+.home-card {
+    border-radius: 24px;
+    padding: 22px 14px;
+    border: 1px solid #e2e8f0 !important;
+    border-left: none !important;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    transition: 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.home-card:active {
+    transform: scale(0.97);
+}
+
+.home-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, #2563eb, #38bdf8);
+}
+
+.home-card h4 {
+    margin: 6px 0 0;
+    font-size: 0.85em;
+    color: #0f172a;
+}
+
+.card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: #dbeafe;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7em;
+    margin-bottom: 8px;
+}
+
+/* CARDS ESCUROS DO MENU */
+.home-card[style*="color:white"] h4,
+.home-card[style*="color: white"] h4 {
+    color: white;
+}
+
+.home-card[style*="background:#6200ee"],
+.home-card[style*="background:#334155"],
+.home-card[style*="background:#475569"] {
+    background: linear-gradient(135deg, #0f172a, #1e3a8a) !important;
+    color: white !important;
+}
+
+.home-card[style*="background:#6200ee"]::before,
+.home-card[style*="background:#334155"]::before,
+.home-card[style*="background:#475569"]::before {
+    background: linear-gradient(90deg, #38bdf8, #2563eb);
+}
+
+/* BADGE DA LOJA */
+.loja-badge {
+    border: 1px solid #bfdbfe !important;
+    background: white !important;
+    color: #0f172a !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+/* TÍTULOS VERMELHOS DO HTML */
+h2,
+h3 {
+    color: #0f172a !important;
+}
+
+/* OVERLAY */
+#overlay p {
+    color: #2563eb !important;
+}
+
+/* SWIPE */
+.swipe-container {
+    background: #2563eb;
+}
+
+.swipe-content {
+    border-left-color: #2563eb;
+}
+
+/* REMAN MANTÉM ROXO, MAS MAIS MODERNO */
+.reman-tag,
+.btn-reman-check {
+    background: #4f46e5 !important;
+}
+
+.reman-card-item {
+    border-left-color: #4f46e5;
+}
+
+/* INVENTÁRIO / PREVENÇÃO */
+#viewMenuInventario h3,
+#viewNomeInv,
+#viewTamanhoInv {
+    color: #2563eb !important;
+}
+
+/* BOTÕES COM COR INLINE ANTIGA */
+button[style*="background:#7c3aed"],
+button[style*="background: #7c3aed"],
+button[style*="background:#6200ee"],
+button[style*="background: #6200ee"] {
+    background: linear-gradient(135deg, #2563eb, #1e40af) !important;
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+    .home-card {
+        padding: 20px 10px;
+    }
+
+    .card-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.5em;
+    }
+
+    .home-card h4 {
+        font-size: 0.78em;
+    }
+}
+/* =================================
+   AJUSTE DO TOPO / MENU PRINCIPAL
+   Remove loja duplicada do cabeçalho
+================================= */
+
+/* Esconde "LOJA: 288" do cabeçalho */
+.header-info {
+    display: none !important;
+}
+
+/* Deixa o título centralizado e mais limpo */
+.header h1 {
+    font-size: 1.25em !important;
+    margin: 0 auto !important;
+}
+
+/* Deixa o badge de unidade mais discreto */
+.loja-badge {
+    font-size: 0.85em !important;
+    padding: 9px 12px !important;
+    border-radius: 18px !important;
+}
+
+/* Caso queira esconder também a linha UNIDADE/OPERADOR, descomente abaixo */
+/*
+.loja-badge {
+    display: none !important;
+}
+*/
+/* BOTÃO FIXO DA LISTA DE REPOSIÇÃO */
+.footer-action-estoque {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.96);
+    padding: 14px 18px;
+    border-top: 1px solid #e2e8f0;
+    z-index: 900;
+    display: flex;
+    justify-content: center;
+}
+
+.footer-action-estoque .btn-main {
+    max-width: 450px;
+}
+
+/* MELHORA DO SWIPE */
+.swipe-content {
+    touch-action: pan-y;
+    will-change: transform;
+}
+
+/* ================================
+   MENU PREMIUM ROXO
+================================ */
+
+:root {
+    --purple-main: #5b16c8;
+    --purple-dark: #24105f;
+    --purple-soft: #f5efff;
+    --purple-border: #dfccff;
+    --purple-text: #25105f;
+}
+
+.header {
+    background: linear-gradient(135deg, #23005d, #6d19d8) !important;
+    height: 88px;
+    box-shadow: none;
+}
+
+.header h1 {
+    font-size: 1.45em !important;
+    font-weight: 900;
+}
+
+#viewMenu {
+    background: linear-gradient(180deg, #ffffff 0%, #fbf8ff 100%);
+    border-radius: 34px 34px 0 0;
+    margin-top: -8px;
+    padding: 26px 18px 18px;
+}
+
+.loja-badge {
+    background: white !important;
+    border: 1.5px solid var(--purple-border) !important;
+    color: var(--purple-text) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 8px 25px rgba(91, 22, 200, 0.08);
+    font-size: 0.95em !important;
+}
+
+.badge-separator {
+    display: inline-block;
+    width: 1px;
+    height: 22px;
+    background: var(--purple-border);
+    margin: 0 18px;
+    vertical-align: middle;
+}
+
+.home-grid {
+    max-width: 900px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.home-card {
+    min-height: 175px;
+    align-items: flex-start;
+    text-align: left;
+    border-radius: 22px;
+    padding: 26px 26px 22px;
+    border: 1px solid #eee7ff !important;
+    box-shadow: 0 12px 32px rgba(91, 22, 200, 0.08);
+    position: relative;
+}
+
+.home-card::before {
+    display: none;
+}
+
+.card-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #f0e4ff;
+    color: var(--purple-main);
+    font-size: 2.1em;
+    margin-bottom: 18px;
+}
+
+.card-text h4 {
+    color: var(--purple-text);
+    font-size: 1.05em;
+    margin: 0 0 8px;
+}
+
+.card-text p {
+    color: #625b7c;
+    font-size: 0.9em;
+    line-height: 1.35;
+    margin: 0;
+}
+
+.card-arrow {
+    position: absolute;
+    right: 26px;
+    bottom: 28px;
+    color: #8b5cf6;
+    font-size: 2.2em;
+    font-weight: 300;
+}
+
+.small-card {
+    min-height: 120px;
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+}
+
+.small-card .card-icon {
+    width: 58px;
+    height: 58px;
+    font-size: 1.7em;
+    margin-bottom: 0;
+}
+
+.btn-sair {
+    grid-column: span 2;
+    background: linear-gradient(135deg, #741ee8, #31046f);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 18px;
+    font-size: 1em;
+    font-weight: 900;
+    box-shadow: 0 12px 28px rgba(91, 22, 200, 0.25);
+}
+
+.footer-copy {
+    margin-top: 18px;
+    color: #9b85c9;
+    font-size: 0.8em;
+    text-align: center;
+}
+
+@media (max-width: 520px) {
+    .home-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .home-card {
+        min-height: 160px;
+        padding: 20px 16px;
+    }
+
+    .card-icon {
+        width: 58px;
+        height: 58px;
+        font-size: 1.7em;
+    }
+
+    .card-text h4 {
+        font-size: 0.86em;
+    }
+
+    .card-text p {
+        font-size: 0.75em;
+    }
+
+    .card-arrow {
+        right: 16px;
+        bottom: 18px;
+    }
+}
+
+/* =====================================================
+   TEMA GLOBAL ROXO PREMIUM - ULTRA CHECK HUB
+   Cole no FINAL do css/main.css
+===================================================== */
+
+:root {
+    --uh-primary: #5b16c8;
+    --uh-primary-dark: #23005d;
+    --uh-primary-2: #7c3aed;
+    --uh-bg: #fbf8ff;
+    --uh-card: #ffffff;
+    --uh-border: #eadcff;
+    --uh-soft: #f2e9ff;
+    --uh-text: #25105f;
+    --uh-muted: #6b6380;
+    --uh-success: #22c55e;
+    --uh-warning: #f59e0b;
+    --uh-danger: #ef4444;
+
+    --centauro-red: #5b16c8;
+    --dark-blue: #25105f;
+    --accent: #7c3aed;
+}
+
+body {
+    background: linear-gradient(180deg, #ffffff 0%, var(--uh-bg) 100%) !important;
+    color: var(--uh-text) !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* HEADER GLOBAL */
+.header {
+    background: linear-gradient(135deg, var(--uh-primary-dark), var(--uh-primary)) !important;
+    color: white !important;
+    box-shadow: 0 10px 28px rgba(91, 22, 200, 0.22) !important;
+}
+
+.header h1 {
+    color: white !important;
+    font-weight: 900 !important;
+}
+
+.btn-menu-top {
+    background: rgba(255,255,255,0.18) !important;
+    border: 1px solid rgba(255,255,255,0.28) !important;
+    color: white !important;
+    border-radius: 999px !important;
+}
+
+/* TELAS */
+.view-container {
+    background: transparent !important;
+}
+
+/* CARDS GERAIS */
+.card-internal,
+.reman-card-item,
+.swipe-content {
+    background: var(--uh-card) !important;
+    border: 1px solid var(--uh-border) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 12px 30px rgba(91, 22, 200, 0.08) !important;
+}
+
+/* TÍTULOS */
+h2, h3, h4 {
+    color: var(--uh-text) !important;
+}
+
+/* INPUTS E SELECTS */
+input,
+select {
+    background: white !important;
+    border: 2px solid var(--uh-border) !important;
+    color: var(--uh-text) !important;
+    border-radius: 16px !important;
+}
+
+input:focus,
+select:focus {
+    outline: none !important;
+    border-color: var(--uh-primary) !important;
+    box-shadow: 0 0 0 4px rgba(91, 22, 200, 0.12) !important;
+}
+
+/* BOTÕES */
+.btn-main {
+    background: linear-gradient(135deg, var(--uh-primary-2), var(--uh-primary-dark)) !important;
+    color: white !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 22px rgba(91, 22, 200, 0.22) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.btn-main:active,
+.home-card:active {
+    transform: scale(0.98);
+}
+
+/* BADGES */
+.loja-badge {
+    background: white !important;
+    color: var(--uh-text) !important;
+    border: 1.5px solid var(--uh-border) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 8px 25px rgba(91, 22, 200, 0.08) !important;
+}
+
+/* MENU */
+.home-card {
+    background: white !important;
+    color: var(--uh-text) !important;
+    border: 1px solid var(--uh-border) !important;
+    border-left: none !important;
+    border-radius: 22px !important;
+    box-shadow: 0 12px 32px rgba(91, 22, 200, 0.08) !important;
+}
+
+.card-icon {
+    background: var(--uh-soft) !important;
+    color: var(--uh-primary) !important;
+}
+
+/* REPOSIÇÃO / ESTOQUE */
+.swipe-container {
+    background: var(--uh-danger) !important;
+    border-radius: 22px !important;
+}
+
+.swipe-content {
+    border-left: 6px solid var(--uh-primary) !important;
+}
+
+.swipe-action {
+    background: var(--uh-danger) !important;
+}
+
+.tam-row,
+.reman-grade-linha,
+.grade-btn {
+    background: #fcfaff !important;
+    border: 2px solid var(--uh-border) !important;
+    color: var(--uh-text) !important;
+    border-radius: 16px !important;
+}
+
+.tam-row.coletado,
+.marcado-separado {
+    background: #f0fdf4 !important;
+    border-color: var(--uh-success) !important;
+    color: #166534 !important;
+}
+
+/* QR */
+.btn-qr-direct,
+.btn-reman-check {
+    background: var(--uh-primary) !important;
+    color: white !important;
+}
+
+/* TAGS */
+.reman-tag {
+    background: linear-gradient(135deg, var(--uh-primary-2), var(--uh-primary-dark)) !important;
+    color: white !important;
+}
+
+.cor-tag,
+.saldo-txt {
+    color: var(--uh-muted) !important;
+}
+
+.preco-tag {
+    background: var(--uh-primary-dark) !important;
+    color: white !important;
+}
+
+/* HISTÓRICO */
+#contHist > div,
+#histRelatorioInv,
+#listaAnalise > div,
+#listaPedidos > div {
+    border-radius: 22px !important;
+}
+
+/* INVENTÁRIO */
+#gestureZoneInv {
+    border-radius: 28px !important;
+}
+
+#viewNomeInv,
+#viewTamanhoInv,
+#viewSKUInv {
+    color: var(--uh-primary) !important;
+}
+
+#progressBarInv,
+#barFill {
+    background: linear-gradient(90deg, var(--uh-primary), var(--uh-primary-2)) !important;
+}
+
+/* UPLOAD */
+#viewUpload .card-internal {
+    background: white !important;
+}
+
+/* MODAIS */
+#modalFoto .card-internal,
+#modalQR .card-internal {
+    border-radius: 24px !important;
+    border: 1px solid var(--uh-border) !important;
+}
+
+/* LOADING */
+.spinner {
+    border-top-color: var(--uh-primary) !important;
+}
+
+#overlay p {
+    color: var(--uh-primary) !important;
+}
+
+/* BOTÃO FIXO DE SINC */
+.footer-action-estoque {
+    background: rgba(255,255,255,0.96) !important;
+    border-top: 1px solid var(--uh-border) !important;
+}
+
+/* MOBILE */
+@media (max-width: 520px) {
+    .card-internal {
+        padding: 20px !important;
+    }
+
+    .btn-main {
+        padding: 16px !important;
+        font-size: 0.85em !important;
+    }
+
+    input,
+    select {
+        padding: 14px !important;
+    }
+
+    .home-card {
+        border-radius: 20px !important;
+    }
+}
+
+/* STATUS REMAN */
+.reman-alerta {
+    background: linear-gradient(135deg, #f97316, #ea580c) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 8px 22px rgba(249,115,22,0.25);
+}
+
+.reman-normal {
+    background: linear-gradient(135deg, #7c3aed, #23005d) !important;
+    color: white !important;
+}
+
+#tagFeedbackTop.reman-laranja {
+    background: linear-gradient(135deg, #f97316, #c2410c) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 24px rgba(249,115,22,0.35) !important;
+    border: none !important;
+}
+
+/* CARD ESCURO - PRIMEIRA BUSCA */
+.home-card.card-dark,
+.menu-card-dark {
+    background: linear-gradient(135deg, #23005d, #233b8f) !important;
+    color: white !important;
+}
+
+.home-card.card-dark h3,
+.home-card.card-dark h4,
+.home-card.card-dark p,
+.menu-card-dark h3,
+.menu-card-dark h4,
+.menu-card-dark p {
+    color: white !important;
+}
+
+.home-card.card-dark .card-icon,
+.menu-card-dark .card-icon {
+    background: rgba(255,255,255,0.12) !important;
+    color: white !important;
+}
+
+/* AJUSTE CARD 1ª BUSCA RFID */
+.inventario-card-destaque {
+    background: linear-gradient(135deg, #23005d, #233b8f) !important;
+    color: white !important;
+    border: none !important;
+    min-height: 170px !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+}
+
+.inventario-card-destaque h4,
+.inventario-card-destaque p {
+    color: white !important;
+}
+
+.inventario-card-destaque p {
+    font-size: 0.75em;
+    opacity: 0.9;
+    margin: 6px 0 0;
+}
+
+.inventario-card-destaque .card-icon {
+    background: rgba(255,255,255,0.16) !important;
+    color: white !important;
+}
+
+/* MENU INVENTÁRIO ISOLADO */
+.inventario-menu-grid {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.inventario-card-principal {
+    grid-column: span 2;
+    background: linear-gradient(135deg, #23005d, #233b8f);
+    color: white;
+    border-radius: 24px;
+    padding: 28px;
+    min-height: 170px;
+    box-shadow: 0 14px 32px rgba(91, 22, 200, 0.18);
+    cursor: pointer;
+}
+
+.inventario-card-principal h4,
+.inventario-card-principal p {
+    color: white !important;
+    margin: 0;
+}
+
+.inventario-card-principal p {
+    margin-top: 8px;
+    opacity: 0.9;
+    font-size: 0.85em;
+}
+
+.inventario-card,
+.inventario-card-principal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.inventario-card {
+    background: white;
+    color: #25105f;
+    border: 1px solid #eadcff;
+    border-radius: 22px;
+    padding: 24px;
+    min-height: 150px;
+    box-shadow: 0 12px 32px rgba(91, 22, 200, 0.08);
+    cursor: pointer;
+}
+
+.inventario-card h4 {
+    color: #25105f !important;
+    margin: 12px 0 0;
+}
+
+.inventario-icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: #f2e9ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8em;
+    margin-bottom: 12px;
+}
+
+.inventario-card-principal .inventario-icon {
+    background: rgba(255,255,255,0.16);
+}
+
+@media (max-width: 520px) {
+    .inventario-menu-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .inventario-card-principal {
+        min-height: 150px;
+        padding: 22px;
+    }
+
+    .inventario-card {
+        min-height: 135px;
+        padding: 18px;
+    }
+
+    .inventario-icon {
+        width: 54px;
+        height: 54px;
+        font-size: 1.5em;
+    }
+}
+
+/* =========================================
+   UPLOAD MODERNO
+========================================= */
+
+.upload-box {
+    width: 100%;
+    background: white;
+    border: 2px solid #eadcff;
+    border-radius: 22px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 10px 28px rgba(91,22,200,0.06);
+}
+
+.upload-btn {
+    background: linear-gradient(135deg, #7c3aed, #23005d);
+    color: white;
+    border-radius: 16px;
+    padding: 14px;
+    font-weight: 900;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+.upload-btn:active {
+    transform: scale(0.98);
+}
+
+.upload-name {
+    background: #faf7ff;
+    border: 1px solid #eadcff;
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 0.8em;
+    color: #25105f;
+    word-break: break-word;
+    text-align: center;
+}
+
+/* =========================================
+   SOBRE
+========================================= */
+
+.sobre-bloco {
+    margin-bottom: 28px;
+}
+
+.sobre-bloco h3 {
+    color: #5b16c8;
+    margin-bottom: 12px;
+    font-size: 1.05em;
+}
+
+.sobre-bloco p {
+    color: #5b5570;
+    font-size: 0.9em;
+    margin-bottom: 14px;
+}
+
+.sobre-lista {
+    padding-left: 18px;
+    color: #5b5570;
+    font-size: 0.9em;
+}
+
+.sobre-lista li {
+    margin-bottom: 10px;
+}
+
+.sobre-dev {
+    margin-top: 35px;
+    padding: 24px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #23005d, #5b16c8);
+    color: white;
+    box-shadow: 0 14px 32px rgba(91,22,200,0.22);
+}
+
+.sobre-dev h3 {
+    color: white;
+    margin: 12px 0 8px;
+}
+
+.sobre-dev p {
+    color: rgba(255,255,255,0.88);
+    font-size: 0.88em;
+}
+
+.dev-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.16);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.75em;
+    font-weight: 900;
+}

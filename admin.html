@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Ultra Check</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<style>
+
+body{
+    margin:0;
+    background:#f1f5f9;
+    font-family:Arial,sans-serif;
+    color:#0f172a;
+}
+
+.header{
+    background:linear-gradient(135deg,#0f172a,#1e3a8a);
+    color:white;
+    padding:18px;
+    text-align:center;
+    font-weight:900;
+    font-size:1.2em;
+}
+
+.container{
+    max-width:500px;
+    margin:0 auto;
+    padding:15px;
+}
+
+.card{
+    background:white;
+    border-radius:24px;
+    padding:20px;
+    margin-top:18px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+h2{
+    margin-top:0;
+    color:#1e3a8a;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border-radius:14px;
+    border:2px solid #e2e8f0;
+    margin-bottom:10px;
+    box-sizing:border-box;
+    font-weight:700;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:#2563eb;
+    color:white;
+    font-weight:900;
+    cursor:pointer;
+    margin-top:8px;
+}
+
+.btn-red{
+    background:#ef4444;
+}
+
+.btn-gray{
+    background:#475569;
+}
+
+.usuario-card{
+    border:1px solid #e2e8f0;
+    border-radius:18px;
+    padding:15px;
+    margin-top:12px;
+}
+
+.usuario-card h3{
+    margin:0;
+    font-size:1em;
+}
+
+.usuario-card p{
+    margin:5px 0;
+    color:#64748b;
+    font-size:0.9em;
+}
+
+.status{
+    display:inline-block;
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:0.75em;
+    font-weight:900;
+    margin-top:8px;
+}
+
+.ativo{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.inativo{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.msg{
+    text-align:center;
+    margin-top:12px;
+    font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+ADMIN ULTRA CHECK
+</div>
+
+<div class="container">
+
+    <!-- LOGIN -->
+    <div class="card" id="loginCard">
+
+        <h2>Login Admin</h2>
+
+        <input type="text" id="usuarioAdmin" placeholder="Usuário">
+
+        <input type="password" id="senhaAdmin" placeholder="Senha">
+
+        <button onclick="loginAdmin()">
+            ENTRAR
+        </button>
+
+        <div class="msg" id="msgLogin"></div>
+
+    </div>
+
+    <!-- PAINEL -->
+    <div id="painelAdmin" style="display:none;">
+
+        <!-- CADASTRO -->
+        <div class="card">
+
+            <h2>Novo Usuário</h2>
+
+            <input type="text" id="novoUsuario" placeholder="Usuário">
+
+            <input type="text" id="novoNome" placeholder="Nome">
+
+            <input type="password" id="novaSenha" placeholder="Senha">
+
+            <button onclick="cadastrarUsuario()">
+                CADASTRAR
+            </button>
+
+            <div class="msg" id="msgCadastro"></div>
+
+        </div>
+
+        <!-- LISTA -->
+        <div class="card">
+
+            <h2>Usuários</h2>
+
+            <div id="listaUsuarios"></div>
+
+        </div>
+
+        <div class="card">
+
+            <button class="btn-gray" onclick="logout()">
+                SAIR
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBnyiKNfjW6Y4t15OnGRdKaKw6Fm8srx2k",
+    authDomain: "rfid-sincronizado.firebaseapp.com",
+    databaseURL: "https://rfid-sincronizado-default-rtdb.firebaseio.com",
+    projectId: "rfid-sincronizado",
+    storageBucket: "rfid-sincronizado.appspot.com",
+    messagingSenderId: "1092450813850",
+    appId: "1:1092450813850:web:f6d3c7f9f1b2a5c0a1d111"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const database = firebase.database();
+
+let adminAtual = null;
+
+function gerarEmail(usuario){
+
+    return usuario
+        .toLowerCase()
+        .trim() + "@ultracheck.local";
+
+}
+
+function loginAdmin(){
+
+    const usuario =
+        document.getElementById('usuarioAdmin')
+        .value.trim();
+
+    const senha =
+        document.getElementById('senhaAdmin')
+        .value.trim();
+
+    const email = gerarEmail(usuario);
+
+    auth.signInWithEmailAndPassword(email, senha)
+
+    .then(async(userCredential)=>{
+
+        const user = userCredential.user;
+
+        const admin =
+            await database
+            .ref("admins/" + user.uid)
+            .once("value");
+
+        if(admin.val() === true){
+
+            adminAtual = user;
+
+            document
+            .getElementById('loginCard')
+            .style.display = 'none';
+
+            document
+            .getElementById('painelAdmin')
+            .style.display = 'block';
+
+            carregarUsuarios();
+
+        }else{
+
+            auth.signOut();
+
+            document
+            .getElementById('msgLogin')
+            .innerText =
+            "Usuário não é administrador.";
+
+        }
+
+    })
+
+    .catch((error)=>{
+
+        console.log(error);
+
+        document
+        .getElementById('msgLogin')
+        .innerText =
+        "Login inválido.";
+
+    });
+
+}
+
+function cadastrarUsuario(){
+
+    const usuario =
+        document.getElementById('novoUsuario')
+        .value.trim();
+
+    const nome =
+        document.getElementById('novoNome')
+        .value.trim();
+
+    const senha =
+        document.getElementById('novaSenha')
+        .value.trim();
+
+    if(!usuario || !nome || !senha){
+
+        return alert("Preencha todos os campos.");
+
+    }
+
+    if(senha.length < 6){
+
+        return alert(
+            "A senha precisa ter no mínimo 6 caracteres."
+        );
+
+    }
+
+    const email = gerarEmail(usuario);
+
+    const secondApp =
+        firebase.initializeApp(
+            firebaseConfig,
+            "Secondary"
+        );
+
+    const secondAuth = secondApp.auth();
+
+    secondAuth
+    .createUserWithEmailAndPassword(email, senha)
+
+    .then(async(userCredential)=>{
+
+        const novoUser = userCredential.user;
+
+        await database
+        .ref("usuarios_autorizados/" + novoUser.uid)
+        .set({
+
+            usuario: usuario,
+            nome: nome,
+            ativo: true,
+            criadoEm: new Date().toISOString()
+
+        });
+
+        document
+        .getElementById('msgCadastro')
+        .innerText =
+        "Usuário cadastrado.";
+
+        document
+        .getElementById('novoUsuario')
+        .value = "";
+
+        document
+        .getElementById('novoNome')
+        .value = "";
+
+        document
+        .getElementById('novaSenha')
+        .value = "";
+
+        carregarUsuarios();
+
+        secondAuth.signOut();
+
+        secondApp.delete();
+
+    })
+
+    .catch((err)=>{
+
+        console.log(err);
+
+        alert(err.message);
+
+    });
+
+}
+
+function carregarUsuarios(){
+
+    database
+    .ref("usuarios_autorizados")
+    .on("value",(snapshot)=>{
+
+        const lista =
+            document.getElementById('listaUsuarios');
+
+        lista.innerHTML = "";
+
+        const dados = snapshot.val() || {};
+
+        Object.keys(dados).forEach(uid=>{
+
+            const user = dados[uid];
+
+            const div =
+                document.createElement('div');
+
+            div.className = 'usuario-card';
+
+            div.innerHTML = `
+
+                <h3>${user.nome}</h3>
+
+                <p>
+                    Usuário:
+                    <b>${user.usuario}</b>
+                </p>
+
+                <div class="
+                    status
+                    ${user.ativo ? 'ativo' : 'inativo'}
+                ">
+                    ${user.ativo ? 'ATIVO' : 'INATIVO'}
+                </div>
+
+                <button onclick="editarNome(
+                    '${uid}',
+                    '${user.nome}'
+                )">
+                    EDITAR NOME
+                </button>
+
+                <button onclick="toggleUsuario(
+                    '${uid}',
+                    ${user.ativo}
+                )">
+                    ${user.ativo ? 'DESATIVAR' : 'ATIVAR'}
+                </button>
+
+                <button
+                    class="btn-red"
+                    onclick="removerUsuario(
+                    '${uid}'
+                )">
+                    REMOVER ACESSO
+                </button>
+
+            `;
+
+            lista.appendChild(div);
+
+        });
+
+    });
+
+}
+
+function editarNome(uid,nomeAtual){
+
+    const novoNome =
+        prompt("Novo nome:",nomeAtual);
+
+    if(!novoNome) return;
+
+    database
+    .ref("usuarios_autorizados/" + uid + "/nome")
+    .set(novoNome);
+
+}
+
+function toggleUsuario(uid,statusAtual){
+
+    database
+    .ref("usuarios_autorizados/" + uid + "/ativo")
+    .set(!statusAtual);
+
+}
+
+function removerUsuario(uid){
+
+    if(confirm("Remover acesso deste usuário?")){
+
+        database
+        .ref("usuarios_autorizados/" + uid)
+        .remove();
+
+    }
+
+}
+
+function logout(){
+
+    auth.signOut()
+    .then(()=>{
+
+        location.reload();
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,227 @@
+// js/inventario_core.js
+import { state, normalizarCodigo } from './state.js';
+import { database } from './firebase.js';
+import { mudarTela } from './ui.js';
+
+export function abrirModoInventario(modo, label) {
+    document.getElementById('overlay').style.display = 'flex';
+    state.modoInventario = modo;
+    state.indiceInventario = 0;
+    state.listaInventarioOriginal = [];
+    
+    database.ref('arquivos_lojas/' + state.lojaAtual).once('value', snapshot => {
+        const d = snapshot.val();
+        
+        // Filtros originais rigorosos da 1ª e 2ª Busca
+        if(modo === 'padrao') { 
+            state.listaInventarioOriginal = Object.keys(state.dbMojixGlobal)
+                .filter(k => parseInt(state.dbMojixGlobal[k].Remaining) < 0)
+                .map(k => ({ Material: k })); 
+        } else { 
+            state.listaInventarioOriginal = JSON.parse(d.busca || "[]")
+                .map(r => ({ Material: normalizarCodigo(r.Material || r.SKU || Object.values(r)[0]) }))
+                .filter(x => x.Material != "undefined"); 
+        }
+        
+        state.listaInventarioFiltrada = [...state.listaInventarioOriginal];
+        document.getElementById('labelBuscaNome').innerText = label;
+        document.getElementById('filtroCategoria').value = "TODAS";
+        
+        // Povoa Filtro
+        let cats = new Set();
+        Object.values(state.dbMojixGlobal).forEach(m => { 
+            if(m['Dept Name']) cats.add(m['Dept Name']); 
+        });
+        const select = document.getElementById('filtroCategoria');
+        select.innerHTML = '<option value="TODAS">TODAS AS CATEGORIAS</option>';
+        Array.from(cats).sort().forEach(c => { 
+            select.innerHTML += `<option value="${c}">${c}</option>`; 
+        });
+        select.innerHTML += '<option value="MANUAL">📦 ITENS MANUAIS</option>';
+
+        iniciarAppInventario();
+    });
+}
+
+function iniciarAppInventario() {
+    database.ref('sinc_rfid/' + state.lojaAtual).on('value', s => { 
+        state.respostasInventarioNuvem = s.val() || {}; 
+        renderInventario(); 
+        atualizarChecklistInv(document.getElementById('listaProgresso'), state.listaInventarioFiltrada); 
+        atualizarBarraProgressoInv();
+        document.getElementById('overlay').style.display = 'none'; 
+        mudarTela('viewInventarioApp');
+    });
+}
+
+export function aplicarFiltroCategoriaInv() {
+    const cat = document.getElementById('filtroCategoria').value;
+    if(cat === "TODAS") { 
+        state.listaInventarioFiltrada = [...state.listaInventarioOriginal]; 
+    } else if(cat === "MANUAL") { 
+        state.listaInventarioFiltrada = state.listaInventarioOriginal.filter(it => !state.dbMojixGlobal[it.Material]); 
+    } else { 
+        state.listaInventarioFiltrada = state.listaInventarioOriginal.filter(it => state.dbMojixGlobal[it.Material] && state.dbMojixGlobal[it.Material]['Dept Name'] === cat); 
+    }
+    state.indiceInventario = 0; 
+    renderInventario(); 
+    atualizarChecklistInv(document.getElementById('listaProgresso'), state.listaInventarioFiltrada); 
+    atualizarBarraProgressoInv();
+}
+
+function atualizarBarraProgressoInv() {
+    const total = state.listaInventarioFiltrada.length;
+    const respondidos = state.listaInventarioFiltrada.filter(it => state.respostasInventarioNuvem[it.Material]).length;
+    const porc = total > 0 ? Math.round((respondidos / total) * 100) : 0;
+    document.getElementById('progressBarInv').style.width = porc + "%";
+    document.getElementById('labelProgressoPercent').innerText = `Progresso: ${porc}% (${respondidos}/${total})`;
+}
+
+export function renderInventario() {
+    if(!state.listaInventarioFiltrada[state.indiceInventario]) return;
+    
+    const sku = state.listaInventarioFiltrada[state.indiceInventario].Material;
+    const info = state.dbSap[sku] || {};
+    const moj = state.dbMojixGlobal[sku] || {};
+    
+    document.getElementById('viewImgInv').src = `https://imgcentauro-a.akamaihd.net/768x768/${sku.substring(0,8)}.jpg`;
+    document.getElementById('viewNomeInv').innerText = info["Descrição material"] || info["Texto breve material"] || moj["SKU Description"] || "NÃO CADASTRADO NO SAP";
+    document.getElementById('viewSKUInv').innerText = sku; 
+    document.getElementById('viewEANInv').innerText = info.EAN || "---";
+    
+    let tam = "--";
+    for(let key in info) { if(key.toLowerCase().includes("tam")) tam = info[key]; }
+    if(info.Tamanho) tam = info.Tamanho; // Resgata nomenclatura antiga caso exista
+    
+    document.getElementById('viewTamanhoInv').innerText = tam;
+    
+    document.getElementById('statsAreaInv').style.display = (state.modoInventario === 'padrao' ? 'grid' : 'none');
+    if(state.modoInventario === 'padrao') { 
+        document.getElementById('viewExpInv').innerText = moj.Expected || 0; 
+        document.getElementById('viewCountInv').innerText = moj.Counted || 0; 
+        document.getElementById('viewDifInv').innerText = moj.Remaining || 0; 
+    }
+    
+    document.getElementById('contadorInv').innerText = (state.indiceInventario+1).toString().padStart(2, '0') + " / " + state.listaInventarioFiltrada.length;
+    document.getElementById('inputAchadoInv').value = state.respostasInventarioNuvem[sku] || "";
+    document.getElementById('btnEspiarInv').style.display = (state.modoInventario === 'padrao' ? 'none' : 'block');
+}
+
+export function navegarInventario(p) { 
+    state.indiceInventario += p; 
+
+    if (state.indiceInventario < 0) {
+        state.indiceInventario = 0;
+    }
+
+    if (state.indiceInventario >= state.listaInventarioFiltrada.length) {
+        state.indiceInventario = state.listaInventarioFiltrada.length - 1;
+    }
+
+    renderInventario();
+}
+
+export function salvarContagemRemota() { 
+    database.ref(`sinc_rfid/${state.lojaAtual}/${state.listaInventarioFiltrada[state.indiceInventario].Material}`).set(document.getElementById('inputAchadoInv').value || null); 
+}
+
+export function espiarMojix() { 
+    const m = state.dbMojixGlobal[state.listaInventarioFiltrada[state.indiceInventario].Material]; 
+    alert(m ? `ESP: ${m.Expected} | LIDO: ${m.Counted}` : "Sem dados de RFID para este item."); 
+}
+
+// FUNÇÃO ORIGINAL RESTAURADA: Atualiza a lista verde inferior dinamicamente
+function atualizarChecklistInv(container, lista) {
+    if(!container) return;
+    container.innerHTML = "";
+    
+    lista.forEach((it, i) => {
+        const val = state.respostasInventarioNuvem[it.Material];
+        const info = state.dbSap[it.Material] || {};
+        const moj = state.dbMojixGlobal[it.Material] || {};
+        const base8 = it.Material.substring(0, 8); // Pega a base para a imagem
+        
+        const d = document.createElement('div'); 
+        d.className = `check-item ${val ? 'concluido' : ''}`;
+        
+        d.style.background = "#fff";
+        d.style.padding = "15px";
+        d.style.borderBottom = "1px solid #f1f5f9";
+        d.style.borderRadius = "15px";
+        d.style.marginBottom = "10px";
+        d.style.fontSize = "0.85em";
+        d.style.textAlign = "left";
+        d.style.cursor = "pointer";
+        d.style.boxShadow = "0 4px 10px rgba(0,0,0,0.03)";
+        
+        if (val) {
+            d.style.background = "#f0fdf4";
+            d.style.borderLeft = "8px solid #22c55e";
+        }
+        
+        const nomeExibicao = info["Descrição material"] || info["Texto breve material"] || moj["SKU Description"] || "Item s/ Nome";
+        let tam = "--";
+        for(let key in info) { if(key.toLowerCase().includes("tam")) tam = info[key]; }
+        if(info.Tamanho) tam = info.Tamanho; 
+        
+        d.onclick = () => { 
+            state.indiceInventario = i; 
+            renderInventario(); 
+            if(container.id !== 'listaProgresso') mudarTela('viewInventarioApp');
+            window.scrollTo(0,0);
+        };
+        
+        // A FOTO FOI INSERIDA AQUI NO HTML DINÂMICO
+        d.innerHTML = `
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width: 60px; height: 60px; border-radius: 10px; border: 1px solid #eee; object-fit: contain; background: white;">
+                <div style="flex: 1;">
+                    <span style="font-size:0.7em;">EAN: ${info.EAN || '---'} | TAM: ${tam}</span><br>
+                    <b>${it.Material}</b> - <span style="font-size:0.85em; color:#6200ee;">${nomeExibicao}</span>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:12px; font-weight:800; color:#64748b; background:rgba(0,0,0,0.03); padding:8px 12px; border-radius:10px; font-size:0.75em;">
+                <span>EXP: ${moj.Expected || 0}</span> <span>LIDO: ${moj.Counted || 0}</span> <span>MÃO: ${val || "Vazio"}</span>
+            </div>
+        `;
+        container.appendChild(d);
+    });
+}
+/* =========================================
+   SWIPE INVENTÁRIO
+========================================= */
+
+let startXInv = 0;
+let endXInv = 0;
+
+setTimeout(() => {
+
+    const area = document.getElementById('gestureZoneInv');
+
+    if(area){
+
+        area.addEventListener('touchstart', (e) => {
+            startXInv = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        area.addEventListener('touchend', (e) => {
+
+            endXInv = e.changedTouches[0].screenX;
+
+            const diff = endXInv - startXInv;
+
+            // Swipe para esquerda = próximo
+            if(diff < -60){
+                navegarInventario(1);
+            }
+
+            // Swipe para direita = voltar
+            if(diff > 60){
+                navegarInventario(-1);
+            }
+
+        }, { passive: true });
+
+    }
+
+}, 1000);

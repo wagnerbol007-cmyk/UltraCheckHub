@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ultra Check Hub - 2.0</title>
+    
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <div id="overlay" class="overlay-hidden">
+        <div class="spinner"></div><p style="margin-top:15px; font-weight:900; color: #e20613;">AGUARDE...</p>
+    </div>
+
+    <div id="matrixOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10001; padding: 20px; flex-direction: column; color: #00ff41; font-family: monospace; font-size: 0.8em; overflow: hidden;">
+        <div style="font-weight: bold; font-size: 1.2em; border-bottom: 1px solid #00ff41; padding-bottom: 5px;">PROCESSANDO BASE...</div>
+        <div id="matrixLog" style="flex: 1; overflow-y: hidden; white-space: nowrap; text-shadow: 0 0 5px #00ff41;"></div>
+        <div class="matrix-bar-container" style="background: #111; height: 30px; border: 1px solid #00ff41; border-radius: 5px; margin-top: 15px; position: relative;">
+            <div id="matrixBar" style="background: #00ff41; height: 100%; width: 0%; transition: width 0.1s;"></div>
+            <div id="matrixPercent" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; mix-blend-mode: difference;">0%</div>
+        </div>
+    </div>
+
+    <div id="modalFoto" onclick="this.style.display='none'" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2000; display:none; justify-content:center; align-items:center; padding:20px;">
+        <div class="card-internal" onclick="event.stopPropagation()" style="padding:20px; text-align:center; max-width:320px;">
+            <img id="imgGrande" src="" style="width:100%; border-radius:10px; margin-bottom:15px;">
+            <button class="btn-main" onclick="document.getElementById('modalFoto').style.display='none'">FECHAR</button>
+        </div>
+    </div>
+
+    <div id="modalQR" onclick="this.style.display='none'" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2000; display:none; justify-content:center; align-items:center; padding:20px;">
+        <div class="card-internal" onclick="event.stopPropagation()" style="padding:20px; text-align:center; max-width:320px;">
+            <h3 id="qrTitle" style="margin-top:0; font-size: 0.9em; color:#1e293b;"></h3>
+            <div id="qrcode" style="display:flex; justify-content:center; margin: 15px 0;"></div>
+            <p id="qrSku" style="font-weight: 800; font-size: 0.85em; margin-bottom: 20px; color: #e20613; word-break: break-all;"></p>
+            <button class="btn-main" onclick="document.getElementById('modalQR').style.display='none'">CONCLUÍDO</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <button id="btnVoltarHome" onclick="app.voltarMenu()" class="btn-menu-top" style="display:none;">MENU</button>
+        <h1 style="font-size: 1.2em; margin: 0;">Ultra Check Hub 2.0</h1>
+        <div class="header-info" id="infoHeader" style="display:none;">LOJA: <span id="displayLoja" style="font-size: 1.2em;"></span></div>
+    </div>
+
+<div id="viewLogin" class="view-container active-view">
+    <div class="card-internal">
+        <h2 style="color: #2563eb; font-weight: 900; margin-bottom: 20px;">ACESSO INTERNO</h2>
+
+        <input type="text" id="inputUsuario" placeholder="USUÁRIO">
+        <input type="password" id="inputSenha" placeholder="SENHA">
+
+        <button class="btn-main" onclick="app.fazerLogin()">ENTRAR</button>
+    </div>
+</div>
+
+<div id="viewSelecionarLoja" class="view-container">
+    <div class="card-internal">
+        <h2 style="color: #2563eb; font-weight: 900; margin-bottom: 20px;">SELECIONAR LOJA</h2>
+
+        <input type="number" id="inputLoja" placeholder="Nº DA LOJA">
+
+        <button class="btn-main" onclick="app.confirmarLoja()">ACESSAR SISTEMA</button>
+    </div>
+</div>
+
+<div id="viewMenu" class="view-container">
+    <div class="loja-badge">
+        📍 UNIDADE: <span id="labelLojaAtiva">--</span>
+        <span class="badge-separator"></span>
+        👤 <span id="labelOperador">--</span>
+    </div>
+
+    <div class="home-grid">
+        <div class="home-card" onclick="app.abrirPainel('viewReposicao')">
+            <div class="card-icon">🔍</div>
+            <div class="card-text">
+                <h4>Criar Lista de Reposição</h4>
+                <p>Crie novas listas de reposição.</p>
+            </div>
+            <span class="card-arrow">›</span>
+        </div>
+
+        <div class="home-card" onclick="app.abrirPainel('viewReman')">
+            <div class="card-icon">♻️</div>
+            <div class="card-text">
+                <h4>Conferir Remanejamento</h4>
+                <p>Conferir e validar remanejamentos.</p>
+            </div>
+            <span class="card-arrow">›</span>
+        </div>
+
+        <div class="home-card" onclick="app.abrirPainel('viewEstoque')">
+            <div class="card-icon">📦</div>
+            <div class="card-text">
+                <h4>Listas de Reposição</h4>
+                <p>Visualize e gerencie suas listas.</p>
+            </div>
+            <span class="card-arrow">›</span>
+        </div>
+
+        <div class="home-card" onclick="app.abrirPainel('viewAnalise')">
+            <div class="card-icon">⚠️</div>
+            <div class="card-text">
+                <h4>Não Achei</h4>
+                <p>Itens que não foram encontrados.</p>
+            </div>
+            <span class="card-arrow">›</span>
+        </div>
+
+        <div class="home-card" onclick="app.abrirPainel('viewRelatorio')">
+            <div class="card-icon">📊</div>
+            <div class="card-text">
+                <h4>Histórico</h4>
+                <p>Acompanhe o histórico de atividades.</p>
+            </div>
+            <span class="card-arrow">›</span>
+        </div>
+
+        <div class="home-card" onclick="app.abrirPainel('viewMenuInventario')">
+            <div class="card-icon">🎯</div>
+            <div class="card-text">
+                <h4>Prevenção e perdas</h4>
+                <p>Ações e análises para reduzir perdas.</p>
+            </div>
+            <span class="card-arrow">›</span>
+        </div>
+
+        <div class="home-card small-card" onclick="app.abrirPainel('viewUpload')">
+            <div class="card-icon">☁️</div>
+            <div class="card-text">
+                <h4>Upload Base</h4>
+                <p>Envie e atualize bases.</p>
+            </div>
+            <span class="card-arrow">›</span>
+        </div>
+
+        <div class="home-card small-card" onclick="app.abrirPainel('viewSobre')">
+            <div class="card-icon">💡</div>
+            <div class="card-text">
+                <h4>Sobre</h4>
+                <p>Informações do sistema.</p>
+            </div>
+            <span class="card-arrow">›</span>
+        </div>
+
+        <button class="btn-sair" onclick="app.fazerLogout()">🚪 Sair do Sistema</button>
+    </div>
+
+    <div class="footer-copy">© 2024 Ultra Check Hub 2.0</div>
+</div>
+        </div>
+    </div>
+
+    <div id="viewReposicao" class="view-container">
+        <div class="card-internal">
+            <button class="btn-main" style="background:#475569; margin-bottom: 15px;" onclick="app.iniciarCamera('readerLoja', 'reposicao')">📸 ABRIR CÂMERA</button>
+            <div id="readerLoja" class="reader-box"></div>
+            <input type="text" id="inputBip" placeholder="BIPAR SKU OU EAN" onchange="app.biparReposicao(this.value)">
+            
+            <div id="detalhesProduto" style="display: none; text-align: left; margin-top: 15px;">
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center;">
+                    <img id="prodImg" class="thumb" src="" onclick="app.zoomFoto(this.src)">
+                    <div style="flex:1">
+                        <div id="prodNome" style="font-weight:900; font-size:0.85em; line-height:1.2;"></div>
+                        <div id="prodCor" class="cor-tag"></div>
+                        <div id="prodPreco" class="preco-tag"></div>
+                    </div>
+                </div>
+                <div class="grade-grid" id="gradeGridLoja"></div>
+                <button class="btn-main" onclick="app.enviarPedidoFaltantes()">ENVIAR PARA ESTOQUE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewReman" class="view-container">
+        <div class="card-internal">
+            <button class="btn-main" style="background:#7c3aed; margin-bottom: 15px;" onclick="app.iniciarCamera('readerReman', 'reman')">📸 ABRIR CÂMERA SCANNER</button>
+            <div id="readerReman" class="reader-box"></div>
+            <input type="text" id="inputBipReman" placeholder="BIPAR PRODUTO REMAN" onchange="app.biparReman(this.value)">
+            
+            <button class="btn-main" style="background:#22c55e; margin-top:15px; font-size: 0.8em;" onclick="app.exportarReman()">📊 EXPORTAR SEPARADOS (EXCEL)</button>
+
+            <div id="cardBipResultadoTop" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border-left:6px solid #22c55e;">
+                <div id="tagFeedbackTop" class="reman-tag"></div>
+                <div id="corpoFeedbackTop" style="display:flex; flex-direction:column; gap:8px;"></div>
+            </div>
+        </div>
+        <div id="remanListaSincronizada" class="reman-container-lista" style="margin-top:15px; width: 100%; max-width: 450px;"></div>
+    </div>
+
+<div id="viewEstoque" class="view-container">
+    <div id="progressoEstoque" style="width: 100%; max-width: 450px; background: #e2e8f0; border-radius: 10px; height: 24px; margin-bottom: 15px; position: relative; overflow: hidden; display: none;">
+        <div id="barFill" style="height: 100%; background: #22c55e; width: 0%; transition: width 0.4s ease;"></div>
+        <div id="barTxt" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: 900; color: #1e293b;">0 / 0</div>
+    </div>
+
+    <div id="listaPedidos" style="width: 100%; max-width: 450px; padding-bottom: 90px;"></div>
+
+    <div class="footer-action-estoque">
+        <button class="btn-main" style="background:#22c55e; margin:0;" onclick="app.finalizarColetaGeral()">
+            ✅ SINC COLETA
+        </button>
+    </div>
+</div>
+    <div id="viewAnalise" class="view-container">
+        <h3 style="color:#e20613; margin-bottom:15px; text-transform:uppercase; font-weight:900;">Auditoria de Faltas</h3>
+        <div id="listaAnalise" style="width: 100%; max-width: 450px;"></div>
+    </div>
+
+    <div id="viewRelatorio" class="view-container">
+        <div class="card-internal">
+            <h3 style="color:#4b5563; margin-bottom:15px; font-weight:900; text-transform:uppercase;">Histórico de Coletas</h3>
+            <div id="contHist" style="width:100%; text-align: left;"></div>
+        </div>
+    </div>
+
+<div id="viewMenuInventario" class="view-container">
+    <h3 style="color:#6200ee; margin-bottom:20px; font-weight:900; text-transform:uppercase;">
+        Prevenção e Perdas
+    </h3>
+
+    <div class="inventario-menu-grid">
+        <div class="inventario-card-principal" onclick="app.abrirModoInventario('padrao', '1ª Busca RFID')">
+            <div class="inventario-icon">🎯</div>
+            <h4>1ª Busca RFID</h4>
+            <p>Divergências Mojix</p>
+        </div>
+
+        <div class="inventario-card" onclick="app.abrirModoInventario('analista', '2ª Busca')">
+            <div class="inventario-icon">📋</div>
+            <h4>2ª Busca</h4>
+        </div>
+
+        <div class="inventario-card" onclick="app.abrirPainel('viewInventarioRelatorio')">
+            <div class="inventario-icon">📊</div>
+            <h4>Auditoria</h4>
+        </div>
+    </div>
+</div>
+
+ <div id="viewInventarioApp" class="view-container">
+        <select id="filtroCategoria" style="width: auto; max-width: 180px; padding: 4px 8px; border-radius: 10px; border: 1.5px solid #ddd; background: #fff; color: #6200ee; font-weight: 800; margin-bottom: 10px; font-size: 0.65em; align-self: flex-end;" onchange="app.aplicarFiltroCategoriaInv()">
+            <option value="TODAS">CATEGORIA</option>
+        </select>
+        
+        <div class="card-internal" id="gestureZoneInv" style="padding:15px; position:relative; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; font-size:0.75em; color:#64748b;"><span id="labelBuscaNome">MODO</span><span id="contadorInv">00 / 00</span></div>
+            
+            <div style="width:100%; height:260px; background:#fff; border-radius:20px; margin:10px 0; display:flex; align-items:center; justify-content:center; border:1px solid #f1f5f9;">
+                <img id="viewImgInv" style="max-height:95%; max-width:95%; object-fit:contain;" src="">
+            </div>
+            
+            <div id="viewNomeInv" style="font-weight:900; color:#6200ee; height:50px; overflow:hidden; font-size:1.1em;">---</div>
+            <div style="font-size:0.85em; text-align:left; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">SKU: <b id="viewSKUInv">--</b> | EAN: <b id="viewEANInv">--</b> | TAM: <b id="viewTamanhoInv" style="color:#6200ee">--</b></div>
+            
+            <div class="stats-grid" id="statsAreaInv">
+                <div class="stat-box" style="background:#f8f9fd; padding:10px 5px; border-radius:15px; border:1px solid #eef0f7;"><span style="color:#6200ee; font-size:0.6em; font-weight:900;">ESP</span><b id="viewExpInv" style="font-size:1.2em;">0</b></div>
+                <div class="stat-box" style="background:#f8f9fd; padding:10px 5px; border-radius:15px; border:1px solid #eef0f7;"><span style="color:#6200ee; font-size:0.6em; font-weight:900;">LIDO</span><b id="viewCountInv" style="font-size:1.2em;">0</b></div>
+                <div class="stat-box" style="background:#f8f9fd; padding:10px 5px; border-radius:15px; border:1px solid #eef0f7;"><span style="color:#6200ee; font-size:0.6em; font-weight:900;">DIF</span><b id="viewDifInv" style="font-size:1.2em;">0</b></div>
+            </div>
+            
+            <div style="display:flex; gap:10px;">
+                <button class="btn-main" style="background:#202124; flex:1; font-size:0.75em;" onclick="app.gerarQRInv()">🔳 QR SKU</button>
+                <button id="btnEspiarInv" class="btn-main" style="background:#475569; flex:1; font-size:0.75em;" onclick="app.espiarMojix()">🔍 ESPIAR</button>
+            </div>
+            
+            <input type="number" id="inputAchadoInv" style="font-size:3em; text-align:center; border:3px solid #6200ee; height:80px; color:#6200ee; font-weight:900; border-radius:25px; margin:10px 0; width:100%; background:#fff;" placeholder="0" oninput="app.salvarContagemRemota()">
+            
+            <span id="labelProgressoPercent" style="font-size:0.6em; color:#64748b; font-weight:900; display:block;">Progresso: 0%</span>
+            <div style="width:100%; background:#eef0f7; border-radius:10px; height:10px; margin:10px 0; overflow:hidden;">
+                <div id="progressBarInv" style="height:100%; background:#22c55e; width:0%; transition:0.3s;"></div>
+            </div>
+            
+            <div style="display:flex; gap:12px;">
+                <button class="btn-main" style="background:#eef0f7; color:#64748b; flex:1;" onclick="app.navegarInventario(-1)">VOLTAR</button>
+                <button class="btn-main" style="background:#6200ee; flex:2;" onclick="app.navegarInventario(1)">PRÓXIMO</button>
+            </div>
+        </div>
+
+        <div id="listaProgresso" style="width: 100%; max-width: 480px; margin-top: 15px;"></div>
+    </div>
+
+    <div id="viewInventarioRelatorio" class="view-container">
+        <div class="card-internal">
+            <h3 style="color:#6200ee; margin-bottom:15px; text-transform:uppercase; font-weight:900;">Auditoria</h3>
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <button class="btn-main" style="background:#6200ee; padding:12px;" onclick="app.gerarHistAuditoria('padrao')">1ª Busca</button>
+                <button class="btn-main" style="background:#5f6368; padding:12px;" onclick="app.gerarHistAuditoria('analista')">2ª Busca</button>
+            </div>
+            <div id="histRelatorioInv" style="max-height:60vh; overflow-y:auto; border:1.5px solid #eee; border-radius:20px; margin-bottom:15px; background:#fff; text-align:left;"></div>
+            
+            <button class="btn-main" style="background:#22c55e;" onclick="app.baixarCSVInventario()">Exportar CSV</button>
+            <button class="btn-main" style="background:#ef4444; margin-top:20px;" onclick="app.limparColetaInventario()">⚠️ RESETAR COLETA</button>
+        </div>
+    </div>
+
+<div id="viewUpload" class="view-container">
+    <div class="card-internal" style="text-align:left;">
+
+        <h3 style="
+            color:#25105f;
+            margin-bottom:25px;
+            font-weight:900;
+            text-transform:uppercase;
+            font-size:1.2em;
+        ">
+            ☁️ Painel de Sincronização
+        </h3>
+
+        <!-- REPOSIÇÃO -->
+        <div style="margin-bottom:30px;">
+
+            <b style="
+                color:#e20613;
+                font-size:0.82em;
+                text-transform:uppercase;
+                display:block;
+                margin-bottom:12px;
+            ">
+                Reposição & Reman
+            </b>
+
+            <!-- SAP -->
+            <div class="upload-box">
+
+                <label for="fileSAP" class="upload-btn">
+                    📁 Selecionar Arquivo SAP
+                </label>
+
+                <input
+                    type="file"
+                    id="fileSAP"
+                    accept=".xlsx"
+                    hidden
+                    onchange="mostrarNomeArquivo(this, 'nomeSAP')"
+                >
+
+                <div id="nomeSAP" class="upload-name">
+                    Nenhum arquivo selecionado
+                </div>
+
+                <button class="btn-main"
+                    style="background:#e20613;"
+                    onclick="app.processarSAP()">
+                    SAP (.xlsx)
+                </button>
+
+            </div>
+
+            <!-- REMAN -->
+            <div class="upload-box" style="margin-top:18px;">
+
+                <label for="fileReman" class="upload-btn">
+                    📁 Selecionar Arquivo REMAN
+                </label>
+
+                <input
+                    type="file"
+                    id="fileReman"
+                    accept=".xlsx"
+                    hidden
+                    onchange="mostrarNomeArquivo(this, 'nomeReman')"
+                >
+
+                <div id="nomeReman" class="upload-name">
+                    Nenhum arquivo selecionado
+                </div>
+
+                <button class="btn-main"
+                    style="background:#7c3aed;"
+                    onclick="app.processarReman()">
+                    REMAN (.xlsx)
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- INVENTÁRIO -->
+        <div style="
+            border-top:2px dashed #eadcff;
+            padding-top:24px;
+        ">
+
+            <b style="
+                color:#6200ee;
+                font-size:0.82em;
+                text-transform:uppercase;
+                display:block;
+                margin-bottom:12px;
+            ">
+                Inventários RFID
+            </b>
+
+            <!-- MOJIX -->
+            <div class="upload-box">
+
+                <label for="inMogix" class="upload-btn">
+                    📁 Report Mojix (.csv)
+                </label>
+
+                <input
+                    type="file"
+                    id="inMogix"
+                    accept=".csv"
+                    hidden
+                    onchange="mostrarNomeArquivo(this, 'nomeMojix')"
+                >
+
+                <div id="nomeMojix" class="upload-name">
+                    Nenhum arquivo selecionado
+                </div>
+
+            </div>
+
+            <!-- BUSCA -->
+            <div class="upload-box" style="margin-top:18px;">
+
+                <label for="inBusca" class="upload-btn">
+                    📁 Busca Analista (.xlsx)
+                </label>
+
+                <input
+                    type="file"
+                    id="inBusca"
+                    accept=".xlsx"
+                    hidden
+                    onchange="mostrarNomeArquivo(this, 'nomeBusca')"
+                >
+
+                <div id="nomeBusca" class="upload-name">
+                    Nenhum arquivo selecionado
+                </div>
+
+            </div>
+
+            <button class="btn-main"
+                style="
+                    background:#6200ee;
+                    padding:14px;
+                    margin-top:18px;
+                "
+                onclick="app.processarUploadApp2()">
+
+                SUBIR BASES RFID
+
+            </button>
+
+        </div>
+    </div>
+</div>
+
+    <div id="viewSobre" class="view-container">
+<div class="card-internal" style="text-align:left; line-height:1.7;">
+
+    <h2 style="
+        color:#25105f;
+        font-size:1.5em;
+        margin-bottom:10px;
+        font-weight:900;
+    ">
+        Ultra Check Hub 2.0
+    </h2>
+
+    <p style="
+        color:#5b5570;
+        font-size:0.92em;
+        margin-bottom:25px;
+    ">
+        Plataforma operacional inteligente desenvolvida para otimizar
+        processos internos de reposição, inventário RFID,
+        remanejamento e prevenção de perdas em ambiente de varejo.
+    </p>
+
+    <div class="sobre-bloco">
+
+        <h3>🚀 Objetivo do Sistema</h3>
+
+        <p>
+            O Ultra Check Hub 2.0 foi criado com foco em velocidade,
+            organização operacional e redução de perdas, permitindo
+            que equipes trabalhem de forma mais eficiente no dia a dia
+            da loja.
+        </p>
+
+        <p>
+            O sistema centraliza múltiplos processos operacionais
+            em uma única plataforma moderna, responsiva e integrada
+            em tempo real com bases SAP, inventários RFID e
+            sincronização em nuvem.
+        </p>
+
+    </div>
+
+    <div class="sobre-bloco">
+
+        <h3>📦 Principais Funcionalidades</h3>
+
+        <ul class="sobre-lista">
+            <li>Reposição inteligente por divergência de estoque</li>
+            <li>Separação e conferência de remanejamentos</li>
+            <li>Inventário RFID integrado</li>
+            <li>Auditoria operacional e histórico em tempo real</li>
+            <li>Integração SAP + Mojix</li>
+            <li>Controle de itens não encontrados</li>
+            <li>Sincronização em nuvem entre lojas</li>
+            <li>Controle de usuários e autenticação segura</li>
+            <li>Compatibilidade com coletores e leitores de código de barras</li>
+            <li>Interface otimizada para dispositivos móveis</li>
+        </ul>
+
+    </div>
+
+    <div class="sobre-bloco">
+
+        <h3>⚡ Diferenciais</h3>
+
+        <p>
+            Diferente de sistemas operacionais tradicionais,
+            o Ultra Check Hub 2.0 foi projetado com foco em
+            praticidade operacional real, reduzindo etapas,
+            eliminando processos manuais desnecessários e
+            acelerando fluxos internos críticos da loja.
+        </p>
+
+        <p>
+            A interface foi desenvolvida priorizando rapidez,
+            acessibilidade e usabilidade em ambiente operacional,
+            inclusive em dispositivos móveis e coletores.
+        </p>
+
+    </div>
+
+    <div class="sobre-dev">
+
+        <div class="dev-badge">
+            👨‍💻 Desenvolvido por
+        </div>
+
+        <h3>Wagner Gomes dos Santos</h3>
+
+        <p>
+            Desenvolvimento independente focado em automação,
+            tecnologia operacional e otimização de processos
+            internos para varejo.
+        </p>
+
+    </div>
+
+</div>
+    </div>
+
+<script>
+(function () {
+    const style = document.createElement("style");
+    style.innerHTML = `
+        #toastContainer {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            z-index: 99999;
+            width: calc(100% - 32px);
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast-msg {
+            background: linear-gradient(135deg, #5b16c8, #23005d);
+            color: white;
+            padding: 14px 16px;
+            border-radius: 18px;
+            font-weight: 900;
+            font-size: 0.85em;
+            text-align: center;
+            box-shadow: 0 12px 28px rgba(91, 22, 200, 0.28);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.25s ease;
+        }
+
+        .toast-msg.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-msg.erro {
+            background: linear-gradient(135deg, #ef4444, #991b1b);
+        }
+
+        .toast-msg.sucesso {
+            background: linear-gradient(135deg, #22c55e, #166534);
+        }
+    `;
+    document.head.appendChild(style);
+
+    const container = document.createElement("div");
+    container.id = "toastContainer";
+    document.body.appendChild(container);
+
+    window.mostrarAviso = function (mensagem, tipo = "info") {
+        const toast = document.createElement("div");
+        toast.className = "toast-msg";
+
+        const texto = String(mensagem || "");
+
+        if (
+            texto.toLowerCase().includes("erro") ||
+            texto.toLowerCase().includes("negado") ||
+            texto.toLowerCase().includes("não") ||
+            texto.toLowerCase().includes("selecione")
+        ) {
+            toast.classList.add("erro");
+        }
+
+        if (
+            texto.toLowerCase().includes("sucesso") ||
+            texto.toLowerCase().includes("enviado") ||
+            texto.toLowerCase().includes("concluído") ||
+            texto.toLowerCase().includes("sincronizada")
+        ) {
+            toast.classList.add("sucesso");
+        }
+
+        toast.innerText = texto;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add("show");
+        }, 50);
+
+        setTimeout(() => {
+            toast.classList.remove("show");
+            setTimeout(() => toast.remove(), 300);
+        }, 2800);
+    };
+
+    window.alert = function (mensagem) {
+        window.mostrarAviso(mensagem);
+    };
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    function configurarCampoBip(inputId, callback) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+
+                const valor = input.value.trim();
+                if (!valor) return;
+
+                callback(valor);
+
+                setTimeout(() => {
+                    input.value = "";
+                    input.focus();
+                }, 80);
+            }
+        });
+
+        input.addEventListener("change", () => {
+            setTimeout(() => {
+                input.value = "";
+                input.focus();
+            }, 80);
+        });
+    }
+
+    configurarCampoBip("inputBip", (valor) => {
+        if (window.app && window.app.biparReposicao) {
+            window.app.biparReposicao(valor);
+        }
+    });
+
+    configurarCampoBip("inputBipReman", (valor) => {
+        if (window.app && window.app.biparReman) {
+            window.app.biparReman(valor);
+        }
+    });
+});
+</script>
+
+<script>
+    
+function mostrarNomeArquivo(input, targetId) {
+
+    const alvo = document.getElementById(targetId);
+
+    if (!alvo) return;
+
+    if (input.files.length > 0) {
+
+        alvo.innerText =
+            "📄 " + input.files[0].name;
+
+    } else {
+
+        alvo.innerText =
+            "Nenhum arquivo selecionado";
+
+    }
+
+}
+</script>
+
+    <script type="module" src="js/main.js"></script>
+
+    <script>
+let tS = 0;
+let tY = 0;
+let swipeTravado = false;
+
+document.addEventListener("DOMContentLoaded", () => {
+    const gZ = document.getElementById('gestureZoneInv');
+
+    if (gZ) {
+        gZ.style.touchAction = "pan-y";
+
+        gZ.addEventListener('touchstart', e => {
+            if (e.target.closest('input, button, select')) return;
+
+            tS = e.touches[0].clientX;
+            tY = e.touches[0].clientY;
+            swipeTravado = false;
+
+            gZ.style.transition = "none";
+        }, { passive: true });
+
+        gZ.addEventListener('touchmove', e => {
+            if (e.target.closest('input, button, select')) return;
+
+            const dx = e.touches[0].clientX - tS;
+            const dy = e.touches[0].clientY - tY;
+
+            if (Math.abs(dx) > 25 && Math.abs(dx) > Math.abs(dy)) {
+                swipeTravado = true;
+                e.preventDefault();
+
+                gZ.style.transform = `translateX(${dx * 0.18}px)`;
+            }
+        }, { passive: false });
+
+        gZ.addEventListener('touchend', e => {
+            if (e.target.closest('input, button, select')) return;
+
+            const endX = e.changedTouches[0].clientX;
+            const diff = endX - tS;
+
+            gZ.style.transition = "transform 0.18s ease-out";
+            gZ.style.transform = "translateX(0)";
+
+            if (!swipeTravado) return;
+
+            if (diff < -70) {
+                window.app.navegarInventario(1);
+            }
+
+            if (diff > 70) {
+                window.app.navegarInventario(-1);
+            }
+        }, { passive: true });
+    }
+});
+</script>
