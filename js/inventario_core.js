@@ -1,19 +1,30 @@
 // js/inventario_core.js
-// StockFlow v2.1.1
-// Registro de operador na 1ª e 2ª busca
+// StockFlow v2.2.0
+// Coletas separadas:
+// 1ª Busca  -> sinc_rfid_primeira/{loja}
+// 2ª Busca  -> sinc_rfid_segunda/{loja}
 
 import { state, normalizarCodigo } from './state.js';
 import { database } from './firebase.js';
 import { mudarTela } from './ui.js';
 
+function getCaminhoColetaInventario() {
+    if (state.modoInventario === 'padrao') {
+        return `sinc_rfid_primeira/${state.lojaAtual}`;
+    }
+
+    return `sinc_rfid_segunda/${state.lojaAtual}`;
+}
+
 export function abrirModoInventario(modo, label) {
     document.getElementById('overlay').style.display = 'flex';
+
     state.modoInventario = modo;
     state.indiceInventario = 0;
     state.listaInventarioOriginal = [];
 
     database.ref('arquivos_lojas/' + state.lojaAtual).once('value', snapshot => {
-        const d = snapshot.val();
+        const d = snapshot.val() || {};
 
         if (modo === 'padrao') {
             state.listaInventarioOriginal = Object.keys(state.dbMojixGlobal)
@@ -21,11 +32,18 @@ export function abrirModoInventario(modo, label) {
                 .map(k => ({ Material: k }));
         } else {
             state.listaInventarioOriginal = JSON.parse(d.busca || "[]")
-                .map(r => ({ Material: normalizarCodigo(r.Material || r.SKU || Object.values(r)[0]) }))
-                .filter(x => x.Material != "undefined");
+                .map(r => ({
+                    Material: normalizarCodigo(
+                        r.Material ||
+                        r.SKU ||
+                        Object.values(r)[0]
+                    )
+                }))
+                .filter(x => x.Material && x.Material !== "undefined");
         }
 
         state.listaInventarioFiltrada = [...state.listaInventarioOriginal];
+
         document.getElementById('labelBuscaNome').innerText = label;
         document.getElementById('filtroCategoria').value = "TODAS";
 
@@ -49,11 +67,18 @@ export function abrirModoInventario(modo, label) {
 }
 
 function iniciarAppInventario() {
-    database.ref('sinc_rfid/' + state.lojaAtual).on('value', s => {
+    const caminho = getCaminhoColetaInventario();
+
+    database.ref(caminho).on('value', s => {
         state.respostasInventarioNuvem = s.val() || {};
+
         renderInventario();
-        atualizarChecklistInv(document.getElementById('listaProgresso'), state.listaInventarioFiltrada);
+        atualizarChecklistInv(
+            document.getElementById('listaProgresso'),
+            state.listaInventarioFiltrada
+        );
         atualizarBarraProgressoInv();
+
         document.getElementById('overlay').style.display = 'none';
         mudarTela('viewInventarioApp');
     });
@@ -65,17 +90,22 @@ export function aplicarFiltroCategoriaInv() {
     if (cat === "TODAS") {
         state.listaInventarioFiltrada = [...state.listaInventarioOriginal];
     } else if (cat === "MANUAL") {
-        state.listaInventarioFiltrada = state.listaInventarioOriginal.filter(it => !state.dbMojixGlobal[it.Material]);
+        state.listaInventarioFiltrada =
+            state.listaInventarioOriginal.filter(it => !state.dbMojixGlobal[it.Material]);
     } else {
-        state.listaInventarioFiltrada = state.listaInventarioOriginal.filter(it =>
-            state.dbMojixGlobal[it.Material] &&
-            state.dbMojixGlobal[it.Material]['Dept Name'] === cat
-        );
+        state.listaInventarioFiltrada =
+            state.listaInventarioOriginal.filter(it =>
+                state.dbMojixGlobal[it.Material] &&
+                state.dbMojixGlobal[it.Material]['Dept Name'] === cat
+            );
     }
 
     state.indiceInventario = 0;
     renderInventario();
-    atualizarChecklistInv(document.getElementById('listaProgresso'), state.listaInventarioFiltrada);
+    atualizarChecklistInv(
+        document.getElementById('listaProgresso'),
+        state.listaInventarioFiltrada
+    );
     atualizarBarraProgressoInv();
 }
 
@@ -114,7 +144,8 @@ function atualizarBarraProgressoInv() {
     const porc = total > 0 ? Math.round((respondidos / total) * 100) : 0;
 
     document.getElementById('progressBarInv').style.width = porc + "%";
-    document.getElementById('labelProgressoPercent').innerText = `Progresso: ${porc}% (${respondidos}/${total})`;
+    document.getElementById('labelProgressoPercent').innerText =
+        `Progresso: ${porc}% (${respondidos}/${total})`;
 }
 
 export function renderInventario() {
@@ -161,7 +192,8 @@ export function renderInventario() {
         " / " +
         state.listaInventarioFiltrada.length;
 
-    document.getElementById('inputAchadoInv').value = obterQuantidadeResposta(resposta);
+    document.getElementById('inputAchadoInv').value =
+        obterQuantidadeResposta(resposta);
 
     document.getElementById('btnEspiarInv').style.display =
         (state.modoInventario === 'padrao' ? 'none' : 'block');
@@ -188,13 +220,14 @@ export function salvarContagemRemota() {
 
     const sku = itemAtual.Material;
     const qtd = document.getElementById('inputAchadoInv').value;
+    const caminho = getCaminhoColetaInventario();
 
     if (!qtd) {
-        database.ref(`sinc_rfid/${state.lojaAtual}/${sku}`).remove();
+        database.ref(`${caminho}/${sku}`).remove();
         return;
     }
 
-    database.ref(`sinc_rfid/${state.lojaAtual}/${sku}`).set({
+    database.ref(`${caminho}/${sku}`).set({
         quantidade: qtd,
         operador: state.operador || "DESCONHECIDO",
         dataHora: new Date().toLocaleString("pt-BR")
@@ -202,9 +235,16 @@ export function salvarContagemRemota() {
 }
 
 export function espiarMojix() {
-    const m = state.dbMojixGlobal[state.listaInventarioFiltrada[state.indiceInventario].Material];
+    const m =
+        state.dbMojixGlobal[
+            state.listaInventarioFiltrada[state.indiceInventario].Material
+        ];
 
-    alert(m ? `ESP: ${m.Expected} | LIDO: ${m.Counted}` : "Sem dados de RFID para este item.");
+    alert(
+        m
+            ? `ESP: ${m.Expected} | LIDO: ${m.Counted}`
+            : "Sem dados de RFID para este item."
+    );
 }
 
 function atualizarChecklistInv(container, lista) {
@@ -258,17 +298,22 @@ function atualizarChecklistInv(container, lista) {
             state.indiceInventario = i;
             renderInventario();
 
-            if (container.id !== 'listaProgresso') mudarTela('viewInventarioApp');
+            if (container.id !== 'listaProgresso') {
+                mudarTela('viewInventarioApp');
+            }
 
             window.scrollTo(0, 0);
         };
 
         d.innerHTML = `
             <div style="display: flex; gap: 15px; align-items: center;">
-                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width: 60px; height: 60px; border-radius: 10px; border: 1px solid #eee; object-fit: contain; background: white;">
+                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg"
+                    style="width: 60px; height: 60px; border-radius: 10px; border: 1px solid #eee; object-fit: contain; background: white;">
+
                 <div style="flex: 1;">
                     <span style="font-size:0.7em;">EAN: ${info.EAN || '---'} | TAM: ${tam}</span><br>
-                    <b>${it.Material}</b> - <span style="font-size:0.85em; color:#6200ee;">${nomeExibicao}</span>
+                    <b>${it.Material}</b> -
+                    <span style="font-size:0.85em; color:#6200ee;">${nomeExibicao}</span>
                 </div>
             </div>
 
@@ -309,13 +354,8 @@ setTimeout(() => {
 
             const diff = endXInv - startXInv;
 
-            if (diff < -60) {
-                navegarInventario(1);
-            }
-
-            if (diff > 60) {
-                navegarInventario(-1);
-            }
+            if (diff < -60) navegarInventario(1);
+            if (diff > 60) navegarInventario(-1);
         }, { passive: true });
     }
 }, 1000);

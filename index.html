@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StockFlow v2.1.3</title>
-    
+    <title>StockFlow v2.2.0</title>
+
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
 
@@ -54,7 +54,7 @@
         LOJA: <span id="displayLoja"></span>
     </div>
 
-    <div class="stockflow-title">StockFlow <span>v2.1.2</span></div>
+    <div class="stockflow-title">StockFlow <span>v2.2.0</span></div>
 </div>
 
 <div id="viewLogin" class="view-container active-view">
@@ -161,7 +161,7 @@
         <button class="btn-sair" onclick="app.fazerLogout()">🚪 Sair do Sistema</button>
     </div>
 
-    <div class="footer-copy">© StockFlow v2.1.3 • Desenvolvido por Wagner Gomes dos Santos</div>
+    <div class="footer-copy">© StockFlow v2.2.0 • Desenvolvido por Wagner Gomes dos Santos</div>
 </div>
         </div>
     </div>
@@ -304,8 +304,17 @@
             </div>
             <div id="histRelatorioInv" style="max-height:60vh; overflow-y:auto; border:1.5px solid #eee; border-radius:20px; margin-bottom:15px; background:#fff; text-align:left;"></div>
             
-            <button class="btn-main" style="background:#22c55e;" onclick="app.baixarCSVInventario()">Exportar CSV</button>
-            <button class="btn-main" style="background:#ef4444; margin-top:20px;" onclick="app.limparColetaInventario()">⚠️ RESETAR COLETA</button>
+<button class="btn-main" style="background:#22c55e;" onclick="app.baixarCSVInventario()">
+    Exportar CSV
+</button>
+
+<button class="btn-main" style="background:#ef4444; margin-top:20px;" onclick="app.limparColetaInventario('padrao')">
+    🗑️ Apagar Coleta 1ª Busca
+</button>
+
+<button class="btn-main" style="background:#991b1b; margin-top:10px;" onclick="app.limparColetaInventario('analista')">
+    🗑️ Apagar Coleta 2ª Busca
+</button>
         </div>
     </div>
 
