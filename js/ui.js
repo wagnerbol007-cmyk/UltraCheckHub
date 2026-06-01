@@ -1,36 +1,74 @@
 // js/ui.js
+// StockFlow v2.1.3
 
-export function mudarTela(idView) {
-    // Esconde todas as views
+let historicoTelas = [];
+let telaAtual = null;
+let ignorarHistorico = false;
+
+export function mudarTela(idView, registrar = true) {
+    if (registrar && telaAtual && telaAtual !== idView) {
+        historicoTelas.push(telaAtual);
+    }
+
+    telaAtual = idView;
+
     document.querySelectorAll('.view-container').forEach(v => {
         v.classList.remove('active-view');
         v.style.display = 'none';
     });
-    
-    // Mostra a selecionada
+
     const viewAtiva = document.getElementById(idView);
+
     if (viewAtiva) {
         viewAtiva.classList.add('active-view');
         viewAtiva.style.display = 'flex';
     }
 
-    // Controle do botão Voltar (Menu)
     const btnVoltar = document.getElementById('btnVoltarHome');
     const infoHeader = document.getElementById('infoHeader');
-    
-    if (idView === 'viewLogin' || idView === 'viewMenu') {
-        btnVoltar.style.display = 'none';
-    } else {
-        btnVoltar.style.display = 'block';
+
+    if (btnVoltar) {
+        btnVoltar.style.display =
+            (idView === 'viewLogin' || idView === 'viewMenu')
+                ? 'none'
+                : 'block';
     }
 
-    if(idView !== 'viewLogin') {
-        infoHeader.style.display = 'block';
+    if (infoHeader) {
+        infoHeader.style.display =
+            idView === 'viewLogin'
+                ? 'none'
+                : 'block';
+    }
+
+    if (!ignorarHistorico && idView !== 'viewLogin') {
+        history.pushState({ tela: idView }, "", "");
     }
 }
 
+export function voltarTela() {
+    if (historicoTelas.length > 0) {
+        const telaAnterior = historicoTelas.pop();
+        mudarTela(telaAnterior, false);
+        return;
+    }
+
+    if (telaAtual && telaAtual !== 'viewMenu' && telaAtual !== 'viewLogin') {
+        mudarTela('viewMenu', false);
+    }
+}
+
+window.addEventListener('popstate', () => {
+    ignorarHistorico = true;
+    voltarTela();
+    setTimeout(() => {
+        ignorarHistorico = false;
+    }, 100);
+});
+
 export function mostrarLoading(mostrar) {
     const overlay = document.getElementById('overlay');
+
     if (mostrar) {
         overlay.classList.remove('overlay-hidden');
         overlay.style.display = 'flex';

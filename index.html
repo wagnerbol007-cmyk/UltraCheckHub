@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultra Check Hub - 2.0</title>
+    <title>StockFlow v2.1.3</title>
     
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
@@ -17,9 +17,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
 <body>
-    <div id="overlay" class="overlay-hidden">
-        <div class="spinner"></div><p style="margin-top:15px; font-weight:900; color: #e20613;">AGUARDE...</p>
-    </div>
+<div id="overlay" class="overlay-hidden">
+    <div class="spinner"></div>
+    <p style="margin-top:15px; font-weight:900;">CARREGANDO DADOS...</p>
+</div>
 
     <div id="matrixOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10001; padding: 20px; flex-direction: column; color: #00ff41; font-family: monospace; font-size: 0.8em; overflow: hidden;">
         <div style="font-weight: bold; font-size: 1.2em; border-bottom: 1px solid #00ff41; padding-bottom: 5px;">PROCESSANDO BASE...</div>
@@ -46,11 +47,15 @@
         </div>
     </div>
 
-    <div class="header">
-        <button id="btnVoltarHome" onclick="app.voltarMenu()" class="btn-menu-top" style="display:none;">MENU</button>
-        <h1 style="font-size: 1.2em; margin: 0;">Ultra Check Hub 2.0</h1>
-        <div class="header-info" id="infoHeader" style="display:none;">LOJA: <span id="displayLoja" style="font-size: 1.2em;"></span></div>
+<div class="header stockflow-header">
+    <button id="btnVoltarHome" onclick="app.voltarMenu()" class="btn-menu-top" style="display:none;">‹</button>
+
+    <div class="header-info" id="infoHeader" style="display:none;">
+        LOJA: <span id="displayLoja"></span>
     </div>
+
+    <div class="stockflow-title">StockFlow <span>v2.1.2</span></div>
+</div>
 
 <div id="viewLogin" class="view-container active-view">
     <div class="card-internal">
@@ -156,7 +161,7 @@
         <button class="btn-sair" onclick="app.fazerLogout()">🚪 Sair do Sistema</button>
     </div>
 
-    <div class="footer-copy">© 2024 Ultra Check Hub 2.0</div>
+    <div class="footer-copy">© StockFlow v2.1.3 • Desenvolvido por Wagner Gomes dos Santos</div>
 </div>
         </div>
     </div>
@@ -469,7 +474,7 @@
         margin-bottom:10px;
         font-weight:900;
     ">
-        Ultra Check Hub 2.0
+        STOCKFLOW
     </h2>
 
     <p style="
@@ -487,7 +492,7 @@
         <h3>🚀 Objetivo do Sistema</h3>
 
         <p>
-            O Ultra Check Hub 2.0 foi criado com foco em velocidade,
+            O STOCKFLOW foi criado com foco em velocidade,
             organização operacional e redução de perdas, permitindo
             que equipes trabalhem de forma mais eficiente no dia a dia
             da loja.
@@ -527,7 +532,7 @@
 
         <p>
             Diferente de sistemas operacionais tradicionais,
-            o Ultra Check Hub 2.0 foi projetado com foco em
+            o STOCKFLOW foi projetado com foco em
             praticidade operacional real, reduzindo etapas,
             eliminando processos manuais desnecessários e
             acelerando fluxos internos críticos da loja.

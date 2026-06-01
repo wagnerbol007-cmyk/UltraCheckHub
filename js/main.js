@@ -1,6 +1,6 @@
 // js/main.js
 import { state } from './state.js';
-import { mudarTela } from './ui.js';
+import { mudarTela, voltarTela, mostrarLoading } from './ui.js';
 import { fazerLogin, fazerLogout, confirmarLoja } from './auth.js';
 import { iniciarCamera } from './scanner.js';
 import { analisarDisponibilidade, enviarPedidoFaltantes } from './reposicao.js';
@@ -27,16 +27,28 @@ import {
 window.app = {
 
     // UI e Navegação
-    voltarMenu: () => mudarTela('viewMenu'),
+  voltarMenu: () => voltarTela(),
 
-    abrirPainel: (painelId) => {
+abrirPainel: async (painelId) => {
+    mostrarLoading(true);
+
+    setTimeout(() => {
         mudarTela(painelId);
 
-        if (painelId === 'viewEstoque') ouvirEstoque();
-        if (painelId === 'viewAnalise') ouvirAnalise();
-        if (painelId === 'viewRelatorio') ouvirHistorico();
-        if (painelId === 'viewReman') renderizarListaCompletaReman();
-    },
+        setTimeout(() => {
+            if (painelId === 'viewEstoque') ouvirEstoque();
+            if (painelId === 'viewAnalise') ouvirAnalise();
+            if (painelId === 'viewRelatorio') ouvirHistorico();
+            if (painelId === 'viewReman') renderizarListaCompletaReman();
+
+            setTimeout(() => {
+                mostrarLoading(false);
+            }, 500);
+
+        }, 150);
+
+    }, 80);
+},
 
     zoomFoto: (url) => {
         document.getElementById('imgGrande').src =
