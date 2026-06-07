@@ -1169,3 +1169,17 @@ select:focus {
     object-fit:contain !important;
     display:block !important;
 }
+
+#viewMasterBox,
+#viewMasterBox * {
+    pointer-events: auto !important;
+}
+
+#historicoMasters {
+    pointer-events: auto !important;
+}
+
+.home-card,
+.btn-main {
+    touch-action: manipulation;
+}

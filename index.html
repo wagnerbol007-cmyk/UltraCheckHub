@@ -464,21 +464,29 @@
     <div class="card-internal" style="text-align:left;">
         <h3 style="color:#25105f;font-weight:900;">📦 MASTER BOX</h3>
 
-        <button class="btn-main" onclick="app.abrirCriarMasterBox()">
-            CRIAR NOVA MASTER
-        </button>
+<button class="btn-main"
+    onclick="app.abrirCriarMasterBox()"
+    ontouchend="event.preventDefault(); app.abrirCriarMasterBox();">
+    CRIAR NOVA MASTER
+</button>
 
-        <button class="btn-main" onclick="app.abrirConsultarMasterBox()">
-            CONSULTAR MASTER
-        </button>
+<button class="btn-main"
+    onclick="app.abrirConsultarMasterBox()"
+    ontouchend="event.preventDefault(); app.abrirConsultarMasterBox();">
+    CONSULTAR MASTER
+</button>
 
-        <button class="btn-main" onclick="app.abrirBuscarItemMasterBox()">
-            BUSCAR ITEM
-        </button>
+<button class="btn-main"
+    onclick="app.abrirBuscarItemMasterBox()"
+    ontouchend="event.preventDefault(); app.abrirBuscarItemMasterBox();">
+    BUSCAR ITEM
+</button>
 
-        <button class="btn-main" onclick="app.listarHistoricoMasters()">
-            HISTÓRICO DE MASTERS
-        </button>
+<button class="btn-main"
+    onclick="app.listarHistoricoMasters()"
+    ontouchend="event.preventDefault(); app.listarHistoricoMasters();">
+    HISTÓRICO DE MASTERS
+</button>
 
         <div id="historicoMasters" style="margin-top:15px;"></div>
     </div>
