@@ -8,11 +8,9 @@ import { ouvirEstoque, ouvirAnalise, limparAnalise, finalizarColetaGeral, ouvirH
 import { biparReman, alternarStatusReman, renderizarListaCompletaReman, exportarRemanExcel } from './reman.js';
 import { processarSAP, processarReman, processarUploadApp2 } from './upload.js';
 
-// IMPORTAÇÕES DO INVENTÁRIO (APP 2)
 import {
     abrirModoInventario,
     aplicarFiltroCategoriaInv,
-    renderInventario,
     navegarInventario,
     salvarContagemRemota,
     espiarMojix
@@ -24,31 +22,44 @@ import {
     limparColetaInventario
 } from './inventario_relatorio.js';
 
+import {
+    abrirCriarMasterBox,
+    abrirConsultarMasterBox,
+    abrirBuscarItemMasterBox,
+    biparItemMaster,
+    alterarQtdMaster,
+    removerItemMaster,
+    salvarMasterAtual,
+    consultarMaster,
+    buscarItemNaMaster,
+    exportarPDFMaster,
+    listarHistoricoMasters,
+    editarMasterAtual
+} from './masterbox.js';
+
 window.app = {
+    voltarMenu: () => voltarTela(),
 
-    // UI e Navegação
-  voltarMenu: () => voltarTela(),
-
-abrirPainel: async (painelId) => {
-    mostrarLoading(true);
-
-    setTimeout(() => {
-        mudarTela(painelId);
+    abrirPainel: async (painelId) => {
+        mostrarLoading(true);
 
         setTimeout(() => {
-            if (painelId === 'viewEstoque') ouvirEstoque();
-            if (painelId === 'viewAnalise') ouvirAnalise();
-            if (painelId === 'viewRelatorio') ouvirHistorico();
-            if (painelId === 'viewReman') renderizarListaCompletaReman();
+            mudarTela(painelId);
 
             setTimeout(() => {
-                mostrarLoading(false);
-            }, 500);
+                if (painelId === 'viewEstoque') ouvirEstoque();
+                if (painelId === 'viewAnalise') ouvirAnalise();
+                if (painelId === 'viewRelatorio') ouvirHistorico();
+                if (painelId === 'viewReman') renderizarListaCompletaReman();
 
-        }, 150);
+                setTimeout(() => {
+                    mostrarLoading(false);
+                }, 500);
 
-    }, 80);
-},
+            }, 150);
+
+        }, 80);
+    },
 
     zoomFoto: (url) => {
         document.getElementById('imgGrande').src =
@@ -57,51 +68,66 @@ abrirPainel: async (painelId) => {
         document.getElementById('modalFoto').style.display = 'flex';
     },
 
-    // LOGIN / AUTH
-    fazerLogin: fazerLogin,
-    confirmarLoja: confirmarLoja,
-    fazerLogout: fazerLogout,
+    fazerLogin,
+    confirmarLoja,
+    fazerLogout,
 
-    // CÂMERA
     iniciarCamera: (containerId, contexto) => {
-
         iniciarCamera(containerId, (codigoLido) => {
 
             if (contexto === 'reposicao') {
-
                 document.getElementById('inputBip').value = codigoLido;
-
                 analisarDisponibilidade(codigoLido);
+            }
 
-            } else if (contexto === 'reman') {
-
+            else if (contexto === 'reman') {
                 document.getElementById('inputBipReman').value = codigoLido;
-
                 biparReman(codigoLido);
             }
 
-        });
+            else if (contexto === 'master') {
+                const agora = Date.now();
 
+                if (
+                    window.__ultimoBipMasterCodigo === codigoLido &&
+                    agora - window.__ultimoBipMasterTempo < 1200
+                ) {
+                    return;
+                }
+
+                window.__ultimoBipMasterCodigo = codigoLido;
+                window.__ultimoBipMasterTempo = agora;
+
+                document.getElementById('inputBipMaster').value = codigoLido;
+                window.app.biparItemMaster();
+            }
+
+            else if (contexto === 'masterConsulta') {
+                document.getElementById('inputMasterConsulta').value = codigoLido;
+                window.app.consultarMaster();
+            }
+
+            else if (contexto === 'masterBusca') {
+                document.getElementById('inputBuscaItemMaster').value = codigoLido;
+                window.app.buscarItemNaMaster();
+            }
+        });
     },
 
-    // REPOSIÇÃO
     biparReposicao: analisarDisponibilidade,
-    enviarPedidoFaltantes: enviarPedidoFaltantes,
+    enviarPedidoFaltantes,
 
-    // REMAN
-    biparReman: biparReman,
-    alternarStatusReman: alternarStatusReman,
+    biparReman,
+    alternarStatusReman,
     exportarReman: exportarRemanExcel,
 
     gerarQRReman: (tamanho, sku) => {
-
         event.stopPropagation();
 
         document.getElementById('qrTitle').innerText =
             "PROCURAR TAMANHO: " + tamanho;
 
         document.getElementById('qrSku').innerText = sku;
-
         document.getElementById('qrcode').innerHTML = "";
 
         new QRCode(document.getElementById('qrcode'), {
@@ -113,17 +139,11 @@ abrirPainel: async (painelId) => {
         document.getElementById('modalQR').style.display = 'flex';
     },
 
-    // ESTOQUE
     ticarContador: (idPedido, tamanho, qtdTotal) => {
-
-        let atual =
-            state.coletaEstoqueLocal[idPedido + tamanho] || 0;
+        let atual = state.coletaEstoqueLocal[idPedido + tamanho] || 0;
 
         if (atual < qtdTotal) {
-
-            state.coletaEstoqueLocal[idPedido + tamanho] =
-                atual + 1;
-
+            state.coletaEstoqueLocal[idPedido + tamanho] = atual + 1;
             ouvirEstoque();
         }
     },
@@ -132,46 +152,44 @@ abrirPainel: async (painelId) => {
         window.app.gerarQRReman(tamanho, sku);
     },
 
-    limparAnalise: limparAnalise,
+    limparAnalise,
+    finalizarColetaGeral,
 
-    finalizarColetaGeral: finalizarColetaGeral,
-
-    // INVENTÁRIO
-    abrirModoInventario: abrirModoInventario,
-
-    aplicarFiltroCategoriaInv: aplicarFiltroCategoriaInv,
-
-    navegarInventario: navegarInventario,
-
-    salvarContagemRemota: salvarContagemRemota,
-
-    espiarMojix: espiarMojix,
+    abrirModoInventario,
+    aplicarFiltroCategoriaInv,
+    navegarInventario,
+    salvarContagemRemota,
+    espiarMojix,
 
     gerarQRInv: () => {
-
         window.app.gerarQRReman(
             document.getElementById('viewTamanhoInv').innerText,
             document.getElementById('viewSKUInv').innerText
         );
-
     },
 
-    gerarHistAuditoria: gerarHistAuditoria,
+    gerarHistAuditoria,
+    baixarCSVInventario,
+    limparColetaInventario,
 
-    baixarCSVInventario: baixarCSVInventario,
+    processarSAP,
+    processarReman,
+    processarUploadApp2,
 
-    limparColetaInventario: limparColetaInventario,
-
-    // UPLOADS
-    processarSAP: processarSAP,
-
-    processarReman: processarReman,
-
-    processarUploadApp2: processarUploadApp2
+    abrirCriarMasterBox,
+    abrirConsultarMasterBox,
+    abrirBuscarItemMasterBox,
+    biparItemMaster,
+    alterarQtdMaster,
+    removerItemMaster,
+    salvarMasterAtual,
+    consultarMaster,
+    buscarItemNaMaster,
+    exportarPDFMaster,
+    listarHistoricoMasters,
+    editarMasterAtual
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-
     mudarTela('viewLogin');
-
 });

@@ -1098,7 +1098,7 @@ select:focus {
 }
 
 /* ================================
-   STOCKFLOW v2.2.0 - HEADER FINO
+   STOCKFLOW v2.3.1 - HEADER FINO
 ================================ */
 
 .stockflow-header {
@@ -1149,4 +1149,23 @@ select:focus {
 .stockflow-title span {
     opacity: 0.72;
     font-size: 0.75em;
+}
+
+.card-icon{
+    width:64px !important;
+    height:64px !important;
+    min-width:64px !important;
+    border-radius:18px !important;
+    background:#f3e8ff !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    flex-shrink:0 !important;
+}
+
+.menu-icon{
+    width:36px !important;
+    height:36px !important;
+    object-fit:contain !important;
+    display:block !important;
 }

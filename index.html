@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StockFlow v2.2.0</title>
+    <title>StockFlow v2.3.1</title>
 
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
@@ -15,6 +15,7 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <div id="overlay" class="overlay-hidden">
@@ -54,7 +55,7 @@
         LOJA: <span id="displayLoja"></span>
     </div>
 
-    <div class="stockflow-title">StockFlow <span>v2.2.0</span></div>
+    <div class="stockflow-title">StockFlow <span>v2.3.1</span></div>
 </div>
 
 <div id="viewLogin" class="view-container active-view">
@@ -84,84 +85,69 @@
         <span class="badge-separator"></span>
         👤 <span id="labelOperador">--</span>
     </div>
+<div class="home-grid">
 
-    <div class="home-grid">
-        <div class="home-card" onclick="app.abrirPainel('viewReposicao')">
-            <div class="card-icon">🔍</div>
-            <div class="card-text">
-                <h4>Criar Lista de Reposição</h4>
-                <p>Crie novas listas de reposição.</p>
-            </div>
-            <span class="card-arrow">›</span>
-        </div>
+    <div class="home-card" onclick="app.abrirPainel('viewReposicao')">
+        <div class="card-icon"><img src="img/icons/package-plus.svg" class="menu-icon"></div>
+        <div class="card-text"><h4>Criar Lista de Reposição</h4><p>Crie novas listas de reposição.</p></div>
+        <span class="card-arrow">›</span>
+    </div>
 
-        <div class="home-card" onclick="app.abrirPainel('viewReman')">
-            <div class="card-icon">♻️</div>
-            <div class="card-text">
-                <h4>Conferir Remanejamento</h4>
-                <p>Conferir e validar remanejamentos.</p>
-            </div>
-            <span class="card-arrow">›</span>
-        </div>
+    <div class="home-card" onclick="app.abrirPainel('viewReman')">
+        <div class="card-icon"><img src="img/icons/refresh-ccw-dot.svg" class="menu-icon"></div>
+        <div class="card-text"><h4>Conferir Remanejamento</h4><p>Conferir e validar remanejamentos.</p></div>
+        <span class="card-arrow">›</span>
+    </div>
 
-        <div class="home-card" onclick="app.abrirPainel('viewEstoque')">
-            <div class="card-icon">📦</div>
-            <div class="card-text">
-                <h4>Listas de Reposição</h4>
-                <p>Visualize e gerencie suas listas.</p>
-            </div>
-            <span class="card-arrow">›</span>
-        </div>
+    <div class="home-card" onclick="app.abrirPainel('viewEstoque')">
+        <div class="card-icon"><img src="img/icons/clipboard-list.svg" class="menu-icon"></div>
+        <div class="card-text"><h4>Listas de Reposição</h4><p>Visualize e gerencie suas listas.</p></div>
+        <span class="card-arrow">›</span>
+    </div>
 
-        <div class="home-card" onclick="app.abrirPainel('viewAnalise')">
-            <div class="card-icon">⚠️</div>
-            <div class="card-text">
-                <h4>Não Achei</h4>
-                <p>Itens que não foram encontrados.</p>
-            </div>
-            <span class="card-arrow">›</span>
-        </div>
+    <div class="home-card" onclick="app.abrirPainel('viewAnalise')">
+        <div class="card-icon"><img src="img/icons/triangle-alert.svg" class="menu-icon"></div>
+        <div class="card-text"><h4>Não Achei</h4><p>Itens que não foram encontrados.</p></div>
+        <span class="card-arrow">›</span>
+    </div>
 
-        <div class="home-card" onclick="app.abrirPainel('viewRelatorio')">
-            <div class="card-icon">📊</div>
-            <div class="card-text">
-                <h4>Histórico</h4>
-                <p>Acompanhe o histórico de atividades.</p>
-            </div>
-            <span class="card-arrow">›</span>
-        </div>
+    <div class="home-card" onclick="app.abrirPainel('viewRelatorio')">
+        <div class="card-icon"><img src="img/icons/chart-column.svg" class="menu-icon"></div>
+        <div class="card-text"><h4>Histórico</h4><p>Acompanhe o histórico de atividades.</p></div>
+        <span class="card-arrow">›</span>
+    </div>
 
-        <div class="home-card" onclick="app.abrirPainel('viewMenuInventario')">
-            <div class="card-icon">🎯</div>
-            <div class="card-text">
-                <h4>Prevenção e perdas</h4>
-                <p>Ações e análises para reduzir perdas.</p>
-            </div>
-            <span class="card-arrow">›</span>
-        </div>
+    <div class="home-card" onclick="app.abrirPainel('viewMenuInventario')">
+        <div class="card-icon"><img src="img/icons/target.svg" class="menu-icon"></div>
+        <div class="card-text"><h4>Prevenção e perdas</h4><p>Ações e análises para reduzir perdas.</p></div>
+        <span class="card-arrow">›</span>
+    </div>
 
-        <div class="home-card small-card" onclick="app.abrirPainel('viewUpload')">
-            <div class="card-icon">☁️</div>
-            <div class="card-text">
-                <h4>Upload Base</h4>
-                <p>Envie e atualize bases.</p>
-            </div>
-            <span class="card-arrow">›</span>
-        </div>
+    <div class="home-card small-card" onclick="app.abrirPainel('viewUpload')">
+        <div class="card-icon"><img src="img/icons/cloud-upload.svg" class="menu-icon"></div>
+        <div class="card-text"><h4>Upload Base</h4><p>Envie e atualize bases.</p></div>
+        <span class="card-arrow">›</span>
+    </div>
 
-        <div class="home-card small-card" onclick="app.abrirPainel('viewSobre')">
-            <div class="card-icon">💡</div>
-            <div class="card-text">
-                <h4>Sobre</h4>
-                <p>Informações do sistema.</p>
-            </div>
-            <span class="card-arrow">›</span>
-        </div>
+        <div class="home-card" onclick="app.abrirPainel('viewMasterBox')">
+        <div class="card-icon"><img src="img/icons/archive.svg" class="menu-icon"></div>
+        <div class="card-text"><h4>Master Box</h4><p>Criar e consultar caixas.</p></div>
+        <span class="card-arrow">›</span>
+    </div>
+
+    <div class="home-card small-card" onclick="app.abrirPainel('viewSobre')">
+        <div class="card-icon"><img src="img/icons/settings.svg" class="menu-icon"></div>
+        <div class="card-text"><h4>Sobre</h4><p>Informações do sistema.</p></div>
+        <span class="card-arrow">›</span>
+    </div>
+
+
+</div>
 
         <button class="btn-sair" onclick="app.fazerLogout()">🚪 Sair do Sistema</button>
     </div>
 
-    <div class="footer-copy">© StockFlow v2.2.0 • Desenvolvido por Wagner Gomes dos Santos</div>
+    <div class="footer-copy">© StockFlow v2.3.1 • Desenvolvido por Wagner Gomes dos Santos</div>
 </div>
         </div>
     </div>
@@ -471,6 +457,120 @@
             </button>
 
         </div>
+    </div>
+</div>
+
+<div id="viewMasterBox" class="view-container">
+    <div class="card-internal" style="text-align:left;">
+        <h3 style="color:#25105f;font-weight:900;">📦 MASTER BOX</h3>
+
+        <button class="btn-main" onclick="app.abrirCriarMasterBox()">
+            CRIAR NOVA MASTER
+        </button>
+
+        <button class="btn-main" onclick="app.abrirConsultarMasterBox()">
+            CONSULTAR MASTER
+        </button>
+
+        <button class="btn-main" onclick="app.abrirBuscarItemMasterBox()">
+            BUSCAR ITEM
+        </button>
+
+        <button class="btn-main" onclick="app.listarHistoricoMasters()">
+            HISTÓRICO DE MASTERS
+        </button>
+
+        <div id="historicoMasters" style="margin-top:15px;"></div>
+    </div>
+</div>
+
+<div id="viewMasterCriar" class="view-container">
+    <div class="card-internal" style="text-align:left;">
+        <h3 id="tituloMasterCriar" style="color:#25105f;font-weight:900;">
+            MASTER
+        </h3>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;">
+            <div class="loja-badge">📦 Itens: <b id="totalItensMaster">0</b></div>
+            <div class="loja-badge">🏷️ SKUs: <b id="totalSkusMaster">0</b></div>
+        </div>
+
+        <button class="btn-main" onclick="app.iniciarCamera('readerMaster','master')">
+            📸 INICIAR LEITURA CONTÍNUA
+        </button>
+
+        <div id="readerMaster" class="reader-box"></div>
+
+        <input type="text" id="inputBipMaster" placeholder="BIPAR SKU OU EAN">
+
+        <button class="btn-main" onclick="app.biparItemMaster()">
+            ADICIONAR ITEM
+        </button>
+
+        <div id="listaItensMaster" style="margin-top:15px;"></div>
+
+        <button
+            id="btnEditarMaster"
+            class="btn-main"
+            style="background:#f59e0b;"
+            onclick="app.editarMasterAtual()">
+            ✏️ EDITAR MASTER
+        </button>
+
+        <button
+            id="btnSalvarMaster"
+            class="btn-main"
+            style="background:#22c55e;"
+            onclick="app.salvarMasterAtual()">
+            SALVAR MASTER
+        </button>
+
+        <button
+            class="btn-main"
+            style="background:#6200ee;"
+            onclick="app.exportarPDFMaster()">
+            EXPORTAR PDF
+        </button>
+    </div>
+</div>
+
+<div id="viewMasterConsultar" class="view-container">
+    <div class="card-internal" style="text-align:left;">
+        <h3 style="color:#25105f;font-weight:900;">CONSULTAR MASTER</h3>
+
+        <button class="btn-main" onclick="app.iniciarCamera('readerMasterConsulta','masterConsulta')">
+            📸 LER QR DA MASTER
+        </button>
+
+        <div id="readerMasterConsulta" class="reader-box"></div>
+
+        <input type="text" id="inputMasterConsulta" placeholder="BIPAR / DIGITAR CÓDIGO DA MASTER">
+
+        <button class="btn-main" onclick="app.consultarMaster()">
+            CONSULTAR MASTER
+        </button>
+
+        <div id="resultadoConsultaMaster" style="margin-top:15px;"></div>
+    </div>
+</div>
+
+<div id="viewMasterBuscar" class="view-container">
+    <div class="card-internal" style="text-align:left;">
+        <h3 style="color:#25105f;font-weight:900;">BUSCAR ITEM NA MASTER</h3>
+
+        <button class="btn-main" onclick="app.iniciarCamera('readerMasterBusca','masterBusca')">
+            📸 LER SKU / EAN
+        </button>
+
+        <div id="readerMasterBusca" class="reader-box"></div>
+
+        <input type="text" id="inputBuscaItemMaster" placeholder="BIPAR SKU OU EAN">
+
+        <button class="btn-main" onclick="app.buscarItemNaMaster()">
+            BUSCAR ITEM
+        </button>
+
+        <div id="resultadoBuscaMaster" style="margin-top:15px;"></div>
     </div>
 </div>
 
