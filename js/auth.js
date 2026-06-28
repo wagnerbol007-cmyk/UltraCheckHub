@@ -88,12 +88,18 @@ export function confirmarLoja(auto = false) {
 
     mostrarLoading(true);
 
-    carregarBancosDaLoja();
+// Primeiro abre o menu
+mudarTela('viewMenu');
 
+setTimeout(() => {
+    mostrarLoading(false);
+
+    // Depois começa a carregar tudo em segundo plano
     setTimeout(() => {
-        mostrarLoading(false);
-        mudarTela('viewMenu');
-    }, auto ? 700 : 1500);
+        carregarBancosDaLoja();
+    }, 100);
+
+}, auto ? 300 : 500);
 }
 
 function carregarBancosDaLoja() {
@@ -107,7 +113,8 @@ function carregarBancosDaLoja() {
     refRemanAtual = database.ref('arquivos_reman/' + lojaCarregada);
     refMojixAtual = database.ref('arquivos_lojas/' + lojaCarregada);
 
-    refSAPAtual.on('value', s => {
+refSAPAtual.once('value')
+.then(s => {
         if (state.lojaAtual !== lojaCarregada) return;
 
         if (s.exists()) {
@@ -138,7 +145,8 @@ function carregarBancosDaLoja() {
         }
     });
 
-    refRemanAtual.on('value', s => {
+refRemanAtual.once('value')
+.then(s => {
         if (state.lojaAtual !== lojaCarregada) return;
 
         if (s.exists()) {
@@ -161,7 +169,8 @@ function carregarBancosDaLoja() {
         }
     });
 
-    refMojixAtual.on('value', snapshot => {
+    refMojixAtual.once('value')
+.then(snapshot => {
         if (state.lojaAtual !== lojaCarregada) return;
 
         const d = snapshot.val();
