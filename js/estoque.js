@@ -6,6 +6,7 @@ let sX = 0;
 let sY = 0;
 let itensOcultosSwipe = [];
 let tamanhosOcultosSwipe = {};
+let swipeParcial = {};
 
 export function ouvirEstoque() {
     database.ref(`reposicao_ativa/${state.lojaAtual}`).on('value', s => {
@@ -236,7 +237,8 @@ database.ref().update(updates).then(() => {
             // LIMPEZA DA TELA APÓS A SINCRONIZAÇÃO
             itensOcultosSwipe = []; // Zera os produtos ocultos
             tamanhosOcultosSwipe = {};
-            
+            swipeParcial = {};
+
             document.getElementById('listaHistLocal').innerHTML = ''; // Limpa os separados agora
             document.getElementById('histLocalRep').style.display = 'none'; // Esconde a caixinha de baixo
             
@@ -301,37 +303,44 @@ function confirmarItemAchei(id, item, wrap) {
 
     let totalSeparado = 0;
     let qtdSeparadaTexto = [];
-    let algumaLinhaOcultadaAgora = false;
+    let algumaAcaoValida = false;
 
     if (!tamanhosOcultosSwipe[id]) tamanhosOcultosSwipe[id] = [];
 
     const tamRows = wrap.querySelectorAll('.tam-row');
 
     Object.entries(item.pedidos).forEach(([tamanho, dados], index) => {
-        const coletado = state.coletaEstoqueLocal[id + tamanho] || 0;
+        const coletadoTotal = state.coletaEstoqueLocal[id + tamanho] || 0;
+        const jaSwipado = swipeParcial[id + tamanho] || 0;
+        const novoColetado = coletadoTotal - jaSwipado; // Calcula só o que você clicou de novo
         const linha = tamRows[index];
 
-        // Esconde e registra APENAS o tamanho que foi selecionado (> 0) e que não estava oculto
-        if (coletado > 0 && !tamanhosOcultosSwipe[id].includes(tamanho)) {
-            if (linha && linha.style.display !== 'none') {
-                linha.style.display = 'none'; // Some só a numeração!
+        // Se você separou algo novo nesse tamanho e ele ainda não foi totalmente oculto
+        if (novoColetado > 0 && !tamanhosOcultosSwipe[id].includes(tamanho)) {
+            algumaAcaoValida = true;
+            totalSeparado += novoColetado;
+            qtdSeparadaTexto.push(`${novoColetado}x Tam ${tamanho}`);
+            
+            // Registra que esse valor já foi pro histórico visual
+            swipeParcial[id + tamanho] = coletadoTotal;
+
+            // 🔥 A MÁGICA AQUI: Só esconde a numeração se você coletou TUDO que estava pedindo
+            if (coletadoTotal >= dados.qtd) {
+                if (linha) linha.style.display = 'none';
                 tamanhosOcultosSwipe[id].push(tamanho);
-                algumaLinhaOcultadaAgora = true;
-                totalSeparado += coletado;
-                qtdSeparadaTexto.push(`${coletado}x Tam ${tamanho}`);
             }
         }
     });
 
-    // 1º Passo: O card volta para o centro depois de arrastar
+    // O card volta para o centro depois de arrastar
     wrap.querySelector('.swipe-content').style.transform = 'translateX(0px)';
 
-    if (!algumaLinhaOcultadaAgora) {
-        alert("⚠️ Selecione a quantidade de um tamanho antes de arrastar para confirmar!");
+    if (!algumaAcaoValida) {
+        alert("⚠️ Selecione a quantidade antes de arrastar para confirmar!");
         return;
     }
 
-    // 2º Passo: Joga no histórico verde ali embaixo
+    // Joga no histórico verde ali embaixo
     const histContainer = document.getElementById('histLocalRep');
     const histLista = document.getElementById('listaHistLocal');
     if (histContainer && histLista) {
@@ -342,7 +351,7 @@ function confirmarItemAchei(id, item, wrap) {
         histLista.prepend(li);
     }
 
-    // 3º Passo: Confere se ainda tem numeração sobrando no card. Se apagou todas, tira o card da tela.
+    // Confere se ainda tem numeração sobrando no card. Se apagou todas, tira o card da tela.
     const linhasVisiveis = Array.from(tamRows).some(row => row.style.display !== 'none');
     if (!linhasVisiveis) {
         itensOcultosSwipe.push(id);
