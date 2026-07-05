@@ -1,5 +1,5 @@
 // js/masterbox.js
-// StockFlow v2.4.0
+// StockFlow v2.4.1
 
 import { state, normalizarCodigo } from './state.js';
 import { database } from './firebase.js';

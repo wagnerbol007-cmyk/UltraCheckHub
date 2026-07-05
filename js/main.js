@@ -5,7 +5,7 @@ import { fazerLogin, fazerLogout, confirmarLoja } from './auth.js';
 import { iniciarCamera } from './scanner.js';
 import { analisarDisponibilidade, enviarPedidoFaltantes } from './reposicao.js';
 import { ouvirEstoque, ouvirAnalise, limparAnalise, finalizarColetaGeral, ouvirHistorico } from './estoque.js';
-import { biparReman, alternarStatusReman, renderizarListaCompletaReman, exportarRemanExcel } from './reman.js';
+import { biparReman, alternarStatusReman, renderizarListaCompletaReman, exportarRemanExcel, ticarContadorReman } from './reman.js';
 import { processarSAP, processarReman, processarUploadApp2 } from './upload.js';
 
 import {
@@ -120,6 +120,7 @@ window.app = {
     biparReman,
     alternarStatusReman,
     exportarReman: exportarRemanExcel,
+    ticarContadorReman: ticarContadorReman,
 
     gerarQRReman: (tamanho, sku) => {
         event.stopPropagation();
