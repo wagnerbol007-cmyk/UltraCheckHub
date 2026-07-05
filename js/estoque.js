@@ -5,6 +5,7 @@ import { state, getHoraCerta } from './state.js';
 let sX = 0; 
 let sY = 0;
 let itensOcultosSwipe = [];
+let tamanhosOcultosSwipe = {};
 
 export function ouvirEstoque() {
     database.ref(`reposicao_ativa/${state.lojaAtual}`).on('value', s => {
@@ -64,11 +65,28 @@ export function ouvirEstoque() {
                 }
             });
             
-            let grade = "";
+let grade = "";
+            let temTamanhoVisivel = false;
+
             Object.entries(item.pedidos).forEach(([t, d]) => {
+                tG += d.qtd; // Mantenha o cálculo do progresso geral
                 let p = state.coletaEstoqueLocal[id+t] || 0; 
-                grade += `<div class="tam-row ${p>=d.qtd?'coletado':''}"><div class="tam-btn-est" onclick="app.ticarContador('${id}','${t}',${d.qtd})">${t}: ${p}/${d.qtd}</div><button class="btn-qr-direct" onclick="app.gerarQR('${t}','${d.fullSku}')">QR</button></div>`;
+                tC += p;
+                
+                // Verifica se ESSE tamanho específico já foi arrastado e ocultado
+                let foiOcultado = tamanhosOcultosSwipe[id] && tamanhosOcultosSwipe[id].includes(t);
+                let styleDisplay = foiOcultado ? 'style="display:none;"' : '';
+                
+                if (!foiOcultado) temTamanhoVisivel = true;
+
+                grade += `<div class="tam-row ${p>=d.qtd?'coletado':''}" ${styleDisplay}><div class="tam-btn-est" onclick="app.ticarContador('${id}','${t}',${d.qtd})">${t}: ${p}/${d.qtd}</div><button class="btn-qr-direct" onclick="app.gerarQR('${t}','${d.fullSku}')">QR</button></div>`;
             });
+
+            // Se todos os tamanhos dessa grade já foram ocultados, cancela a renderização desse card
+            if (!temTamanhoVisivel) {
+                if (!itensOcultosSwipe.includes(id)) itensOcultosSwipe.push(id);
+                return; 
+            }
             
             card.innerHTML = `
                 <div style="font-size:0.65em; color:gray; font-weight:bold;">${item.operador} • ${item.hora}</div>
@@ -151,6 +169,7 @@ export function finalizarColetaGeral() {
         const updates = {};
         const historicoItens = [];
         let totalColetado = 0;
+        
 
         Object.entries(lista).forEach(([id, item]) => {
             Object.entries(item.pedidos).forEach(([tamanho, dados]) => {
@@ -216,6 +235,8 @@ database.ref().update(updates).then(() => {
             
             // LIMPEZA DA TELA APÓS A SINCRONIZAÇÃO
             itensOcultosSwipe = []; // Zera os produtos ocultos
+            tamanhosOcultosSwipe = {};
+            
             document.getElementById('listaHistLocal').innerHTML = ''; // Limpa os separados agora
             document.getElementById('histLocalRep').style.display = 'none'; // Esconde a caixinha de baixo
             
@@ -275,41 +296,56 @@ export function ouvirHistorico() {
     });
 }
 
-// Substituir no final do js/estoque.js
 function confirmarItemAchei(id, item, wrap) {
+    if (!wrap) return;
+
     let totalSeparado = 0;
     let qtdSeparadaTexto = [];
+    let algumaLinhaOcultadaAgora = false;
 
-    // Coleta o que foi "ticado" na tela
-    Object.entries(item.pedidos).forEach(([tamanho, dados]) => {
+    if (!tamanhosOcultosSwipe[id]) tamanhosOcultosSwipe[id] = [];
+
+    const tamRows = wrap.querySelectorAll('.tam-row');
+
+    Object.entries(item.pedidos).forEach(([tamanho, dados], index) => {
         const coletado = state.coletaEstoqueLocal[id + tamanho] || 0;
-        if (coletado > 0) {
-            totalSeparado += coletado;
-            qtdSeparadaTexto.push(`${coletado}x Tam ${tamanho}`);
+        const linha = tamRows[index];
+
+        // Esconde e registra APENAS o tamanho que foi selecionado (> 0) e que não estava oculto
+        if (coletado > 0 && !tamanhosOcultosSwipe[id].includes(tamanho)) {
+            if (linha && linha.style.display !== 'none') {
+                linha.style.display = 'none'; // Some só a numeração!
+                tamanhosOcultosSwipe[id].push(tamanho);
+                algumaLinhaOcultadaAgora = true;
+                totalSeparado += coletado;
+                qtdSeparadaTexto.push(`${coletado}x Tam ${tamanho}`);
+            }
         }
     });
 
-    if (totalSeparado === 0) {
-        alert("⚠️ Toque no tamanho para informar a quantidade antes de arrastar para 'ACHEI'!");
-        if(wrap) wrap.querySelector('.swipe-content').style.transform = 'translateX(0px)'; // reseta o arraste
+    // 1º Passo: O card volta para o centro depois de arrastar
+    wrap.querySelector('.swipe-content').style.transform = 'translateX(0px)';
+
+    if (!algumaLinhaOcultadaAgora) {
+        alert("⚠️ Selecione a quantidade de um tamanho antes de arrastar para confirmar!");
         return;
     }
 
-    // Marca como oculto para não aparecer nos próximos re-desenhos
-    itensOcultosSwipe.push(id);
-    
-    // Tira o card da tela imediatamente!
-    if(wrap) wrap.remove();
-
-    // Joga o registro lá pra parte de baixo (Separados Agora)
+    // 2º Passo: Joga no histórico verde ali embaixo
     const histContainer = document.getElementById('histLocalRep');
     const histLista = document.getElementById('listaHistLocal');
     if (histContainer && histLista) {
         histContainer.style.display = 'block';
-        const hora = getHoraCerta();
         const li = document.createElement('div');
         li.className = 'hist-local-item';
-        li.innerHTML = `<b>${hora}</b> - <span style="color:var(--uh-primary); font-weight:800;">${item.desc}</span><br><small>✅ Separado: ${qtdSeparadaTexto.join(" | ")}</small>`;
+        li.innerHTML = `<b>${getHoraCerta()}</b> - <span style="color:var(--uh-primary); font-weight:800;">${item.desc}</span><br><small>✅ Separado: ${qtdSeparadaTexto.join(" | ")}</small>`;
         histLista.prepend(li);
+    }
+
+    // 3º Passo: Confere se ainda tem numeração sobrando no card. Se apagou todas, tira o card da tela.
+    const linhasVisiveis = Array.from(tamRows).some(row => row.style.display !== 'none');
+    if (!linhasVisiveis) {
+        itensOcultosSwipe.push(id);
+        setTimeout(() => wrap.remove(), 200);
     }
 }
