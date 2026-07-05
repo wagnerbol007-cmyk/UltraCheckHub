@@ -76,6 +76,7 @@ export function enviarPedidoFaltantes() {
     database.ref(`reposicao_ativa/${state.lojaAtual}/${p8}`).set({ 
         desc: prodAtual["Descrição material"] || prodAtual["Texto breve material"], 
         cor: info.cor, 
+        preco: info.preco,
         pedidos: formatado, 
         skuBase8: p8, 
         operador: state.operador, 

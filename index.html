@@ -197,14 +197,20 @@
         <div id="barTxt" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: 900; color: #1e293b;">0 / 0</div>
     </div>
 
+    <div id="histLocalRep" style="width: 100%; max-width: 450px; background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: 22px; padding: 15px; margin-bottom: 15px; display: none; text-align: left;">
+        <h4 style="margin: 0 0 12px 0; color: #166534; font-size: 0.85em; font-weight: 900; text-transform: uppercase;">✅ Separados Agora</h4>
+        <div id="listaHistLocal" style="display: flex; flex-direction: column; gap: 8px;"></div>
+    </div>
+
     <div id="listaPedidos" style="width: 100%; max-width: 450px; padding-bottom: 90px;"></div>
 
     <div class="footer-action-estoque">
         <button class="btn-main" style="background:#22c55e; margin:0;" onclick="app.finalizarColetaGeral()">
-            ✅ SINC COLETA
+            ✅ SINC COLETA GERAL
         </button>
     </div>
 </div>
+
     <div id="viewAnalise" class="view-container">
         <h3 style="color:#e20613; margin-bottom:15px; text-transform:uppercase; font-weight:900;">Auditoria de Faltas</h3>
         <div id="listaAnalise" style="width: 100%; max-width: 450px;"></div>
