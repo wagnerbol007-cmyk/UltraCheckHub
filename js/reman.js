@@ -56,52 +56,46 @@ export function biparReman(bip) {
         let linesTopHtml = "";
         
         pertenceAoReman.forEach(itemPlan => {
-            let skuReman13 = normalizarCodigo(itemPlan.SKU || itemPlan.Material);
-            const correspondenteGradeSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === skuReman13);
-            const infoSap = correspondenteGradeSap ? extrairInfoSAP(correspondenteGradeSap) : { saldo: 0, tam: "UN" };
+            const skuReman13 = normalizarCodigo(itemPlan.SKU || itemPlan.Material);
+            const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === skuReman13);
+            const info = itemSap ? extrairInfoSAP(itemSap) : { saldo: 0, tam: "UN" };
 
-            let classeLinha = "reman-grade-linha";
-            let classeBotao = "btn-reman-action btn-reman-check";
-            let textoBotao = "📦 COLETAR";
+            database.ref(`status_reman_loja/${state.lojaAtual}/${skuReman13}`).once("value").then(snap => {
+                const qtd = snap.val()?.qtd || 0;
 
-            // Verifica o status no banco (agora verifica se a qtd salva é maior que 0)
-            database.ref(`status_reman_loja/${state.lojaAtual}/${skuReman13}`).once('value', sn => {
-                if (sn.exists() && sn.val().qtd > 0) {
-                    classeLinha = "reman-grade-linha marcado-separado";
-                    classeBotao = "btn-reman-action btn-reman-check check-ok";
-                    textoBotao = "✅ OK";
-                }
-            });
-
-            // Adiciona o contador na tela de bip (opcional, mas recomendado para consistência)
-            const ticado = state.coletaEstoqueLocal['reman_' + skuReman13] || 0;
-
-            linesTopHtml += `
-                <div class="${classeLinha}" id="linha-reman-top-${skuReman13}">
-                    <div>TAM: <b>${infoSap.tam}</b> <span style="font-size:0.8em; color:gray;">(Est: ${infoSap.saldo})</span></div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="tam-btn-est" style="background:#e2e8f0; color:var(--dark-blue); border:none; padding:8px;" onclick="app.ticarContadorReman('${skuReman13}', ${infoSap.saldo})">
-                            ${ticado} / ${infoSap.saldo}
-                        </button>
-                        <button class="${classeBotao}" id="btn-check-reman-top-${skuReman13}" onclick="app.alternarStatusReman('${base8}', '${skuReman13}')">${textoBotao}</button>
+                linesTopHtml += `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:10px; border:1px solid #ddd; border-radius:12px; background:white;">
+                    <div>
+                        <b>TAM ${info.tam}</b><br>
+                        <span style="font-size:12px;">Encontrado:</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <button style="padding:6px 12px; font-weight:bold; border:1px solid #ccc; border-radius:6px; background:#fff;" onclick="app.diminuirReman('${skuReman13}')">−</button>
+                        
+                        <span id="qtd-reman-${skuReman13}" style="font-size:18px; font-weight:bold; min-width:30px; text-align:center;">
+                            ${qtd}
+                        </span>
+                        
+                        <button style="padding:6px 12px; font-weight:bold; border:1px solid #ccc; border-radius:6px; background:#fff;" onclick="app.aumentarReman('${skuReman13}',${info.saldo})">+</button>
                     </div>
                 </div>
-            `;
+                `;
+
+                corpoTop.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" class="thumb" style="width:55px;height:55px;" onclick="app.zoomFoto(this.src)">
+                        <div style="flex:1;">
+                            <b>${descricaoItem}</b><br>
+                            REF: ${base8}
+                        </div>
+                    </div>
+                    ${linesTopHtml}
+                    <button class="btn-main" style="margin-top:15px;background:#22c55e;" onclick="app.alternarStatusReman('${base8}','${skuReman13}')">
+                        ✅ DECLARAR SEPARADO
+                    </button>
+                `;
+            });
         });
-
-        corpoTop.innerHTML = `
-            <div style="display:flex; align-items:center; gap:12px;">
-                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" class="thumb" style="width:55px; height:55px;" onclick="app.zoomFoto(this.src)">
-                <div style="flex:1; font-size:0.75em; line-height:1.2;">
-                    <b>${descricaoItem}</b><br>
-                    <span style="color:#7c3aed; font-weight:800;">REF: ${base8}</span>
-                </div>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:6px; margin-top:5px;">
-                ${linesTopHtml}
-            </div>
-        `;
-
     } else {
         cardTop.style.borderLeftColor = "var(--success)";
         tagTop.style.background = "var(--success)";
@@ -119,122 +113,126 @@ export function biparReman(bip) {
     }
 }
 
+export function aumentarReman(sku13, saldoTotal) {
+    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
+    ref.once("value").then(snapshot => {
+        const dados = snapshot.val() || {};
+        let qtd = dados.qtd || 0;
+        
+        if (qtd < saldoTotal) {
+            qtd++;
+        }
+        
+        ref.set({ ...dados, qtd }).then(() => {
+            const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
+            if (spanNumero) spanNumero.innerText = qtd;
+        });
+    });
+}
+
+export function diminuirReman(sku13) {
+    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
+    ref.once("value").then(snapshot => {
+        const dados = snapshot.val() || {};
+        let qtd = dados.qtd || 0;
+        
+        if (qtd > 0) {
+            qtd--;
+        }
+        
+        ref.set({ ...dados, qtd }).then(() => {
+            const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
+            if (spanNumero) spanNumero.innerText = qtd;
+        });
+    });
+}
+
 export function renderizarListaCompletaReman() {
     const container = document.getElementById('remanListaSincronizada');
     if (!container) return;
-    container.innerHTML = "";
 
-    if (state.dadosReman.length === 0) {
-        container.innerHTML = "<p style='color:gray; font-size:0.85em; text-align:center;'>Nenhuma planilha de Reman carregada no sistema.</p>";
-        return;
-    }
+    database.ref(`status_reman_loja/${state.lojaAtual}`).on('value', snapshot => {
+        const statusDb = snapshot.val() || {};
+        container.innerHTML = "";
 
-    let agrupadoPorModelo = {};
-    state.dadosReman.forEach(item => {
-        let skuLimpo = normalizarCodigo(item.SKU || item.Material);
-        if (!skuLimpo) return;
-        let base8 = skuLimpo.substring(0, 8);
-        if (!agrupadoPorModelo[base8]) agrupadoPorModelo[base8] = [];
-        agrupadoPorModelo[base8].push(skuLimpo);
-    });
-
-    Object.entries(agrupadoPorModelo).forEach(([base8, listaSkus13]) => {
-        const desc = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU).startsWith(base8))?.["Descrição material"] || "Produto Reman";
-        
-        const card = document.createElement('div');
-        card.className = "reman-card-item";
-        card.id = `card-modelo-reman-${base8}`;
-
-        let gradeHtml = "";
-        listaSkus13.forEach(sku13 => {
-            const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === sku13);
-            const tam = itemSap ? extrairInfoSAP(itemSap).tam : "UN";
-            const saldo = itemSap ? extrairInfoSAP(itemSap).saldo : 0;
-            
-            // Controle local de contagem usando um prefixo 'reman_'
-            const ticado = state.coletaEstoqueLocal['reman_' + sku13] || 0;
-
-            gradeHtml += `
-                <div class="reman-grade-linha" id="linha-reman-${sku13}" style="display:flex; justify-content:space-between; align-items:center; padding:8px;">
-                    <div>TAM: <b>${tam}</b> <span style="font-size:0.8em; color:gray;">(Est: ${saldo})</span></div>
-                    <div style="display:flex; gap:5px; align-items:center;">
-                        <button class="tam-btn-est" style="background:#e2e8f0; color:var(--dark-blue); border:none; padding:8px; border-radius:8px;" onclick="app.ticarContadorReman('${sku13}', ${saldo})">
-                            ${ticado} / ${saldo}
-                        </button>
-                        <button class="btn-reman-action btn-reman-check" id="btn-check-reman-${sku13}" onclick="app.alternarStatusReman('${base8}', '${sku13}')">📦 COLETAR</button>
-                    </div>
-                </div>
-            `;
+        let agrupado = {};
+        state.dadosReman.forEach(item => {
+            let sku = normalizarCodigo(item.SKU || item.Material);
+            if(!sku) return;
+            let base8 = sku.substring(0, 8);
+            if (!agrupado[base8]) agrupado[base8] = [];
+            agrupado[base8].push(sku);
         });
 
-        card.innerHTML = `
-            <div style="display:flex; gap:12px; align-items:center;">
-                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" class="thumb" style="width:55px; height:55px;" onclick="app.zoomFoto(this.src)">
-                <div style="flex:1; line-height:1.2;">
-                    <b>${desc}</b><br><span style="color:#7c3aed; font-weight:800; font-size:0.8em;">REF: ${base8}</span>
+        Object.entries(agrupado).forEach(([base8, lista]) => {
+            const desc = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU).startsWith(base8))?.["Descrição material"] || "Produto Reman";
+            const card = document.createElement('div');
+            card.className = "reman-card-item";
+            
+            let gradeHtml = "";
+            lista.forEach(sku13 => {
+                const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === sku13);
+                const info = extrairInfoSAP(itemSap || {});
+                const registro = statusDb[sku13] || { qtd: 0 };
+                const ticado = registro.qtd;
+
+                let bgCor = ticado === 0 ? '#ffffff' : (ticado < info.saldo ? '#fff7ed' : '#dcfce7');
+                let bordaCor = ticado === 0 ? '#e2e8f0' : (ticado < info.saldo ? '#fb923c' : '#22c55e');
+
+                gradeHtml += `
+                    <div style="background:${bgCor}; border:1px solid ${bordaCor}; padding:10px; margin:5px 0; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-weight:bold;">TAM: ${info.tam} (${ticado}/${info.saldo})</div>
+                        <div style="display:flex; gap:6px;">
+                            <button style="padding:6px 10px; border-radius:6px; border:1px solid #ccc;" onclick="app.gerarQRReman('${info.tam}', '${sku13}')">🔍</button>
+                            <button style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-weight:bold; background:#fff;" onclick="app.ticarContadorReman('${sku13}', ${info.saldo})">++</button>
+                            <button style="padding:6px 10px; border-radius:6px; border:none; background:${ticado > 0 ? '#22c55e' : '#f97316'}; color:white;" onclick="app.alternarStatusReman('${base8}', '${sku13}')">
+                                ${ticado > 0 ? '✅' : '📦'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            card.innerHTML = `
+                <div style="padding:10px; display:flex; gap:10px; align-items:center; border-bottom:1px solid #eee;">
+                    <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:50px; height:50px; border-radius:8px;">
+                    <div><b>${desc}</b><br><small>REF: ${base8}</small></div>
                 </div>
-            </div>
-            <div style="margin-top:10px;">${gradeHtml}</div>
-        `;
-        container.appendChild(card);
+                <div style="padding:10px;">${gradeHtml}</div>
+            `;
+            container.appendChild(card);
+        });
     });
 }
 
-// NOVA FUNÇÃO: Ticar o contador do Remanejamento
 export function ticarContadorReman(sku13, saldoTotal) {
-    const chave = 'reman_' + sku13;
-    let atual = state.coletaEstoqueLocal[chave] || 0;
-
-    if (atual < saldoTotal) {
-        state.coletaEstoqueLocal[chave] = atual + 1;
-    } else {
-        state.coletaEstoqueLocal[chave] = 0; // Zera se passar do saldo
-    }
+    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
     
-    // Atualiza a tela (força a re-renderização das listas)
-    renderizarListaCompletaReman();
-    
-    // Se o card de bip estiver aberto e for desse SKU, re-renderiza ele também
-    const inputBip = document.getElementById('inputBipReman');
-    if (inputBip && document.getElementById(`linha-reman-top-${sku13}`)) {
-        // Isso é um truque para re-renderizar o card superior
-        biparReman(sku13);
-    }
+    ref.once('value', snapshot => {
+        const atual = snapshot.val()?.qtd || 0;
+        const novaQtd = (atual < saldoTotal) ? atual + 1 : 0;
+        
+        ref.update({ qtd: novaQtd });
+    });
 }
 
 export function alternarStatusReman(base8, sku13) {
-    const linha = document.getElementById(`linha-reman-${sku13}`);
-    const btn = document.getElementById(`btn-check-reman-${sku13}`);
-    const linhaTop = document.getElementById(`linha-reman-top-${sku13}`);
-    const btnTop = document.getElementById(`btn-check-reman-top-${sku13}`);
-
-    const estaSeparado = linha ? linha.classList.contains('marcado-separado') : (linhaTop ? linhaTop.classList.contains('marcado-separado') : false);
+    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
     
-    // Pega a quantidade que o usuário ticou na tela
-    const qtdTicada = state.coletaEstoqueLocal['reman_' + sku13] || 0;
-
-    if (!estaSeparado) {
-        // Exige que o usuário tenha ticado pelo menos 1 item antes de coletar
-        if (qtdTicada === 0) {
-            alert("⚠️ Selecione a quantidade no contador antes de coletar!");
-            return;
-        }
-
-        database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`).set({
-            status: "separado",
-            qtd: qtdTicada,
-            quem: state.operador,
-            hora: getHoraCerta()
-        });
+    ref.once('value', snapshot => {
+        const registro = snapshot.val();
         
-        if(linha) { linha.classList.add('marcado-separado'); btn.className = "btn-reman-action btn-reman-check check-ok"; btn.innerText = "✅ OK"; }
-        if(linhaTop) { linhaTop.classList.add('marcado-separado'); btnTop.className = "btn-reman-action btn-reman-check check-ok"; btnTop.innerText = "✅ OK"; }
-    } else {
-        database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`).remove();
-        if(linha) { linha.classList.remove('marcado-separado'); btn.className = "btn-reman-action btn-reman-check"; btn.innerText = "📦 COLETAR"; }
-        if(linhaTop) { linhaTop.classList.remove('marcado-separado'); btnTop.className = "btn-reman-action btn-reman-check"; btnTop.innerText = "📦 COLETAR"; }
-    }
-    recalcularProgressoCard(base8);
+        if (registro && registro.qtd > 0) {
+            ref.update({
+                quem: state.operador,
+                hora: getHoraCerta()
+            }).then(() => {
+                window.mostrarAviso("✅ Coleta confirmada para: " + sku13, "sucesso");
+            });
+        } else {
+            window.mostrarAviso("⚠️ Selecione a quantidade no contador (+) antes de coletar!", "erro");
+        }
+    });
 }
 
 function recalcularProgressoCard(base8) {
@@ -257,7 +255,7 @@ export function exportarRemanExcel() {
         const listaSkus = Object.keys(status);
 
         if (listaSkus.length === 0) {
-            return alert("Nenhum item foi separado ainda para exportar.");
+            return window.mostrarAviso("Nenhum item foi separado ainda para exportar.", "erro");
         }
 
         let dadosExportacao = [];

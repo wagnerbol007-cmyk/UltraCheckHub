@@ -5,8 +5,18 @@ import { fazerLogin, fazerLogout, confirmarLoja } from './auth.js';
 import { iniciarCamera } from './scanner.js';
 import { analisarDisponibilidade, enviarPedidoFaltantes } from './reposicao.js';
 import { ouvirEstoque, ouvirAnalise, limparAnalise, finalizarColetaGeral, ouvirHistorico } from './estoque.js';
-import { biparReman, alternarStatusReman, renderizarListaCompletaReman, exportarRemanExcel, ticarContadorReman } from './reman.js';
 import { processarSAP, processarReman, processarUploadApp2 } from './upload.js';
+
+// Importação limpa e corrigida do Reman
+import {
+    biparReman,
+    alternarStatusReman,
+    renderizarListaCompletaReman,
+    exportarRemanExcel,
+    ticarContadorReman,
+    aumentarReman,
+    diminuirReman
+} from './reman.js';
 
 import {
     abrirModoInventario,
@@ -37,6 +47,7 @@ import {
     editarMasterAtual
 } from './masterbox.js';
 
+// Criando a "lista de presença" (window.app) de forma correta
 window.app = {
     voltarMenu: () => voltarTela(),
 
@@ -62,9 +73,7 @@ window.app = {
     },
 
     zoomFoto: (url) => {
-        document.getElementById('imgGrande').src =
-            url.replace('100x100', '768x768');
-
+        document.getElementById('imgGrande').src = url.replace('100x100', '768x768');
         document.getElementById('modalFoto').style.display = 'flex';
     },
 
@@ -74,39 +83,28 @@ window.app = {
 
     iniciarCamera: (containerId, contexto) => {
         iniciarCamera(containerId, (codigoLido) => {
-
             if (contexto === 'reposicao') {
                 document.getElementById('inputBip').value = codigoLido;
                 analisarDisponibilidade(codigoLido);
             }
-
             else if (contexto === 'reman') {
                 document.getElementById('inputBipReman').value = codigoLido;
                 biparReman(codigoLido);
             }
-
             else if (contexto === 'master') {
                 const agora = Date.now();
-
-                if (
-                    window.__ultimoBipMasterCodigo === codigoLido &&
-                    agora - window.__ultimoBipMasterTempo < 1200
-                ) {
+                if (window.__ultimoBipMasterCodigo === codigoLido && agora - window.__ultimoBipMasterTempo < 1200) {
                     return;
                 }
-
                 window.__ultimoBipMasterCodigo = codigoLido;
                 window.__ultimoBipMasterTempo = agora;
-
                 document.getElementById('inputBipMaster').value = codigoLido;
                 window.app.biparItemMaster();
             }
-
             else if (contexto === 'masterConsulta') {
                 document.getElementById('inputMasterConsulta').value = codigoLido;
                 window.app.consultarMaster();
             }
-
             else if (contexto === 'masterBusca') {
                 document.getElementById('inputBuscaItemMaster').value = codigoLido;
                 window.app.buscarItemNaMaster();
@@ -117,17 +115,18 @@ window.app = {
     biparReposicao: analisarDisponibilidade,
     enviarPedidoFaltantes,
 
-    biparReman,
-    alternarStatusReman,
-    exportarReman: exportarRemanExcel,
+    // Funções do Reman conectadas corretamente
+    biparReman: biparReman,
+    alternarStatusReman: alternarStatusReman,
     ticarContadorReman: ticarContadorReman,
+    renderizarListaCompletaReman: renderizarListaCompletaReman,
+    exportarReman: exportarRemanExcel,
+    aumentarReman: aumentarReman,
+    diminuirReman: diminuirReman,
 
     gerarQRReman: (tamanho, sku) => {
         event.stopPropagation();
-
-        document.getElementById('qrTitle').innerText =
-            "PROCURAR TAMANHO: " + tamanho;
-
+        document.getElementById('qrTitle').innerText = "PROCURAR TAMANHO: " + tamanho;
         document.getElementById('qrSku').innerText = sku;
         document.getElementById('qrcode').innerHTML = "";
 
@@ -142,7 +141,6 @@ window.app = {
 
     ticarContador: (idPedido, tamanho, qtdTotal) => {
         let atual = state.coletaEstoqueLocal[idPedido + tamanho] || 0;
-
         if (atual < qtdTotal) {
             state.coletaEstoqueLocal[idPedido + tamanho] = atual + 1;
             ouvirEstoque();
@@ -189,7 +187,7 @@ window.app = {
     exportarPDFMaster,
     listarHistoricoMasters,
     editarMasterAtual
-};
+}; // Agora sim o objeto fecha no lugar certo!
 
 document.addEventListener("DOMContentLoaded", () => {
     mudarTela('viewLogin');
