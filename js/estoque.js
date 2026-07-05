@@ -169,13 +169,15 @@ export function finalizarColetaGeral() {
         let totalColetado = 0;
 
         Object.entries(lista).forEach(([id, item]) => {
-            Object.entries(item.pedidos).forEach(([tamanho, dados]) => {
-                const chaveLocal = id + tamanho;
-                const coletado = state.coletaEstoqueLocal[chaveLocal] || 0;
+            let aindaTemPendente = false;
 
+            // 1. Coleta os dados para o histórico e verifica se faltou algum tamanho
+            Object.entries(item.pedidos).forEach(([tamanho, dados]) => {
+                const coletado = Number(state.coletaEstoqueLocal[id + tamanho]) || 0;
+                const meta = Number(dados.qtd) || 0;
+                
                 if (coletado > 0) {
                     totalColetado += coletado;
-
                     historicoItens.push({
                         produto: item.desc || "Produto sem descrição",
                         cor: item.cor || "",
@@ -183,40 +185,43 @@ export function finalizarColetaGeral() {
                         tamanho: tamanho,
                         sku: dados.fullSku || "",
                         quantidadeSeparada: coletado,
-                        quantidadeOriginal: dados.qtd,
+                        quantidadeOriginal: meta,
                         operadorPedido: item.operador || "",
                         horaPedido: item.hora || ""
                     });
+                }
 
-                    if (coletado >= dados.qtd) {
-                        updates[`reposicao_ativa/${state.lojaAtual}/${id}/pedidos/${tamanho}`] = null;
-                    } else {
-                        updates[`reposicao_ativa/${state.lojaAtual}/${id}/pedidos/${tamanho}/qtd`] = dados.qtd - coletado;
-                    }
+                if (coletado < meta) {
+                    aindaTemPendente = true; // Se não pegou 100% desse tamanho, marca que tem pendência
                 }
             });
+
+            // 2. Prepara as atualizações de forma inteligente (SEM SOBREPOR OS CAMINHOS NO FIREBASE)
+            if (!aindaTemPendente) {
+                // Se pegou TUDO do produto, apaga a caixa inteira de uma vez e ignora os filhos
+                updates[`reposicao_ativa/${state.lojaAtual}/${id}`] = null;
+            } else {
+                // Se ainda tem tamanho pendente, atualiza/apaga apenas os tamanhos individualmente
+                Object.entries(item.pedidos).forEach(([tamanho, dados]) => {
+                    const coletado = Number(state.coletaEstoqueLocal[id + tamanho]) || 0;
+                    const meta = Number(dados.qtd) || 0;
+                    if (coletado > 0) {
+                        if (coletado >= meta) {
+                            updates[`reposicao_ativa/${state.lojaAtual}/${id}/pedidos/${tamanho}`] = null;
+                        } else {
+                            updates[`reposicao_ativa/${state.lojaAtual}/${id}/pedidos/${tamanho}/qtd`] = meta - coletado;
+                        }
+                    }
+                });
+            }
         });
 
         if (totalColetado === 0) {
             return alert("Nenhum item foi ticado para sincronizar.");
         }
 
-        Object.entries(lista).forEach(([id, item]) => {
-            const pedidos = item.pedidos || {};
-            let aindaTemPendente = false;
-
-            Object.entries(pedidos).forEach(([tamanho, dados]) => {
-                const coletado = state.coletaEstoqueLocal[id + tamanho] || 0;
-                if (coletado < dados.qtd) aindaTemPendente = true;
-            });
-
-            if (!aindaTemPendente) {
-                updates[`reposicao_ativa/${state.lojaAtual}/${id}`] = null;
-            }
-        });
-
+        // 3. Salva no Histórico Geral
         const historicoRef = database.ref(`historico_reposicao/${state.lojaAtual}`).push();
-
         updates[`historico_reposicao/${state.lojaAtual}/${historicoRef.key}`] = {
             hora: getHoraCerta(),
             quem: state.operador,
@@ -227,10 +232,11 @@ export function finalizarColetaGeral() {
             ).join("<br>")
         };
 
+        // 4. Envia tudo para o banco de dados
         database.ref().update(updates).then(() => {
             state.coletaEstoqueLocal = {};
             
-            // LIMPEZA GERAL DE MEMÓRIA DE ARRASTE
+            // LIMPEZA DA TELA APÓS A SINCRONIZAÇÃO
             itensOcultosSwipe = [];
             tamanhosOcultosSwipe = {};
             swipeParcial = {};
@@ -240,10 +246,11 @@ export function finalizarColetaGeral() {
             if(listaHist) listaHist.innerHTML = ''; 
             if(contHist) contHist.style.display = 'none'; 
             
-            ouvirEstoque();
+            ouvirEstoque(); // Recarrega a tela limpa
             if (window.mostrarAviso) window.mostrarAviso("Coleta sincronizada e enviada para o histórico!", "sucesso");
+            else alert("Coleta sincronizada e enviada para o histórico!");
         }).catch(error => {
-            console.error(error);
+            console.error("Erro no Firebase: ", error);
             alert("Erro ao sincronizar coleta.");
         });
     });
