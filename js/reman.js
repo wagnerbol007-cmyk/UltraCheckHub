@@ -16,7 +16,6 @@ function extrairInfoSAP(item) {
 // Transformamos em async para esperar o Firebase sem travar a tela
 export async function biparReman(bip) {
     
-    // MÁGICA: Injeta a função de salvar parcial sem você precisar tocar no main.js
     if (window.app && !window.app.salvarColetaParcial) {
         window.app.salvarColetaParcial = function(base8) {
             const pertence = state.dadosReman.filter(i => normalizarCodigo(i.SKU || i.Material).startsWith(base8));
@@ -25,7 +24,6 @@ export async function biparReman(bip) {
                 let sku13 = normalizarCodigo(item.SKU || item.Material);
                 database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`).once("value").then(snap => {
                     let reg = snap.val();
-                    // Só salva no histórico (quem separou) o que for MAIOR que ZERO.
                     if (reg && reg.qtd > 0) {
                         database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`).update({
                             quem: state.operador,
@@ -80,36 +78,51 @@ export async function biparReman(bip) {
         tagTop.classList.add("reman-laranja");
         tagTop.innerText = "🚨 ITEM DE REMAN! SEPARAR";
 
-        // Espera todos os dados carregarem perfeitamente do banco
         const promessas = pertenceAoReman.map(async (itemPlan) => {
             const skuReman13 = normalizarCodigo(itemPlan.SKU || itemPlan.Material);
             const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === skuReman13);
             const info = itemSap ? extrairInfoSAP(itemSap) : { saldo: 0, tam: "UN" };
 
+            // 1. Busca os dados no Firebase ANTES de desenhar a tela
             const snap = await database.ref(`status_reman_loja/${state.lojaAtual}/${skuReman13}`).once("value");
-            const qtd = snap.val()?.qtd || 0;
+            
+            // 2. Força a transformação para NÚMEROS (Corrige o erro visual)
+            const qtd = Number(snap.val()?.qtd || 0);
+            const saldo = Number(info.saldo || 0);
 
-            // AQUI ESTÁ A MUDANÇA: Adicionei o Estoque SAP visualmente no card
+            // 3. Aplica a cor dependendo da quantidade já salva no banco
+            let bgCor = '#ffffff'; 
+            let bordaCor = '#e2e8f0'; 
+
+            if (qtd > 0) {
+                if (qtd >= saldo) {
+                    bgCor = '#dcfce7'; // Verde (Completo)
+                    bordaCor = '#22c55e';
+                } else {
+                    bgCor = '#fff7ed'; // Laranja (Parcial)
+                    bordaCor = '#fb923c';
+                }
+            }
+
             return `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:10px; border:1px solid #ddd; border-radius:12px; background:white;">
+            <div id="linha-reman-top-${skuReman13}" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:10px; border:1px solid ${bordaCor}; border-radius:12px; background:${bgCor}; transition: 0.3s ease;">
                 <div>
                     <b style="font-size: 1.1em;">TAM ${info.tam}</b><br>
-                    <span style="font-size:12px; color:#64748b;">Estoque SAP: <b style="color:#0f172a;">${info.saldo}</b></span>
+                    <span style="font-size:12px; color:#64748b;">Estoque SAP: <b style="color:#0f172a;">${saldo}</b></span>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;">
-                    <button style="padding:6px 12px; font-weight:bold; border:1px solid #ccc; border-radius:6px; background:#fff; cursor:pointer;" onclick="app.diminuirReman('${skuReman13}')">−</button>
+                    <button style="padding:6px 12px; font-weight:bold; border:1px solid #ccc; border-radius:6px; background:#fff; cursor:pointer;" onclick="app.diminuirReman('${skuReman13}', ${saldo})">−</button>
                     
                     <span id="qtd-reman-${skuReman13}" style="font-size:18px; font-weight:bold; min-width:30px; text-align:center; color:#2563eb;">
                         ${qtd}
                     </span>
                     
-                    <button style="padding:6px 12px; font-weight:bold; border:1px solid #ccc; border-radius:6px; background:#fff; cursor:pointer;" onclick="app.aumentarReman('${skuReman13}',${info.saldo})">+</button>
+                    <button style="padding:6px 12px; font-weight:bold; border:1px solid #ccc; border-radius:6px; background:#fff; cursor:pointer;" onclick="app.aumentarReman('${skuReman13}',${saldo})">+</button>
                 </div>
             </div>
             `;
         });
 
-        // Junta tudo no HTML
         const linhasResolvidas = await Promise.all(promessas);
         const linesTopHtml = linhasResolvidas.join('');
 
@@ -145,42 +158,52 @@ export async function biparReman(bip) {
 
 export function aumentarReman(sku13, saldoTotal) {
     const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}/qtd`);
+    const saldo = Number(saldoTotal);
     
-    // Pega o número que já está na tela e aumenta na hora (visual instantâneo)
     const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
     let qtdLocal = 0;
     if (spanNumero) {
-        qtdLocal = parseInt(spanNumero.innerText) || 0;
-        if (qtdLocal < saldoTotal) {
+        qtdLocal = Number(spanNumero.innerText) || 0;
+        if (qtdLocal < saldo) {
             qtdLocal++;
-            spanNumero.innerText = qtdLocal; // Atualiza a tela imediatamente!
+            spanNumero.innerText = qtdLocal; 
+            
+            const linha = document.getElementById(`linha-reman-top-${sku13}`);
+            if (linha) {
+                linha.style.background = qtdLocal < saldo ? '#fff7ed' : '#dcfce7';
+                linha.style.borderColor = qtdLocal < saldo ? '#fb923c' : '#22c55e';
+            }
         }
     }
 
-    // Envia para o banco de dados em segundo plano
     ref.transaction((qtdAtual) => {
-        let atual = qtdAtual || 0;
-        return (atual < saldoTotal) ? atual + 1 : atual;
+        let atual = Number(qtdAtual) || 0;
+        return (atual < saldo) ? atual + 1 : atual;
     });
 }
 
-export function diminuirReman(sku13) {
+export function diminuirReman(sku13, saldoTotal) {
     const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}/qtd`);
+    const saldo = Number(saldoTotal);
     
-    // Pega o número que já está na tela e diminui na hora (visual instantâneo)
     const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
     let qtdLocal = 0;
     if (spanNumero) {
-        qtdLocal = parseInt(spanNumero.innerText) || 0;
+        qtdLocal = Number(spanNumero.innerText) || 0;
         if (qtdLocal > 0) {
             qtdLocal--;
-            spanNumero.innerText = qtdLocal; // Atualiza a tela imediatamente!
+            spanNumero.innerText = qtdLocal;
+            
+            const linha = document.getElementById(`linha-reman-top-${sku13}`);
+            if (linha) {
+                linha.style.background = qtdLocal === 0 ? '#ffffff' : (qtdLocal < saldo ? '#fff7ed' : '#dcfce7');
+                linha.style.borderColor = qtdLocal === 0 ? '#e2e8f0' : (qtdLocal < saldo ? '#fb923c' : '#22c55e');
+            }
         }
     }
 
-    // Envia para o banco de dados em segundo plano
     ref.transaction((qtdAtual) => {
-        let atual = qtdAtual || 0;
+        let atual = Number(qtdAtual) || 0;
         return (atual > 0) ? atual - 1 : 0;
     });
 }
