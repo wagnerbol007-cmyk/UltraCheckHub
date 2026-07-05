@@ -262,29 +262,30 @@ export function ouvirHistorico() {
 
     container.innerHTML = "<p style='color:gray; font-weight:800; text-align:center;'>Carregando histórico...</p>";
 
-    database.ref(`historico_reposicao`).once('value', snapshot => {
+    // Indo direto na pasta da loja logada
+    database.ref(`historico_reposicao/${state.lojaAtual}`).once('value', snapshot => {
         container.innerHTML = "";
 
         if (!snapshot.exists()) {
-            container.innerHTML = "<p style='color:gray; font-weight:800; text-align:center;'>Nenhum histórico encontrado.</p>";
+            container.innerHTML = "<p style='color:gray; font-weight:800; text-align:center;'>Nenhum histórico encontrado para esta loja.</p>";
             return;
         }
 
         const dados = snapshot.val();
         let historicos = [];
 
-        Object.entries(dados).forEach(([grupo, registros]) => {
-            if (!registros || typeof registros !== "object") return;
-
-            Object.entries(registros).forEach(([id, h]) => {
-                historicos.push({ id, grupo, ...h });
-            });
+        // AGORA SIM: Lendo direto, sem o loop duplo que quebrava os dados!
+        Object.entries(dados).forEach(([id, h]) => {
+            if (h && typeof h === "object") {
+                historicos.push({ id, ...h });
+            }
         });
 
+        // Inverte para os mais novos aparecerem no topo
         historicos.reverse();
 
         if (historicos.length === 0) {
-            container.innerHTML = "<p style='color:gray; font-weight:800; text-align:center;'>Nenhum histórico encontrado.</p>";
+            container.innerHTML = "<p style='color:gray; font-weight:800; text-align:center;'>Nenhum histórico encontrado para esta loja.</p>";
             return;
         }
 
