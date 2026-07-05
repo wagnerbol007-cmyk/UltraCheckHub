@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StockFlow v2.3.1</title>
+    <title>StockFlow v2.4.0</title>
 
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
@@ -55,7 +55,7 @@
         LOJA: <span id="displayLoja"></span>
     </div>
 
-    <div class="stockflow-title">StockFlow <span>v2.3.1</span></div>
+    <div class="stockflow-title">StockFlow <span>v2.4.0</span></div>
 </div>
 
 <div id="viewLogin" class="view-container active-view">
@@ -149,7 +149,7 @@
 </button>
 
 <div class="footer-copy">
-    © StockFlow v2.3.1 • Desenvolvido por Wagner Gomes dos Santos
+    © StockFlow v2.4.0 • Desenvolvido por Wagner Gomes dos Santos
 </div>
         </div>
     </div>
@@ -192,18 +192,22 @@
     </div>
 
 <div id="viewEstoque" class="view-container">
+    <!-- Barra de Progresso -->
     <div id="progressoEstoque" style="width: 100%; max-width: 450px; background: #e2e8f0; border-radius: 10px; height: 24px; margin-bottom: 15px; position: relative; overflow: hidden; display: none;">
         <div id="barFill" style="height: 100%; background: #22c55e; width: 0%; transition: width 0.4s ease;"></div>
         <div id="barTxt" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7em; font-weight: 900; color: #1e293b;">0 / 0</div>
     </div>
 
-    <div id="histLocalRep" style="width: 100%; max-width: 450px; background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: 22px; padding: 15px; margin-bottom: 15px; display: none; text-align: left;">
+    <!-- Lista Principal de Separação (FICA EM CIMA AGORA) -->
+    <div id="listaPedidos" style="width: 100%; max-width: 450px;"></div>
+
+    <!-- Histórico de Reposição (MOVIDO PARA BAIXO, LOGO ACIMA DO BOTÃO) -->
+    <div id="histLocalRep" style="width: 100%; max-width: 450px; background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: 22px; padding: 15px; margin-top: 15px; margin-bottom: 90px; display: none; text-align: left;">
         <h4 style="margin: 0 0 12px 0; color: #166534; font-size: 0.85em; font-weight: 900; text-transform: uppercase;">✅ Separados Agora</h4>
         <div id="listaHistLocal" style="display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
 
-    <div id="listaPedidos" style="width: 100%; max-width: 450px; padding-bottom: 90px;"></div>
-
+    <!-- Botão Fixo de Sincronizar -->
     <div class="footer-action-estoque">
         <button class="btn-main" style="background:#22c55e; margin:0;" onclick="app.finalizarColetaGeral()">
             ✅ SINC COLETA GERAL

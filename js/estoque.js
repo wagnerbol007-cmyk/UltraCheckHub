@@ -4,6 +4,7 @@ import { state, getHoraCerta } from './state.js';
 
 let sX = 0; 
 let sY = 0;
+let itensOcultosSwipe = [];
 
 export function ouvirEstoque() {
     database.ref(`reposicao_ativa/${state.lojaAtual}`).on('value', s => {
@@ -17,17 +18,29 @@ export function ouvirEstoque() {
         }
         
         let tG = 0, tC = 0;
-        
-        Object.entries(s.val()).forEach(([id, item]) => {
+        let dados = s.val();
+
+        // 1. Calcula o progresso total, contando inclusive com o que já sumiu da tela
+        Object.entries(dados).forEach(([id, item]) => {
+            Object.entries(item.pedidos).forEach(([t, d]) => {
+                tG += d.qtd; 
+                let p = state.coletaEstoqueLocal[id+t] || 0; 
+                tC += p;
+            });
+        });
+
+        // 2. Desenha apenas os itens pendentes
+        Object.entries(dados).forEach(([id, item]) => {
+            // Se o item já foi arrastado e está oculto, pula a renderização dele!
+            if (itensOcultosSwipe.includes(id)) return;
+
             const wrap = document.createElement('div'); wrap.className = 'swipe-container';
             
-            // NOVO: Ações de Fundo (Verde na esquerda, Vermelho na Direita)
             const actDir = document.createElement('div'); actDir.className = 'swipe-action-dir'; actDir.innerHTML = "ACHEI<br>✅";
             const actEsq = document.createElement('div'); actEsq.className = 'swipe-action-esq'; actEsq.innerHTML = "NÃO<br>ACHEI";
             
             const card = document.createElement('div'); card.className = 'swipe-content';
             
-            // Lógica de Movimento Flexível (Direita e Esquerda)
             card.addEventListener('touchstart', e => { sX = e.touches[0].clientX; sY = e.touches[0].clientY; }, {passive: true});
             card.addEventListener('touchmove', e => {
                 let dx = e.touches[0].clientX - sX; 
@@ -39,46 +52,41 @@ export function ouvirEstoque() {
             
             card.addEventListener('touchend', e => { 
                 let dx = parseInt(card.style.transform.replace(/[^-0-9]/g, '') || 0); 
-                
                 if(dx <= -60) {
-                    // Arrastou pra Esquerda (NÃO ACHEI)
                     card.style.transform = `translateX(-100px)`; 
                     setTimeout(() => moverParaAnalise(id, item), 200);
                 } else if(dx >= 60) {
-                    // Arrastou pra Direita (ACHEI)
                     card.style.transform = `translateX(100px)`; 
-                    setTimeout(() => confirmarItemAchei(id, item), 200);
+                    // PASSAMOS O ENVELOPE (WRAP) PARA SER DELETADO NA HORA!
+                    setTimeout(() => confirmarItemAchei(id, item, wrap), 200);
                 } else {
-                    // Soltou no meio, volta pro normal
                     card.style.transform = `translateX(0)`; 
                 }
             });
             
             let grade = "";
             Object.entries(item.pedidos).forEach(([t, d]) => {
-                tG += d.qtd; 
                 let p = state.coletaEstoqueLocal[id+t] || 0; 
-                tC += p;
                 grade += `<div class="tam-row ${p>=d.qtd?'coletado':''}"><div class="tam-btn-est" onclick="app.ticarContador('${id}','${t}',${d.qtd})">${t}: ${p}/${d.qtd}</div><button class="btn-qr-direct" onclick="app.gerarQR('${t}','${d.fullSku}')">QR</button></div>`;
             });
             
-card.innerHTML = `
-    <div style="font-size:0.65em; color:gray; font-weight:bold;">${item.operador} • ${item.hora}</div>
-    <div style="display:flex; align-items:center; gap:10px;">
-        <img src="https://imgcentauro-a.akamaihd.net/100x100/${item.skuBase8}.jpg" class="thumb" onclick="app.zoomFoto(this.src)" style="width:55px; height:55px;">
-        <div style="flex:1; font-size:0.75em;">
-            <b>${item.desc}</b><br>
-            <span class="cor-tag">${item.cor || ''}</span>
-            ${item.preco ? `<span class="preco-tag" style="font-size:0.85em; padding:2px 6px; border-radius:6px; margin-left:6px; display:inline-block;">${item.preco}</span>` : ''}
-        </div>
-    </div>
-    <div class="grade-grid">${grade}</div>`;
+            card.innerHTML = `
+                <div style="font-size:0.65em; color:gray; font-weight:bold;">${item.operador} • ${item.hora}</div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="https://imgcentauro-a.akamaihd.net/100x100/${item.skuBase8}.jpg" class="thumb" onclick="app.zoomFoto(this.src)" style="width:55px; height:55px;">
+                    <div style="flex:1; font-size:0.75em;">
+                        <b>${item.desc}</b><br>
+                        <span class="cor-tag">${item.cor || ''}</span>
+                        ${item.preco ? `<span class="preco-tag" style="font-size:0.85em; padding:2px 6px; border-radius:6px; margin-left:6px; display:inline-block;">${item.preco}</span>` : ''}
+                    </div>
+                </div>
+                <div class="grade-grid">${grade}</div>`;
                 
             wrap.appendChild(actDir); wrap.appendChild(actEsq); wrap.appendChild(card); container.appendChild(wrap);
         });
         
         document.getElementById('progressoEstoque').style.display='block';
-        const pc = (tC/tG)*100; 
+        const pc = tG === 0 ? 0 : (tC/tG)*100; 
         document.getElementById('barFill').style.width=pc+"%"; 
         document.getElementById('barTxt').innerText=`PROGRESSO: ${tC} / ${tG}`;
     });
@@ -203,10 +211,16 @@ export function finalizarColetaGeral() {
             ).join("<br>")
         };
 
-        database.ref().update(updates).then(() => {
+database.ref().update(updates).then(() => {
             state.coletaEstoqueLocal = {};
+            
+            // LIMPEZA DA TELA APÓS A SINCRONIZAÇÃO
+            itensOcultosSwipe = []; // Zera os produtos ocultos
+            document.getElementById('listaHistLocal').innerHTML = ''; // Limpa os separados agora
+            document.getElementById('histLocalRep').style.display = 'none'; // Esconde a caixinha de baixo
+            
             ouvirEstoque();
-            alert("Coleta sincronizada e enviada para o histórico!");
+            if (window.mostrarAviso) window.mostrarAviso("Coleta sincronizada e enviada para o histórico!", "sucesso");
         }).catch(error => {
             console.error(error);
             alert("Erro ao sincronizar coleta.");
@@ -261,39 +275,33 @@ export function ouvirHistorico() {
     });
 }
 
-function confirmarItemAchei(id, item) {
+// Substituir no final do js/estoque.js
+function confirmarItemAchei(id, item, wrap) {
     let totalSeparado = 0;
     let qtdSeparadaTexto = [];
-    let historicoItens = [];
 
-    // 1. Coleta o que foi "ticado" na tela
+    // Coleta o que foi "ticado" na tela
     Object.entries(item.pedidos).forEach(([tamanho, dados]) => {
         const coletado = state.coletaEstoqueLocal[id + tamanho] || 0;
         if (coletado > 0) {
             totalSeparado += coletado;
             qtdSeparadaTexto.push(`${coletado}x Tam ${tamanho}`);
-            historicoItens.push({
-                produto: item.desc || "Produto sem descrição",
-                cor: item.cor || "",
-                skuBase8: item.skuBase8 || id,
-                tamanho: tamanho,
-                sku: dados.fullSku || "",
-                quantidadeSeparada: coletado,
-                quantidadeOriginal: dados.qtd,
-                operadorPedido: item.operador || "",
-                horaPedido: item.hora || ""
-            });
         }
     });
 
-    // Se o usuário arrastou mas não ticou nada, o sistema avisa e aborta
     if (totalSeparado === 0) {
         alert("⚠️ Toque no tamanho para informar a quantidade antes de arrastar para 'ACHEI'!");
-        ouvirEstoque(); // Reseta a posição do card
+        if(wrap) wrap.querySelector('.swipe-content').style.transform = 'translateX(0px)'; // reseta o arraste
         return;
     }
 
-    // 2. Cria o cardzinho visual no "Histórico" topo da tela
+    // Marca como oculto para não aparecer nos próximos re-desenhos
+    itensOcultosSwipe.push(id);
+    
+    // Tira o card da tela imediatamente!
+    if(wrap) wrap.remove();
+
+    // Joga o registro lá pra parte de baixo (Separados Agora)
     const histContainer = document.getElementById('histLocalRep');
     const histLista = document.getElementById('listaHistLocal');
     if (histContainer && histLista) {
@@ -301,47 +309,7 @@ function confirmarItemAchei(id, item) {
         const hora = getHoraCerta();
         const li = document.createElement('div');
         li.className = 'hist-local-item';
-        li.innerHTML = `<b>${hora}</b> - 👤 ${state.operador}<br><span style="color:var(--uh-primary); font-weight:800;">${item.desc}</span><br><small>✅ Separado: ${qtdSeparadaTexto.join(" | ")}</small>`;
-        histLista.prepend(li); // Coloca sempre no topo
+        li.innerHTML = `<b>${hora}</b> - <span style="color:var(--uh-primary); font-weight:800;">${item.desc}</span><br><small>✅ Separado: ${qtdSeparadaTexto.join(" | ")}</small>`;
+        histLista.prepend(li);
     }
-
-    // 3. Atualiza o banco de dados e envia pro histórico geral do Firebase
-    const updates = {};
-    Object.entries(item.pedidos).forEach(([tamanho, dados]) => {
-        const coletado = state.coletaEstoqueLocal[id + tamanho] || 0;
-        if (coletado > 0) {
-            if (coletado >= dados.qtd) {
-                updates[`reposicao_ativa/${state.lojaAtual}/${id}/pedidos/${tamanho}`] = null;
-            } else {
-                updates[`reposicao_ativa/${state.lojaAtual}/${id}/pedidos/${tamanho}/qtd`] = dados.qtd - coletado;
-            }
-        }
-    });
-
-    let aindaTemPendente = false;
-    Object.entries(item.pedidos).forEach(([tamanho, dados]) => {
-        const coletado = state.coletaEstoqueLocal[id + tamanho] || 0;
-        if (coletado < dados.qtd) aindaTemPendente = true;
-    });
-
-    if (!aindaTemPendente) {
-        updates[`reposicao_ativa/${state.lojaAtual}/${id}`] = null;
-    }
-
-    const historicoRef = database.ref(`historico_reposicao/${state.lojaAtual}`).push();
-    updates[`historico_reposicao/${state.lojaAtual}/${historicoRef.key}`] = {
-        hora: getHoraCerta(),
-        quem: state.operador,
-        total: totalSeparado,
-        itens: historicoItens,
-        desc: `${item.desc} | ` + qtdSeparadaTexto.join(" | ")
-    };
-
-    database.ref().update(updates).then(() => {
-        // Limpa a contagem local daquele item apenas
-        Object.keys(state.coletaEstoqueLocal).forEach(k => {
-            if(k.startsWith(id)) delete state.coletaEstoqueLocal[k];
-        });
-        if (window.mostrarAviso) window.mostrarAviso("Item separado e registrado!", "sucesso");
-    });
 }

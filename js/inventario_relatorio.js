@@ -1,5 +1,5 @@
 // js/inventario_relatorio.js
-// StockFlow v2.3.1
+// StockFlow v2.4.0
 // Relatórios separados:
 // 1ª Busca  -> sinc_rfid_primeira/{loja}
 // 2ª Busca  -> sinc_rfid_segunda/{loja}

@@ -1,5 +1,5 @@
 // js/upload.js
-// StockFlow v2.3.1
+// StockFlow v2.4.0
 // Ao subir nova Busca Analista, pergunta se deseja apagar a coleta da 2ª Busca
 
 import { state } from './state.js';
