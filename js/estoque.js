@@ -4,9 +4,9 @@ import { state, getHoraCerta } from './state.js';
 
 let sX = 0; 
 let sY = 0;
-let itensOcultosSwipe = [];
-let tamanhosOcultosSwipe = {};
-let swipeParcial = {};
+let itensOcultosSwipe = []; 
+let tamanhosOcultosSwipe = {}; 
+let swipeParcial = {}; 
 
 export function ouvirEstoque() {
     database.ref(`reposicao_ativa/${state.lojaAtual}`).on('value', s => {
@@ -21,20 +21,17 @@ export function ouvirEstoque() {
         
         let tG = 0, tC = 0;
         let dados = s.val();
-
-        // 1. Calcula o progresso total, contando inclusive com o que já sumiu da tela
+        
         Object.entries(dados).forEach(([id, item]) => {
             Object.entries(item.pedidos).forEach(([t, d]) => {
-                tG += d.qtd; 
-                let p = state.coletaEstoqueLocal[id+t] || 0; 
+                tG += Number(d.qtd) || 0; 
+                let p = Number(state.coletaEstoqueLocal[id+t]) || 0; 
                 tC += p;
             });
         });
 
-        // 2. Desenha apenas os itens pendentes
         Object.entries(dados).forEach(([id, item]) => {
-            // Se o item já foi arrastado e está oculto, pula a renderização dele!
-            if (itensOcultosSwipe.includes(id)) return;
+            if (itensOcultosSwipe.includes(id)) return; 
 
             const wrap = document.createElement('div'); wrap.className = 'swipe-container';
             
@@ -59,31 +56,31 @@ export function ouvirEstoque() {
                     setTimeout(() => moverParaAnalise(id, item), 200);
                 } else if(dx >= 60) {
                     card.style.transform = `translateX(100px)`; 
-                    // PASSAMOS O ENVELOPE (WRAP) PARA SER DELETADO NA HORA!
                     setTimeout(() => confirmarItemAchei(id, item, wrap), 200);
                 } else {
                     card.style.transform = `translateX(0)`; 
                 }
             });
             
-let grade = "";
+            let grade = "";
             let temTamanhoVisivel = false;
 
             Object.entries(item.pedidos).forEach(([t, d]) => {
-                tG += d.qtd; // Mantenha o cálculo do progresso geral
-                let p = state.coletaEstoqueLocal[id+t] || 0; 
-                tC += p;
+                let p = Number(state.coletaEstoqueLocal[id+t]) || 0; 
+                let meta = Number(d.qtd) || 0;
                 
-                // Verifica se ESSE tamanho específico já foi arrastado e ocultado
                 let foiOcultado = tamanhosOcultosSwipe[id] && tamanhosOcultosSwipe[id].includes(t);
                 let styleDisplay = foiOcultado ? 'style="display:none;"' : '';
                 
                 if (!foiOcultado) temTamanhoVisivel = true;
 
-                grade += `<div class="tam-row ${p>=d.qtd?'coletado':''}" ${styleDisplay}><div class="tam-btn-est" onclick="app.ticarContador('${id}','${t}',${d.qtd})">${t}: ${p}/${d.qtd}</div><button class="btn-qr-direct" onclick="app.gerarQR('${t}','${d.fullSku}')">QR</button></div>`;
+                // Feedback para o operador se ele já arrastou parte do pedido
+                let infoParcial = Number(swipeParcial[id+t]) || 0;
+                let avisoParcial = (infoParcial > 0 && p < meta) ? ' <span style="color:#22c55e; font-size:0.85em; font-weight:900;">(Salvo)</span>' : '';
+
+                grade += `<div class="tam-row ${p>=meta?'coletado':''}" ${styleDisplay}><div class="tam-btn-est" onclick="app.ticarContador('${id}','${t}',${meta})">${t}: ${p}/${meta}${avisoParcial}</div><button class="btn-qr-direct" onclick="app.gerarQR('${t}','${d.fullSku}')">QR</button></div>`;
             });
 
-            // Se todos os tamanhos dessa grade já foram ocultados, cancela a renderização desse card
             if (!temTamanhoVisivel) {
                 if (!itensOcultosSwipe.includes(id)) itensOcultosSwipe.push(id);
                 return; 
@@ -170,7 +167,6 @@ export function finalizarColetaGeral() {
         const updates = {};
         const historicoItens = [];
         let totalColetado = 0;
-        
 
         Object.entries(lista).forEach(([id, item]) => {
             Object.entries(item.pedidos).forEach(([tamanho, dados]) => {
@@ -231,16 +227,18 @@ export function finalizarColetaGeral() {
             ).join("<br>")
         };
 
-database.ref().update(updates).then(() => {
+        database.ref().update(updates).then(() => {
             state.coletaEstoqueLocal = {};
             
-            // LIMPEZA DA TELA APÓS A SINCRONIZAÇÃO
-            itensOcultosSwipe = []; // Zera os produtos ocultos
+            // LIMPEZA GERAL DE MEMÓRIA DE ARRASTE
+            itensOcultosSwipe = [];
             tamanhosOcultosSwipe = {};
             swipeParcial = {};
-
-            document.getElementById('listaHistLocal').innerHTML = ''; // Limpa os separados agora
-            document.getElementById('histLocalRep').style.display = 'none'; // Esconde a caixinha de baixo
+            
+            const listaHist = document.getElementById('listaHistLocal');
+            const contHist = document.getElementById('histLocalRep');
+            if(listaHist) listaHist.innerHTML = ''; 
+            if(contHist) contHist.style.display = 'none'; 
             
             ouvirEstoque();
             if (window.mostrarAviso) window.mostrarAviso("Coleta sincronizada e enviada para o histórico!", "sucesso");
@@ -310,29 +308,34 @@ function confirmarItemAchei(id, item, wrap) {
     const tamRows = wrap.querySelectorAll('.tam-row');
 
     Object.entries(item.pedidos).forEach(([tamanho, dados], index) => {
-        const coletadoTotal = state.coletaEstoqueLocal[id + tamanho] || 0;
-        const jaSwipado = swipeParcial[id + tamanho] || 0;
-        const novoColetado = coletadoTotal - jaSwipado; // Calcula só o que você clicou de novo
+        const coletadoTotal = Number(state.coletaEstoqueLocal[id + tamanho]) || 0;
+        const jaSwipado = Number(swipeParcial[id + tamanho]) || 0;
+        const meta = Number(dados.qtd) || 0;
+        
+        const novoColetado = coletadoTotal - jaSwipado; 
         const linha = tamRows[index];
 
-        // Se você separou algo novo nesse tamanho e ele ainda não foi totalmente oculto
         if (novoColetado > 0 && !tamanhosOcultosSwipe[id].includes(tamanho)) {
             algumaAcaoValida = true;
             totalSeparado += novoColetado;
             qtdSeparadaTexto.push(`${novoColetado}x Tam ${tamanho}`);
             
-            // Registra que esse valor já foi pro histórico visual
             swipeParcial[id + tamanho] = coletadoTotal;
 
-            // 🔥 A MÁGICA AQUI: Só esconde a numeração se você coletou TUDO que estava pedindo
-            if (coletadoTotal >= dados.qtd) {
-                if (linha) linha.style.display = 'none';
+            if (coletadoTotal >= meta) {
+                if (linha) linha.style.display = 'none'; // Some APENAS se bater a meta
                 tamanhosOcultosSwipe[id].push(tamanho);
+            } else {
+                // SE FOI PARCIAL (Achou 1 de 2), deixa a linha com feedback!
+                if (linha) {
+                    const btn = linha.querySelector('.tam-btn-est');
+                    if (btn) btn.innerHTML = `${tamanho}: ${coletadoTotal}/${meta} <span style="color:#22c55e; font-size:0.85em; font-weight:900;">(Salvo)</span>`;
+                    linha.style.borderColor = "#22c55e"; 
+                }
             }
         }
     });
 
-    // O card volta para o centro depois de arrastar
     wrap.querySelector('.swipe-content').style.transform = 'translateX(0px)';
 
     if (!algumaAcaoValida) {
@@ -340,7 +343,6 @@ function confirmarItemAchei(id, item, wrap) {
         return;
     }
 
-    // Joga no histórico verde ali embaixo
     const histContainer = document.getElementById('histLocalRep');
     const histLista = document.getElementById('listaHistLocal');
     if (histContainer && histLista) {
@@ -351,7 +353,6 @@ function confirmarItemAchei(id, item, wrap) {
         histLista.prepend(li);
     }
 
-    // Confere se ainda tem numeração sobrando no card. Se apagou todas, tira o card da tela.
     const linhasVisiveis = Array.from(tamRows).some(row => row.style.display !== 'none');
     if (!linhasVisiveis) {
         itensOcultosSwipe.push(id);
