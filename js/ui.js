@@ -1,5 +1,5 @@
 // js/ui.js
-// StockFlow v2.1.3
+// StockFlow v2.4.0
 
 let historicoTelas = [];
 let telaAtual = null;
