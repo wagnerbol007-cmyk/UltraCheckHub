@@ -3,195 +3,108 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin - Ultra Check</title>
+<title>Super Admin - StockFlow</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <style>
+    body { margin:0; background:#f1f5f9; font-family:Arial,sans-serif; color:#0f172a; }
+    .header { background:linear-gradient(135deg,#0f172a,#25105f); color:white; padding:18px; text-align:center; font-weight:900; font-size:1.2em; display: flex; justify-content: space-between; align-items: center;}
+    .container { max-width: 800px; margin: 0 auto; padding: 15px; }
+    
+    .card { background: white; border-radius: 20px; padding: 25px; margin-top: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    h2 { margin-top: 0; color: #25105f; font-weight: 900; text-transform: uppercase; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;}
+    
+    input { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; margin-bottom: 10px; box-sizing: border-box; font-weight: 700; }
+    
+    button { width: 100%; padding: 14px; border: none; border-radius: 12px; background: #6200ee; color: white; font-weight: 900; cursor: pointer; margin-top: 8px; transition: 0.2s; }
+    button:hover { opacity: 0.9; }
+    
+    .btn-red { background: #ef4444; }
+    .btn-gray { background: #475569; }
+    .btn-orange { background: #f97316; }
+    .btn-green { background: #22c55e; }
 
-body{
-    margin:0;
-    background:#f1f5f9;
-    font-family:Arial,sans-serif;
-    color:#0f172a;
-}
+    .grid-admin { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+    @media(max-width: 600px) { .grid-admin { grid-template-columns: 1fr; } }
 
-.header{
-    background:linear-gradient(135deg,#0f172a,#1e3a8a);
-    color:white;
-    padding:18px;
-    text-align:center;
-    font-weight:900;
-    font-size:1.2em;
-}
-
-.container{
-    max-width:500px;
-    margin:0 auto;
-    padding:15px;
-}
-
-.card{
-    background:white;
-    border-radius:24px;
-    padding:20px;
-    margin-top:18px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.08);
-}
-
-h2{
-    margin-top:0;
-    color:#1e3a8a;
-}
-
-input{
-    width:100%;
-    padding:14px;
-    border-radius:14px;
-    border:2px solid #e2e8f0;
-    margin-bottom:10px;
-    box-sizing:border-box;
-    font-weight:700;
-}
-
-button{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:14px;
-    background:#2563eb;
-    color:white;
-    font-weight:900;
-    cursor:pointer;
-    margin-top:8px;
-}
-
-.btn-red{
-    background:#ef4444;
-}
-
-.btn-gray{
-    background:#475569;
-}
-
-.usuario-card{
-    border:1px solid #e2e8f0;
-    border-radius:18px;
-    padding:15px;
-    margin-top:12px;
-}
-
-.usuario-card h3{
-    margin:0;
-    font-size:1em;
-}
-
-.usuario-card p{
-    margin:5px 0;
-    color:#64748b;
-    font-size:0.9em;
-}
-
-.status{
-    display:inline-block;
-    padding:5px 10px;
-    border-radius:999px;
-    font-size:0.75em;
-    font-weight:900;
-    margin-top:8px;
-}
-
-.ativo{
-    background:#dcfce7;
-    color:#166534;
-}
-
-.inativo{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-.msg{
-    text-align:center;
-    margin-top:12px;
-    font-weight:bold;
-}
-
+    .usuario-card { border: 1px solid #e2e8f0; border-radius: 15px; padding: 15px; margin-top: 12px; background: #f8fafc; }
+    .usuario-card h3 { margin: 0; font-size: 1.1em; color: #0f172a; }
+    .usuario-card p { margin: 5px 0; color: #64748b; font-size: 0.9em; }
+    
+    .status { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 0.75em; font-weight: 900; margin-top: 8px; }
+    .ativo { background: #dcfce7; color: #166534; }
+    .inativo { background: #fee2e2; color: #991b1b; }
+    .msg { text-align: center; margin-top: 12px; font-weight: bold; color: #ef4444; }
 </style>
 </head>
 
 <body>
 
 <div class="header">
-ADMIN ULTRA CHECK
+    <span>🛡️ SUPER ADMIN</span>
+    <button id="btnSairHeader" class="btn-red" style="width: auto; padding: 8px 15px; margin: 0; display: none;" onclick="logout()">SAIR</button>
 </div>
 
 <div class="container">
 
     <!-- LOGIN -->
     <div class="card" id="loginCard">
-
-        <h2>Login Admin</h2>
-
-        <input type="text" id="usuarioAdmin" placeholder="Usuário">
-
+        <h2>Acesso Restrito</h2>
+        <input type="text" id="usuarioAdmin" placeholder="Usuário Admin">
         <input type="password" id="senhaAdmin" placeholder="Senha">
-
-        <button onclick="loginAdmin()">
-            ENTRAR
-        </button>
-
+        <button onclick="loginAdmin()">AUTENTICAR</button>
         <div class="msg" id="msgLogin"></div>
-
     </div>
 
-    <!-- PAINEL -->
+    <!-- PAINEL PRINCIPAL -->
     <div id="painelAdmin" style="display:none;">
 
-        <!-- CADASTRO -->
-        <div class="card">
-
-            <h2>Novo Usuário</h2>
-
-            <input type="text" id="novoUsuario" placeholder="Usuário">
-
-            <input type="text" id="novoNome" placeholder="Nome">
-
-            <input type="password" id="novaSenha" placeholder="Senha">
-
-            <button onclick="cadastrarUsuario()">
-                CADASTRAR
-            </button>
-
-            <div class="msg" id="msgCadastro"></div>
-
+        <!-- GESTÃO DE BANCO DE DADOS POR LOJA -->
+        <div class="card" style="border: 2px solid #6200ee;">
+            <h2>🗄️ Controle de Banco de Dados</h2>
+            <p style="color:#64748b; font-size:0.9em; margin-bottom:15px;">Digite o número da loja alvo para gerenciar os dados dos módulos (apagar históricos, destravar sistemas, limpar coletas).</p>
+            
+            <input type="number" id="inputLojaAlvo" placeholder="Ex: 2000" style="border-color: #6200ee; font-size: 1.2em; text-align: center;">
+            
+            <div class="grid-admin">
+                <button class="btn-orange" onclick="gerenciarDados('reposicao_ativa', 'Reposição Pendente')">Zerar Reposição Ativa</button>
+                <button class="btn-orange" onclick="gerenciarDados('produtos_nao_encontrados', 'Auditoria (Não Achei)')">Zerar Auditoria (Não Achei)</button>
+                <button class="btn-green" onclick="gerenciarDados('status_reman_loja', 'Separação Reman')">Zerar Separação Reman</button>
+                <button class="btn-gray" onclick="gerenciarDados('historico_reposicao', 'Histórico Geral')">Limpar Histórico de Coletas</button>
+                <button class="btn-red" onclick="gerenciarDados('sinc_rfid_primeira', 'Inventário 1ª Busca')">Apagar Inventário 1ª Busca</button>
+                <button class="btn-red" onclick="gerenciarDados('sinc_rfid_segunda', 'Inventário 2ª Busca')">Apagar Inventário 2ª Busca</button>
+            </div>
+            <div style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;">
+                <button class="btn-red" onclick="apagarMasterBoxes()">🗑️ APAGAR TODAS AS MASTER BOXES DA LOJA</button>
+            </div>
         </div>
 
-        <!-- LISTA -->
+        <!-- CADASTRO DE USUÁRIOS -->
         <div class="card">
+            <h2>👤 Novo Operador</h2>
+            <div class="grid-admin" style="margin-top: 0;">
+                <input type="text" id="novoUsuario" placeholder="Usuário de acesso">
+                <input type="text" id="novoNome" placeholder="Nome completo">
+            </div>
+            <input type="password" id="novaSenha" placeholder="Senha (Mínimo 6 dígitos)">
+            <button onclick="cadastrarUsuario()">CADASTRAR USUÁRIO</button>
+            <div class="msg" id="msgCadastro" style="color: #22c55e;"></div>
+        </div>
 
-            <h2>Usuários</h2>
-
+        <!-- LISTA DE USUÁRIOS -->
+        <div class="card">
+            <h2>👥 Equipe Autorizada</h2>
             <div id="listaUsuarios"></div>
-
-        </div>
-
-        <div class="card">
-
-            <button class="btn-gray" onclick="logout()">
-                SAIR
-            </button>
-
         </div>
 
     </div>
-
 </div>
 
 <script>
-
+// Configuração do Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBnyiKNfjW6Y4t15OnGRdKaKw6Fm8srx2k",
     authDomain: "rfid-sincronizado.firebaseapp.com",
@@ -203,288 +116,166 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const database = firebase.database();
 
-let adminAtual = null;
-
 function gerarEmail(usuario){
-
-    return usuario
-        .toLowerCase()
-        .trim() + "@ultracheck.local";
-
+    return usuario.toLowerCase().trim() + "@ultracheck.local";
 }
 
 function loginAdmin(){
-
-    const usuario =
-        document.getElementById('usuarioAdmin')
-        .value.trim();
-
-    const senha =
-        document.getElementById('senhaAdmin')
-        .value.trim();
-
+    const usuario = document.getElementById('usuarioAdmin').value.trim();
+    const senha = document.getElementById('senhaAdmin').value.trim();
     const email = gerarEmail(usuario);
 
-    auth.signInWithEmailAndPassword(email, senha)
-
-    .then(async(userCredential)=>{
-
+    auth.signInWithEmailAndPassword(email, senha).then(async(userCredential)=>{
         const user = userCredential.user;
-
-        const admin =
-            await database
-            .ref("admins/" + user.uid)
-            .once("value");
+        const admin = await database.ref("admins/" + user.uid).once("value");
 
         if(admin.val() === true){
-
-            adminAtual = user;
-
-            document
-            .getElementById('loginCard')
-            .style.display = 'none';
-
-            document
-            .getElementById('painelAdmin')
-            .style.display = 'block';
-
+            document.getElementById('loginCard').style.display = 'none';
+            document.getElementById('painelAdmin').style.display = 'block';
+            document.getElementById('btnSairHeader').style.display = 'block';
             carregarUsuarios();
-
         }else{
-
             auth.signOut();
-
-            document
-            .getElementById('msgLogin')
-            .innerText =
-            "Usuário não é administrador.";
-
+            document.getElementById('msgLogin').innerText = "Acesso Negado: Usuário não é administrador.";
         }
-
-    })
-
-    .catch((error)=>{
-
-        console.log(error);
-
-        document
-        .getElementById('msgLogin')
-        .innerText =
-        "Login inválido.";
-
+    }).catch((error)=>{
+        document.getElementById('msgLogin').innerText = "Credenciais inválidas.";
     });
-
 }
 
+// ==========================================
+// FUNÇÕES DE CONTROLE DE BANCO DE DADOS
+// ==========================================
+
+function obterLojaAlvo() {
+    const loja = document.getElementById('inputLojaAlvo').value.trim();
+    if (!loja) {
+        alert("⚠️ Por favor, digite o número da loja no campo acima primeiro.");
+        return null;
+    }
+    return loja;
+}
+
+function gerenciarDados(caminhoModulo, nomeAmigavel) {
+    const loja = obterLojaAlvo();
+    if (!loja) return;
+
+    const caminhoCompleto = `${caminhoModulo}/${loja}`;
+
+    if(confirm(`🚨 ATENÇÃO!\n\nVocê está prestes a apagar TODOS os dados de "${nomeAmigavel}" da LOJA ${loja}.\n\nTem certeza que deseja continuar? Esta ação não tem volta.`)) {
+        
+        database.ref(caminhoCompleto).remove().then(() => {
+            alert(`✅ Sucesso! Os dados de ${nomeAmigavel} da Loja ${loja} foram limpos.`);
+        }).catch(err => {
+            alert(`Erro ao tentar limpar o banco: ${err.message}`);
+        });
+    }
+}
+
+function apagarMasterBoxes() {
+    const loja = obterLojaAlvo();
+    if (!loja) return;
+
+    if(confirm(`🧨 PERIGO!\n\nVocê vai DELETAR todas as caixas Master Box e o índice delas da LOJA ${loja}.\n\nConfirmar exclusão?`)) {
+        
+        const updates = {};
+        updates[`masters/${loja}`] = null;
+        updates[`master_index/${loja}`] = null;
+
+        database.ref().update(updates).then(() => {
+            alert(`✅ Master Boxes da Loja ${loja} completamente apagadas!`);
+        }).catch(err => alert("Erro: " + err));
+    }
+}
+
+// ==========================================
+// FUNÇÕES DE USUÁRIO (Originais)
+// ==========================================
+
 function cadastrarUsuario(){
+    const usuario = document.getElementById('novoUsuario').value.trim();
+    const nome = document.getElementById('novoNome').value.trim();
+    const senha = document.getElementById('novaSenha').value.trim();
 
-    const usuario =
-        document.getElementById('novoUsuario')
-        .value.trim();
-
-    const nome =
-        document.getElementById('novoNome')
-        .value.trim();
-
-    const senha =
-        document.getElementById('novaSenha')
-        .value.trim();
-
-    if(!usuario || !nome || !senha){
-
-        return alert("Preencha todos os campos.");
-
-    }
-
-    if(senha.length < 6){
-
-        return alert(
-            "A senha precisa ter no mínimo 6 caracteres."
-        );
-
-    }
+    if(!usuario || !nome || !senha) return alert("Preencha todos os campos.");
+    if(senha.length < 6) return alert("A senha precisa ter no mínimo 6 caracteres.");
 
     const email = gerarEmail(usuario);
-
-    const secondApp =
-        firebase.initializeApp(
-            firebaseConfig,
-            "Secondary"
-        );
-
+    const secondApp = firebase.initializeApp(firebaseConfig, "Secondary");
     const secondAuth = secondApp.auth();
 
-    secondAuth
-    .createUserWithEmailAndPassword(email, senha)
-
-    .then(async(userCredential)=>{
-
+    secondAuth.createUserWithEmailAndPassword(email, senha).then(async(userCredential)=>{
         const novoUser = userCredential.user;
-
-        await database
-        .ref("usuarios_autorizados/" + novoUser.uid)
-        .set({
-
+        await database.ref("usuarios_autorizados/" + novoUser.uid).set({
             usuario: usuario,
             nome: nome,
             ativo: true,
             criadoEm: new Date().toISOString()
-
         });
 
-        document
-        .getElementById('msgCadastro')
-        .innerText =
-        "Usuário cadastrado.";
-
-        document
-        .getElementById('novoUsuario')
-        .value = "";
-
-        document
-        .getElementById('novoNome')
-        .value = "";
-
-        document
-        .getElementById('novaSenha')
-        .value = "";
-
-        carregarUsuarios();
-
+        document.getElementById('msgCadastro').innerText = "✅ Usuário cadastrado com sucesso!";
+        document.getElementById('novoUsuario').value = "";
+        document.getElementById('novoNome').value = "";
+        document.getElementById('novaSenha').value = "";
+        setTimeout(() => document.getElementById('msgCadastro').innerText = "", 3000);
+        
         secondAuth.signOut();
-
         secondApp.delete();
-
-    })
-
-    .catch((err)=>{
-
-        console.log(err);
-
-        alert(err.message);
-
-    });
-
+    }).catch(err => alert(err.message));
 }
 
 function carregarUsuarios(){
-
-    database
-    .ref("usuarios_autorizados")
-    .on("value",(snapshot)=>{
-
-        const lista =
-            document.getElementById('listaUsuarios');
-
+    database.ref("usuarios_autorizados").on("value",(snapshot)=>{
+        const lista = document.getElementById('listaUsuarios');
         lista.innerHTML = "";
-
         const dados = snapshot.val() || {};
 
         Object.keys(dados).forEach(uid=>{
-
             const user = dados[uid];
-
-            const div =
-                document.createElement('div');
-
+            const div = document.createElement('div');
             div.className = 'usuario-card';
-
             div.innerHTML = `
-
-                <h3>${user.nome}</h3>
-
-                <p>
-                    Usuário:
-                    <b>${user.usuario}</b>
-                </p>
-
-                <div class="
-                    status
-                    ${user.ativo ? 'ativo' : 'inativo'}
-                ">
-                    ${user.ativo ? 'ATIVO' : 'INATIVO'}
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <div>
+                        <h3>${user.nome}</h3>
+                        <p>Usuário: <b>${user.usuario}</b></p>
+                        <div class="status ${user.ativo ? 'ativo' : 'inativo'}">${user.ativo ? 'ATIVO' : 'BLOQUEADO'}</div>
+                    </div>
                 </div>
-
-                <button onclick="editarNome(
-                    '${uid}',
-                    '${user.nome}'
-                )">
-                    EDITAR NOME
-                </button>
-
-                <button onclick="toggleUsuario(
-                    '${uid}',
-                    ${user.ativo}
-                )">
-                    ${user.ativo ? 'DESATIVAR' : 'ATIVAR'}
-                </button>
-
-                <button
-                    class="btn-red"
-                    onclick="removerUsuario(
-                    '${uid}'
-                )">
-                    REMOVER ACESSO
-                </button>
-
+                <div class="grid-admin">
+                    <button class="btn-gray" onclick="editarNome('${uid}','${user.nome}')">✏️ EDITAR NOME</button>
+                    <button class="${user.ativo ? 'btn-orange' : 'btn-green'}" onclick="toggleUsuario('${uid}',${user.ativo})">
+                        ${user.ativo ? '⏸️ SUSPENDER' : '▶️ ATIVAR'}
+                    </button>
+                    <button class="btn-red" style="grid-column: span 2;" onclick="removerUsuario('${uid}')">🗑️ EXCLUIR DEFINITIVO</button>
+                </div>
             `;
-
             lista.appendChild(div);
-
         });
-
     });
-
 }
 
 function editarNome(uid,nomeAtual){
-
-    const novoNome =
-        prompt("Novo nome:",nomeAtual);
-
-    if(!novoNome) return;
-
-    database
-    .ref("usuarios_autorizados/" + uid + "/nome")
-    .set(novoNome);
-
+    const novoNome = prompt("Novo nome:",nomeAtual);
+    if(novoNome) database.ref("usuarios_autorizados/" + uid + "/nome").set(novoNome);
 }
 
 function toggleUsuario(uid,statusAtual){
-
-    database
-    .ref("usuarios_autorizados/" + uid + "/ativo")
-    .set(!statusAtual);
-
+    database.ref("usuarios_autorizados/" + uid + "/ativo").set(!statusAtual);
 }
 
 function removerUsuario(uid){
-
-    if(confirm("Remover acesso deste usuário?")){
-
-        database
-        .ref("usuarios_autorizados/" + uid)
-        .remove();
-
+    if(confirm("Remover acesso deste usuário definitivamente? O login dele deixará de funcionar.")) {
+        database.ref("usuarios_autorizados/" + uid).remove();
     }
-
 }
 
 function logout(){
-
-    auth.signOut()
-    .then(()=>{
-
-        location.reload();
-
-    });
-
+    auth.signOut().then(() => location.reload());
 }
-
 </script>
 
 </body>
