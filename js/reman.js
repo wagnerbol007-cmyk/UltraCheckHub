@@ -144,36 +144,44 @@ export async function biparReman(bip) {
 }
 
 export function aumentarReman(sku13, saldoTotal) {
-    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
-    ref.once("value").then(snapshot => {
-        const dados = snapshot.val() || {};
-        let qtd = dados.qtd || 0;
-        
-        if (qtd < saldoTotal) {
-            qtd++;
+    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}/qtd`);
+    
+    // Pega o número que já está na tela e aumenta na hora (visual instantâneo)
+    const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
+    let qtdLocal = 0;
+    if (spanNumero) {
+        qtdLocal = parseInt(spanNumero.innerText) || 0;
+        if (qtdLocal < saldoTotal) {
+            qtdLocal++;
+            spanNumero.innerText = qtdLocal; // Atualiza a tela imediatamente!
         }
-        
-        ref.set({ ...dados, qtd }).then(() => {
-            const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
-            if (spanNumero) spanNumero.innerText = qtd;
-        });
+    }
+
+    // Envia para o banco de dados em segundo plano
+    ref.transaction((qtdAtual) => {
+        let atual = qtdAtual || 0;
+        return (atual < saldoTotal) ? atual + 1 : atual;
     });
 }
 
 export function diminuirReman(sku13) {
-    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
-    ref.once("value").then(snapshot => {
-        const dados = snapshot.val() || {};
-        let qtd = dados.qtd || 0;
-        
-        if (qtd > 0) {
-            qtd--;
+    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}/qtd`);
+    
+    // Pega o número que já está na tela e diminui na hora (visual instantâneo)
+    const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
+    let qtdLocal = 0;
+    if (spanNumero) {
+        qtdLocal = parseInt(spanNumero.innerText) || 0;
+        if (qtdLocal > 0) {
+            qtdLocal--;
+            spanNumero.innerText = qtdLocal; // Atualiza a tela imediatamente!
         }
-        
-        ref.set({ ...dados, qtd }).then(() => {
-            const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
-            if (spanNumero) spanNumero.innerText = qtd;
-        });
+    }
+
+    // Envia para o banco de dados em segundo plano
+    ref.transaction((qtdAtual) => {
+        let atual = qtdAtual || 0;
+        return (atual > 0) ? atual - 1 : 0;
     });
 }
 
@@ -270,13 +278,12 @@ export function renderizarListaCompletaReman() {
 }
 
 export function ticarContadorReman(sku13, saldoTotal) {
-    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
+    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}/qtd`);
     
-    ref.once('value', snapshot => {
-        const atual = snapshot.val()?.qtd || 0;
-        const novaQtd = (atual < saldoTotal) ? atual + 1 : 0;
-        
-        ref.update({ qtd: novaQtd });
+    // 🔥 VELOCIDADE: Usamos transaction para atualizar direto no servidor sem precisar ler antes!
+    ref.transaction((qtdAtual) => {
+        let atual = qtdAtual || 0;
+        return (atual < saldoTotal) ? atual + 1 : 0;
     });
 }
 
