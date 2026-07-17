@@ -6,6 +6,7 @@ import { iniciarCamera } from './scanner.js';
 import { analisarDisponibilidade, enviarPedidoFaltantes } from './reposicao.js';
 import { ouvirEstoque, ouvirAnalise, limparAnalise, finalizarColetaGeral, ouvirHistorico } from './estoque.js';
 import { processarSAP, processarReman, processarUploadApp2 } from './upload.js';
+import { abrirIA } from "./ia.js";
 
 // Importação limpa e corrigida do Reman
 import {
@@ -186,7 +187,8 @@ window.app = {
     buscarItemNaMaster,
     exportarPDFMaster,
     listarHistoricoMasters,
-    editarMasterAtual
+    editarMasterAtual,
+    abrirIA,
 }; // Agora sim o objeto fecha no lugar certo!
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -1,0 +1,115 @@
+.ia-container{
+
+    padding:25px;
+
+}
+
+.ia-header{
+
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:25px;
+
+}
+
+.ia-logo{
+
+    width:70px;
+    height:70px;
+
+    border-radius:50%;
+
+    background:#6200ee;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:35px;
+
+    color:white;
+
+}
+
+.ia-resumo{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+    gap:20px;
+
+}
+
+.ia-card{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+
+}
+
+.ia-card h3{
+
+    margin:0;
+
+    color:#666;
+
+}
+
+.ia-card h1{
+
+    margin-top:10px;
+
+    color:#6200ee;
+
+}
+
+.ia-acoes{
+
+    display:flex;
+
+    gap:15px;
+
+    margin-top:30px;
+
+    flex-wrap:wrap;
+
+}
+
+.ia-acoes button{
+
+    padding:15px 25px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#6200ee;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+}
+
+.ia-painel{
+
+    margin-top:35px;
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:25px;
+
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+
+}

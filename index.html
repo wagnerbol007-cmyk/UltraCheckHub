@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StockFlow v2.4.1</title>
+    <title>StockFlow v2.5.0</title>
 
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
@@ -55,7 +55,7 @@
         LOJA: <span id="displayLoja"></span>
     </div>
 
-    <div class="stockflow-title">StockFlow <span>v2.4.1</span></div>
+    <div class="stockflow-title">StockFlow <span>v2.5.0</span></div>
 </div>
 
 <div id="viewLogin" class="view-container active-view">
@@ -87,37 +87,43 @@
     </div>
 <div class="home-grid">
 
-    <div class="home-card" onclick="app.abrirPainel('viewReposicao')">
+    <div class="home-card small-card" onclick="app.abrirIA()">
+        <div class="card-icon"><img src="img/icons/search-check.svg" class="menu-icon"></div>
+        <div class="card-text"><h4>Busca Inteligente</h4><p>IA.</p></div>
+        <span class="card-arrow">›</span>
+    </div>
+
+<div class="home-card small-card" onclick="app.abrirPainel('viewReposicao')">
         <div class="card-icon"><img src="img/icons/package-plus.svg" class="menu-icon"></div>
         <div class="card-text"><h4>Criar Lista de Reposição</h4><p>Crie novas listas de reposição.</p></div>
         <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewReman')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewReman')">
         <div class="card-icon"><img src="img/icons/refresh-ccw-dot.svg" class="menu-icon"></div>
         <div class="card-text"><h4>Conferir Remanejamento</h4><p>Conferir e validar remanejamentos.</p></div>
         <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewEstoque')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewEstoque')">
         <div class="card-icon"><img src="img/icons/clipboard-list.svg" class="menu-icon"></div>
         <div class="card-text"><h4>Listas de Reposição</h4><p>Visualize e gerencie suas listas.</p></div>
         <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewAnalise')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewAnalise')">
         <div class="card-icon"><img src="img/icons/triangle-alert.svg" class="menu-icon"></div>
         <div class="card-text"><h4>Não Achei</h4><p>Itens que não foram encontrados.</p></div>
         <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewRelatorio')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewRelatorio')">
         <div class="card-icon"><img src="img/icons/chart-column.svg" class="menu-icon"></div>
         <div class="card-text"><h4>Histórico</h4><p>Acompanhe o histórico de atividades.</p></div>
         <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewMenuInventario')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewMenuInventario')">
         <div class="card-icon"><img src="img/icons/target.svg" class="menu-icon"></div>
         <div class="card-text"><h4>Prevenção e perdas</h4><p>Ações e análises para reduzir perdas.</p></div>
         <span class="card-arrow">›</span>
@@ -129,11 +135,12 @@
         <span class="card-arrow">›</span>
     </div>
 
-        <div class="home-card" onclick="app.abrirPainel('viewMasterBox')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewMasterBox')">
         <div class="card-icon"><img src="img/icons/archive.svg" class="menu-icon"></div>
         <div class="card-text"><h4>Master Box</h4><p>Criar e consultar caixas.</p></div>
         <span class="card-arrow">›</span>
     </div>
+
 
     <div class="home-card small-card" onclick="app.abrirPainel('viewSobre')">
         <div class="card-icon"><img src="img/icons/settings.svg" class="menu-icon"></div>
@@ -149,7 +156,7 @@
 </button>
 
 <div class="footer-copy">
-    © StockFlow v2.4.1 • Desenvolvido por Wagner Gomes dos Santos
+    © StockFlow v2.5.0 • Desenvolvido por Wagner Gomes dos Santos
 </div>
         </div>
     </div>
@@ -592,6 +599,16 @@
 
         <div id="resultadoBuscaMaster" style="margin-top:15px;"></div>
     </div>
+</div>
+
+<div id="viewIA" class="view-container">
+
+    <div class="page-header">
+        <h2>🤖 Busca inteligente</h2>
+    </div>
+
+    <div id="iaConteudo"></div>
+
 </div>
 
     <div id="viewSobre" class="view-container">
