@@ -68,13 +68,15 @@ function renderizarInterfaceIA() {
 
     container.innerHTML = `
         <div style="background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;">
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <!-- align-items: stretch força o botão e o input a terem a mesma altura perfeitamente -->
+            <div style="display: flex; gap: 10px; align-items: stretch;">
                 <input type="text" id="iaInputBusca" placeholder="Digite o nome, EAN ou bipe o produto..."
-                    style="flex: 1; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1em; font-weight: bold; outline: none; transition: 0.3s;"
+                    style="flex: 1; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1em; font-weight: bold; outline: none; transition: 0.3s; box-sizing: border-box;"
                     onfocus="this.style.borderColor='#6200ee'" onblur="this.style.borderColor='#e2e8f0'">
                 
-                <button onclick="app.abrirScannerIA()" style="background: #6200ee; color: white; border: none; border-radius: 12px; min-width: 55px; height: 55px; cursor: pointer; font-size: 1.4em; display: flex; align-items: center; justify-content: center; transition: 0.3s; margin: 0; box-shadow: 0 4px 10px rgba(98, 0, 238, 0.2);">
-                    📷
+                <button onclick="app.abrirScannerIA()" style="background: #6200ee; border: none; border-radius: 12px; min-width: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; box-shadow: 0 4px 10px rgba(98, 0, 238, 0.2); padding: 0;">
+                    <!-- O filter: brightness(0) invert(1) transforma o ícone SVG em branco -->
+                    <img src="img/icons/camera.svg" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                 </button>
             </div>
         </div>
@@ -96,12 +98,11 @@ function renderizarInterfaceIA() {
             </div>
         </div>
 
-        <!-- Modal para Código de Barras 128 (Corrigido para não estourar a tela) -->
+        <!-- Modal para Código de Barras 128 -->
         <div id="modalBarcodeIA" onclick="this.style.display='none'" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; display:none; justify-content:center; align-items:center; padding:20px;">
             <div class="card-internal" onclick="event.stopPropagation()" style="background: white; padding:25px; text-align:center; max-width:340px; border-radius: 20px; width: 100%; box-sizing: border-box;">
                 <h3 id="barcodeTitulo" style="margin-top:0; font-size: 0.9em; color:#1e293b; text-transform: uppercase;"></h3>
                 <div style="background: white; padding: 10px; border-radius: 10px; margin: 15px 0; width: 100%; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center;">
-                    <!-- A mágica para o código caber certinho está aqui no style do svg -->
                     <svg id="svgBarcode" style="max-width: 100%; height: auto;"></svg>
                 </div>
                 <p id="barcodeSku" style="font-weight: 900; font-size: 1.1em; margin-bottom: 20px; color: #6200ee; letter-spacing: 2px;"></p>
