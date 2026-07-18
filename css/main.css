@@ -1098,7 +1098,7 @@ select:focus {
 }
 
 /* ================================
-   STOCKFLOW v2.4.1 - HEADER FINO
+   STOCKFLOW v2.3.1 - HEADER FINO
 ================================ */
 
 .stockflow-header {
@@ -1241,59 +1241,17 @@ select:focus {
 
 
 /* =====================================================
-   AJUSTE FINAL APP GRID (Ícone em cima, texto embaixo)
+   AJUSTE FLEXÍVEL DO MENU (GRID 2 COLUNAS AUTOMÁTICO)
 ===================================================== */
 .home-grid {
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: 1fr 1fr !important; /* Divide a tela 50/50 dinamicamente */
     gap: 15px !important;
-    width: 100% !important;
-    max-width: 450px !important; 
+    width: 100% !important; /* Ajusta automaticamente ao tamanho da tela */
+    max-width: 600px !important; /* Limite de segurança para tablets */
     margin: 0 auto !important;
-}
-
-.home-card {
-    display: flex !important;
-    flex-direction: column !important; /* Força ficar em pé */
-    align-items: center !important; /* Centraliza horizontalmente */
-    justify-content: center !important; /* Centraliza verticalmente */
-    text-align: center !important;
-    min-height: 130px !important;
-    padding: 20px 10px !important;
-    margin: 0 !important;
-}
-
-.home-card .card-icon {
-    margin-bottom: 10px !important; /* Espaço entre ícone e texto */
-    margin-right: 0 !important; /* Remove margem lateral antiga da classe small-card */
-}
-
-.home-card h4 {
-    margin: 0 !important;
-    text-align: center !important;
-    font-size: 0.85em !important;
-    line-height: 1.2 !important;
-}
-
-/* =====================================================
-   CORREÇÃO DEFINITIVA DO MENU (APP GRID) - v2.5.0
-===================================================== */
-#viewMenu {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    width: 100% !important;
-    padding: 20px 15px !important;
+    padding: 0 10px !important;
     box-sizing: border-box !important;
-}
-
-.home-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 15px !important;
-    width: 100% !important;
-    max-width: 600px !important; /* Larga o suficiente para não amassar as letras */
-    margin: 0 auto !important;
 }
 
 .home-card {
@@ -1301,120 +1259,51 @@ select:focus {
     flex-direction: column !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    text-align: center !important;
+    width: 100% !important; /* Preenche o espaço da sua coluna (1fr) */
+    height: 100% !important; /* Estica igual ao vizinho se o texto for maior */
+    min-height: 135px !important;
+    padding: 20px 8px !important; 
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    
+    /* Mantém a identidade Premium Roxa intacta */
     background: #ffffff !important;
     border: 1px solid #eadcff !important;
-    border-radius: 20px !important;
-    padding: 22px 8px !important; /* Margem lateral menor para o texto respirar */
-    min-height: 140px !important;
-    width: 100% !important;
-    box-shadow: 0 8px 20px rgba(91, 22, 200, 0.05) !important;
-    box-sizing: border-box !important;
-    transition: transform 0.2s ease !important;
+    border-radius: 22px !important;
+    box-shadow: 0 10px 25px rgba(91, 22, 200, 0.08) !important;
 }
 
 .home-card:active {
-    transform: scale(0.95) !important;
+    transform: scale(0.96) !important;
 }
 
 .home-card .card-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     width: 54px !important;
     height: 54px !important;
-    background: #f2e9ff !important;
+    margin: 0 auto 12px auto !important; 
+    background: #f2e9ff !important; 
+    color: #5b16c8 !important;
     border-radius: 16px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 0 auto 12px auto !important;
-}
-
-.home-card .menu-icon {
-    width: 28px !important;
-    height: 28px !important;
 }
 
 .home-card h4 {
     margin: 0 !important;
-    font-size: 0.9em !important;
+    font-size: 0.88em !important;
     color: #25105f !important;
     font-weight: 900 !important;
-    line-height: 1.3 !important;
-    word-wrap: break-word !important;
-}
-
-.btn-sair {
-    width: 100% !important;
-    max-width: 600px !important; /* Exatamente a mesma largura máxima da grade */
-    margin: 20px auto 0 auto !important;
-    display: block !important;
-    box-sizing: border-box !important;
-}
-
-/* =====================================================
-   CORREÇÃO ABSOLUTA DA GRADE (APP GRID) - v2.5.0
-   Sobrescreve qualquer conflito anterior
-===================================================== */
-#viewMenu {
-    padding: 20px 15px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-
-.home-grid {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 12px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
-}
-
-.home-card {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    min-height: 130px !important;
-    /* Reduzimos o padding lateral para 5px, liberando espaço para o texto */
-    padding: 15px 5px !important; 
-    margin: 0 !important;
-    background: #ffffff !important;
-    border: 1px solid #eadcff !important;
-    border-radius: 20px !important;
-    box-shadow: 0 6px 16px rgba(91, 22, 200, 0.06) !important;
-    box-sizing: border-box !important;
-}
-
-.home-card .card-icon {
-    margin: 0 auto 10px auto !important;
-    width: 50px !important;
-    height: 50px !important;
-    border-radius: 14px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: #f2e9ff !important;
-}
-
-.home-card h4 {
-    margin: 0 !important;
-    font-size: 0.85em !important;
-    color: #25105f !important;
-    font-weight: 900 !important;
-    line-height: 1.2 !important;
+    line-height: 1.25 !important;
     text-align: center !important;
-    /* Proíbe o navegador de quebrar palavras no meio */
-    word-break: normal !important; 
-    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
 }
 
 .btn-sair {
-    width: 100% !important;
-    margin: 20px 0 0 0 !important;
+    width: calc(100% - 20px) !important; /* Acompanha a largura da grade automaticamente */
+    max-width: 580px !important;
+    margin: 25px auto 20px auto !important; 
+    display: block !important;
     box-sizing: border-box !important;
 }
