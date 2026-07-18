@@ -87,56 +87,68 @@
     </div>
 <div class="home-grid">
 
-<div class="home-grid">
-    <div class="home-card" onclick="app.abrirIA()">
+    <div class="home-card small-card" onclick="app.abrirIA()">
         <div class="card-icon"><img src="img/icons/search-check.svg" class="menu-icon"></div>
-        <h4>Busca Inteligente</h4>
+        <div class="card-text"><h4>Busca Inteligente</h4><p>IA.</p></div>
+        <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewReposicao')">
+<div class="home-card small-card" onclick="app.abrirPainel('viewReposicao')">
         <div class="card-icon"><img src="img/icons/package-plus.svg" class="menu-icon"></div>
-        <h4>Criar Lista de Reposição</h4>
+        <div class="card-text"><h4>Criar Lista de Reposição</h4><p>Crie novas listas de reposição.</p></div>
+        <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewReman')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewReman')">
         <div class="card-icon"><img src="img/icons/refresh-ccw-dot.svg" class="menu-icon"></div>
-        <h4>Conferir Remanejamento</h4>
+        <div class="card-text"><h4>Conferir Remanejamento</h4><p>Conferir e validar remanejamentos.</p></div>
+        <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewEstoque')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewEstoque')">
         <div class="card-icon"><img src="img/icons/clipboard-list.svg" class="menu-icon"></div>
-        <h4>Listas de Reposição</h4>
+        <div class="card-text"><h4>Listas de Reposição</h4><p>Visualize e gerencie suas listas.</p></div>
+        <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewAnalise')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewAnalise')">
         <div class="card-icon"><img src="img/icons/triangle-alert.svg" class="menu-icon"></div>
-        <h4>Não Achei</h4>
+        <div class="card-text"><h4>Não Achei</h4><p>Itens que não foram encontrados.</p></div>
+        <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewRelatorio')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewRelatorio')">
         <div class="card-icon"><img src="img/icons/chart-column.svg" class="menu-icon"></div>
-        <h4>Histórico</h4>
+        <div class="card-text"><h4>Histórico</h4><p>Acompanhe o histórico de atividades.</p></div>
+        <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewMenuInventario')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewMenuInventario')">
         <div class="card-icon"><img src="img/icons/target.svg" class="menu-icon"></div>
-        <h4>Prevenção e Perdas</h4>
+        <div class="card-text"><h4>Prevenção e perdas</h4><p>Ações e análises para reduzir perdas.</p></div>
+        <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewUpload')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewUpload')">
         <div class="card-icon"><img src="img/icons/cloud-upload.svg" class="menu-icon"></div>
-        <h4>Upload Base</h4>
+        <div class="card-text"><h4>Upload Base</h4><p>Envie e atualize bases.</p></div>
+        <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewMasterBox')">
+    <div class="home-card small-card" onclick="app.abrirPainel('viewMasterBox')">
         <div class="card-icon"><img src="img/icons/archive.svg" class="menu-icon"></div>
-        <h4>Master Box</h4>
+        <div class="card-text"><h4>Master Box</h4><p>Criar e consultar caixas.</p></div>
+        <span class="card-arrow">›</span>
     </div>
 
-    <div class="home-card" onclick="app.abrirPainel('viewSobre')">
+
+    <div class="home-card small-card" onclick="app.abrirPainel('viewSobre')">
         <div class="card-icon"><img src="img/icons/settings.svg" class="menu-icon"></div>
-        <h4>Sobre</h4>
+        <div class="card-text"><h4>Sobre</h4><p>Informações do sistema.</p></div>
+        <span class="card-arrow">›</span>
     </div>
+
+
 </div>
 
 <button class="btn-sair" onclick="app.fazerLogout()">
@@ -147,6 +159,7 @@
     © StockFlow v2.5.0 • Desenvolvido por Wagner Gomes dos Santos
 </div>
         </div>
+    </div>
 
     <div id="viewReposicao" class="view-container">
         <div class="card-internal">
