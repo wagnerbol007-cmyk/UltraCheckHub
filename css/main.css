@@ -1241,16 +1241,23 @@ select:focus {
 
 
 /* =====================================================
-   AJUSTE FLEXÍVEL DO MENU (GRID 2 COLUNAS AUTOMÁTICO)
+   GRADE AUTOMÁTICA (1FR 1FR) - TEMA ROXO PREMIUM
 ===================================================== */
+#viewMenu {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    padding: 15px !important;
+    box-sizing: border-box !important;
+}
+
 .home-grid {
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important; /* Divide a tela 50/50 dinamicamente */
-    gap: 15px !important;
-    width: 100% !important; /* Ajusta automaticamente ao tamanho da tela */
-    max-width: 600px !important; /* Limite de segurança para tablets */
-    margin: 0 auto !important;
-    padding: 0 10px !important;
+    grid-template-columns: 1fr 1fr !important; /* Divide a tela exatamente em 2 */
+    gap: 12px !important; /* Espaço entre os botões */
+    width: 100% !important; 
+    margin: 0 !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
 }
 
@@ -1258,52 +1265,45 @@ select:focus {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    justify-content: flex-start !important;
-    width: 100% !important; /* Preenche o espaço da sua coluna (1fr) */
-    height: 100% !important; /* Estica igual ao vizinho se o texto for maior */
-    min-height: 135px !important;
-    padding: 20px 8px !important; 
-    margin: 0 !important;
-    box-sizing: border-box !important;
-    
-    /* Mantém a identidade Premium Roxa intacta */
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important; /* Ocupa 100% da sua metade da tela */
+    height: auto !important; /* Se ajusta ao tamanho que precisar */
+    min-height: 120px !important;
+    padding: 15px 5px !important; /* Respiro interno */
     background: #ffffff !important;
     border: 1px solid #eadcff !important;
-    border-radius: 22px !important;
-    box-shadow: 0 10px 25px rgba(91, 22, 200, 0.08) !important;
-}
-
-.home-card:active {
-    transform: scale(0.96) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 6px 16px rgba(91, 22, 200, 0.06) !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
 }
 
 .home-card .card-icon {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 14px !important;
+    background: #f2e9ff !important;
+    color: #5b16c8 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 54px !important;
-    height: 54px !important;
-    margin: 0 auto 12px auto !important; 
-    background: #f2e9ff !important; 
-    color: #5b16c8 !important;
-    border-radius: 16px !important;
+    margin: 0 auto 10px auto !important;
 }
 
 .home-card h4 {
     margin: 0 !important;
-    font-size: 0.88em !important;
+    font-size: 0.85em !important;
     color: #25105f !important;
     font-weight: 900 !important;
-    line-height: 1.25 !important;
-    text-align: center !important;
-    word-break: normal !important;
+    line-height: 1.2 !important;
+    word-break: normal !important; 
     overflow-wrap: break-word !important;
 }
 
 .btn-sair {
-    width: calc(100% - 20px) !important; /* Acompanha a largura da grade automaticamente */
-    max-width: 580px !important;
-    margin: 25px auto 20px auto !important; 
+    width: 100% !important;
+    margin: 20px 0 0 0 !important;
     display: block !important;
     box-sizing: border-box !important;
 }
