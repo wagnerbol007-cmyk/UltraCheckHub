@@ -12,32 +12,36 @@ function extrairInfoSAP(item) {
     return { saldo, tam };
 }
 
-// Transformamos em async para esperar o Firebase sem travar a tela
-// Transformamos em async para esperar o Firebase sem travar a tela
 export async function biparReman(bip) {
     
-    if (window.app && !window.app.salvarColetaParcial) {
-        window.app.salvarColetaParcial = function(base8) {
-            const pertence = state.dadosReman.filter(i => normalizarCodigo(i.SKU || i.Material).startsWith(base8));
-            
-            pertence.forEach(item => {
-                let sku13 = normalizarCodigo(item.SKU || item.Material);
-                database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`).once("value").then(snap => {
-                    let reg = snap.val();
-                    if (reg && reg.qtd > 0) {
-                        database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`).update({
-                            quem: state.operador,
-                            hora: getHoraCerta()
-                        });
-                    }
-                });
-            });
+    window.app.salvarColetaParcial = function(base8) {
+        const pertence = state.dadosReman.filter(i => normalizarCodigo(i.SKU || i.Material).startsWith(base8));
+        
+        let pacotaoDeAtualizacoes = {};
 
+        pertence.forEach(item => {
+            let sku13 = normalizarCodigo(item.SKU || item.Material);
+            let spanNumero = document.getElementById(`qtd-reman-${sku13}`);
+            
+            if (spanNumero) {
+                let qtdLocal = Number(spanNumero.innerText) || 0;
+                
+                pacotaoDeAtualizacoes[`status_reman_loja/${state.lojaAtual}/${sku13}`] = {
+                    qtd: qtdLocal,
+                    quem: state.operador,
+                    hora: getHoraCerta()
+                };
+            }
+        });
+
+        database.ref().update(pacotaoDeAtualizacoes).then(() => {
             document.getElementById('cardBipResultadoTop').style.display = "none";
-            document.getElementById('inputBipReman').focus();
-            window.mostrarAviso("✅ Salvo! Apenas os tamanhos marcados foram registrados.", "sucesso");
-        };
-    }
+            // document.getElementById('inputBipReman').focus(); // <-- REMOVIDO PARA A TELA NÃO PULAR
+            window.mostrarAviso("✅ Salvo! Quantidades atualizadas com sucesso.", "sucesso");
+        }).catch(erro => {
+            window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
+        });
+    };
 
     const bipLimpo = normalizarCodigo(bip);
     const cardTop = document.getElementById('cardBipResultadoTop');
@@ -46,15 +50,31 @@ export async function biparReman(bip) {
 
     document.getElementById('inputBipReman').value = "";
 
+    // Esconde o Pop-up da câmera assim que o produto for bipado
+    const modalCamera = document.getElementById('modalScannerReman');
+    if (modalCamera) modalCamera.style.display = "none";
+    
+    // TRANSFORMA O CARD EM UM POP-UP FLUTUANTE
+    cardTop.style.position = "fixed";
+    cardTop.style.top = "20px";
+    cardTop.style.left = "5%";
+    cardTop.style.width = "90%";
+    cardTop.style.zIndex = "9999";
+    cardTop.style.boxShadow = "0 15px 35px rgba(0,0,0,0.4)";
+    cardTop.style.backgroundColor = "#ffffff";
+    cardTop.style.display = "block";
+
     const itemNoSap = state.sapCompleto.find(i => normalizarCodigo(i.EAN) === bipLimpo || normalizarCodigo(i.Material || i.SKU) === bipLimpo);
 
     if (!itemNoSap) {
-        cardTop.style.display = "block";
         cardTop.style.borderLeftColor = "var(--danger)";
         tagTop.style.background = "var(--danger)";
         tagTop.classList.remove("reman-laranja");
         tagTop.innerText = "❌ PRODUTO DESCONHECIDO NO SAP!";
-        corpoTop.innerHTML = `<div style="font-size:0.85em; font-weight:700; color:var(--dark-blue);">O código ${bip} não foi localizado na última extração do SAP.</div>`;
+        corpoTop.innerHTML = `
+            <div style="font-size:0.85em; font-weight:700; color:var(--dark-blue);">O código ${bip} não foi localizado na última extração do SAP.</div>
+            <button class="btn-main" style="margin-top:15px;background:#64748b;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'">FECHAR</button>
+        `;
         return;
     }
 
@@ -66,8 +86,6 @@ export async function biparReman(bip) {
         let skuPlanilha = normalizarCodigo(i.SKU || i.Material);
         return skuPlanilha.substring(0, 8) === base8;
     });
-
-    cardTop.style.display = "block";
 
     if (pertenceAoReman.length > 0) {
         cardTop.style.borderLeftColor = "#f97316";
@@ -83,23 +101,20 @@ export async function biparReman(bip) {
             const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === skuReman13);
             const info = itemSap ? extrairInfoSAP(itemSap) : { saldo: 0, tam: "UN" };
 
-            // 1. Busca os dados no Firebase ANTES de desenhar a tela
             const snap = await database.ref(`status_reman_loja/${state.lojaAtual}/${skuReman13}`).once("value");
             
-            // 2. Força a transformação para NÚMEROS (Corrige o erro visual)
             const qtd = Number(snap.val()?.qtd || 0);
             const saldo = Number(info.saldo || 0);
 
-            // 3. Aplica a cor dependendo da quantidade já salva no banco
             let bgCor = '#ffffff'; 
             let bordaCor = '#e2e8f0'; 
 
             if (qtd > 0) {
                 if (qtd >= saldo) {
-                    bgCor = '#dcfce7'; // Verde (Completo)
+                    bgCor = '#dcfce7'; 
                     bordaCor = '#22c55e';
                 } else {
-                    bgCor = '#fff7ed'; // Laranja (Parcial)
+                    bgCor = '#fff7ed'; 
                     bordaCor = '#fb923c';
                 }
             }
@@ -138,6 +153,9 @@ export async function biparReman(bip) {
             <button class="btn-main" style="margin-top:15px;background:#22c55e;" onclick="app.salvarColetaParcial('${base8}')">
                 ✅ SALVAR O QUE ENCONTREI
             </button>
+            <button class="btn-main" style="margin-top:8px;background:#ef4444;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'">
+                FECHAR
+            </button>
         `;
     } else {
         cardTop.style.borderLeftColor = "var(--success)";
@@ -152,18 +170,17 @@ export async function biparReman(bip) {
                     <span style="color:var(--success); font-weight:800;">PERTENCE À LISTA DE PLANEJAMENTO</span>
                 </div>
             </div>
+            <button class="btn-main" style="margin-top:15px;background:#64748b;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'">FECHAR</button>
         `;
     }
 }
 
 export function aumentarReman(sku13, saldoTotal) {
-    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}/qtd`);
     const saldo = Number(saldoTotal);
-    
     const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
-    let qtdLocal = 0;
+    
     if (spanNumero) {
-        qtdLocal = Number(spanNumero.innerText) || 0;
+        let qtdLocal = Number(spanNumero.innerText) || 0;
         if (qtdLocal < saldo) {
             qtdLocal++;
             spanNumero.innerText = qtdLocal; 
@@ -175,21 +192,14 @@ export function aumentarReman(sku13, saldoTotal) {
             }
         }
     }
-
-    ref.transaction((qtdAtual) => {
-        let atual = Number(qtdAtual) || 0;
-        return (atual < saldo) ? atual + 1 : atual;
-    });
 }
 
 export function diminuirReman(sku13, saldoTotal) {
-    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}/qtd`);
     const saldo = Number(saldoTotal);
-    
     const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
-    let qtdLocal = 0;
+    
     if (spanNumero) {
-        qtdLocal = Number(spanNumero.innerText) || 0;
+        let qtdLocal = Number(spanNumero.innerText) || 0;
         if (qtdLocal > 0) {
             qtdLocal--;
             spanNumero.innerText = qtdLocal;
@@ -201,11 +211,6 @@ export function diminuirReman(sku13, saldoTotal) {
             }
         }
     }
-
-    ref.transaction((qtdAtual) => {
-        let atual = Number(qtdAtual) || 0;
-        return (atual > 0) ? atual - 1 : 0;
-    });
 }
 
 export function renderizarListaCompletaReman() {
@@ -220,7 +225,6 @@ export function renderizarListaCompletaReman() {
         let totalEsperado = 0;
         let totalColetado = 0;
 
-        // Limpa e agrupa os itens, aproveitando para calcular o Progresso!
         state.dadosReman.forEach(item => {
             let sku = normalizarCodigo(item.SKU || item.Material);
             if(!sku) return;
@@ -232,18 +236,16 @@ export function renderizarListaCompletaReman() {
             }
         });
 
-        // Contabilidade geral para a barra de progresso
         Object.entries(agrupado).forEach(([base8, lista]) => {
             lista.forEach(sku13 => {
                 const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === sku13);
                 const info = extrairInfoSAP(itemSap || {});
-                totalEsperado += info.saldo; // Soma o estoque que precisa ser achado
+                totalEsperado += info.saldo; 
                 const ticado = statusDb[sku13]?.qtd || 0;
-                totalColetado += ticado; // Soma o que a galera já achou
+                totalColetado += ticado; 
             });
         });
 
-        // Desenha a Barra de Progresso no topo da lista
         let percent = totalEsperado > 0 ? Math.floor((totalColetado / totalEsperado) * 100) : 0;
         if (percent > 100) percent = 100;
         let corBarra = percent === 100 ? '#22c55e' : '#3b82f6';
@@ -257,7 +259,6 @@ export function renderizarListaCompletaReman() {
             </div>
         `;
 
-        // Renderiza a lista de Cards
         Object.entries(agrupado).forEach(([base8, lista]) => {
             const desc = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU).startsWith(base8))?.["Descrição material"] || "Produto Reman";
             const card = document.createElement('div');
@@ -274,12 +275,14 @@ export function renderizarListaCompletaReman() {
                 let bordaCor = ticado === 0 ? '#e2e8f0' : (ticado < info.saldo ? '#fb923c' : '#22c55e');
 
                 gradeHtml += `
-                    <div style="background:${bgCor}; border:1px solid ${bordaCor}; padding:10px; margin:5px 0; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                        <div style="font-weight:bold;">TAM: ${info.tam} (${ticado}/${info.saldo})</div>
+                    <div id="linha-reman-lista-${sku13}" style="background:${bgCor}; border:1px solid ${bordaCor}; padding:10px; margin:5px 0; border-radius:8px; display:flex; justify-content:space-between; align-items:center; transition: 0.2s ease;">
+                        <div style="font-weight:bold;">
+                            TAM: ${info.tam} (<span id="qtd-reman-lista-${sku13}">${ticado}</span>/${info.saldo})
+                        </div>
                         <div style="display:flex; gap:6px;">
                             <button style="padding:6px 10px; border-radius:6px; border:1px solid #ccc;" onclick="app.gerarQRReman('${info.tam}', '${sku13}')">🔍</button>
                             <button style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-weight:bold; background:#fff; cursor:pointer;" onclick="app.ticarContadorReman('${sku13}', ${info.saldo})">++</button>
-                            <button style="padding:6px 10px; border-radius:6px; border:none; cursor:pointer; background:${ticado > 0 ? '#22c55e' : '#f97316'}; color:white;" onclick="app.alternarStatusReman('${base8}', '${sku13}')">
+                            <button id="btn-status-lista-${sku13}" style="padding:6px 10px; border-radius:6px; border:none; cursor:pointer; background:${ticado > 0 ? '#22c55e' : '#f97316'}; color:white;" onclick="app.alternarStatusReman('${base8}', '${sku13}')">
                                 ${ticado > 0 ? '✅' : '📦'}
                             </button>
                         </div>
@@ -287,7 +290,6 @@ export function renderizarListaCompletaReman() {
                 `;
             });
 
-            // ATENÇÃO AQUI: Adicionado onclick="app.zoomFoto(this.src)" e cursor:pointer na imagem
             card.innerHTML = `
                 <div style="padding:10px; display:flex; gap:10px; align-items:center; border-bottom:1px solid #eee;">
                     <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:50px; height:50px; border-radius:8px; cursor:pointer;" onclick="app.zoomFoto(this.src)">
@@ -301,38 +303,53 @@ export function renderizarListaCompletaReman() {
 }
 
 export function ticarContadorReman(sku13, saldoTotal) {
-    const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}/qtd`);
-    
-    // 🔥 VELOCIDADE: Usamos transaction para atualizar direto no servidor sem precisar ler antes!
-    ref.transaction((qtdAtual) => {
-        let atual = qtdAtual || 0;
-        return (atual < saldoTotal) ? atual + 1 : 0;
-    });
+    const spanNumero = document.getElementById(`qtd-reman-lista-${sku13}`);
+    if (!spanNumero) return;
+
+    let atual = Number(spanNumero.innerText) || 0;
+    const saldo = Number(saldoTotal);
+
+    atual = (atual < saldo) ? atual + 1 : 0;
+    spanNumero.innerText = atual;
+
+    const linha = document.getElementById(`linha-reman-lista-${sku13}`);
+    const btnStatus = document.getElementById(`btn-status-lista-${sku13}`);
+
+    if (linha) {
+        linha.style.background = atual === 0 ? '#ffffff' : (atual < saldo ? '#fff7ed' : '#dcfce7');
+        linha.style.borderColor = atual === 0 ? '#e2e8f0' : (atual < saldo ? '#fb923c' : '#22c55e');
+    }
+    if (btnStatus) {
+        btnStatus.style.background = atual > 0 ? '#22c55e' : '#f97316';
+        btnStatus.innerHTML = atual > 0 ? '✅' : '📦';
+    }
 }
 
 export function alternarStatusReman(base8, sku13) {
+    const spanNumero = document.getElementById(`qtd-reman-lista-${sku13}`);
+    if (!spanNumero) return;
+
+    const qtdLocal = Number(spanNumero.innerText) || 0;
     const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
-    
-    ref.once('value', snapshot => {
-        const registro = snapshot.val();
-        
-        if (registro && registro.qtd > 0) {
-            ref.update({
-                quem: state.operador,
-                hora: getHoraCerta()
-            }).then(() => {
-                window.mostrarAviso("✅ Coleta confirmada para: " + sku13, "sucesso");
-            });
+
+    ref.update({
+        qtd: qtdLocal,
+        quem: state.operador,
+        hora: getHoraCerta()
+    }).then(() => {
+        if (qtdLocal === 0) {
+            window.mostrarAviso("🗑️ Coleta zerada com sucesso!", "sucesso");
         } else {
-            window.mostrarAviso("⚠️ Selecione a quantidade no contador (+) antes de coletar!", "erro");
+            window.mostrarAviso("✅ Coleta salva para o tamanho selecionado!", "sucesso");
         }
+    }).catch(erro => {
+        window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
     });
 }
 
 export function exportarRemanExcel() {
     database.ref(`status_reman_loja/${state.lojaAtual}`).once('value', snapshot => {
         const status = snapshot.val() || {};
-        
         const listaSkus = Object.keys(status);
 
         if (listaSkus.length === 0) {

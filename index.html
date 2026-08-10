@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StockFlow v2.5.0</title>
+    <title>StockFlow v2.5.1</title>
 
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
@@ -55,7 +55,7 @@
         LOJA: <span id="displayLoja"></span>
     </div>
 
-    <div class="stockflow-title">StockFlow <span>v2.5.0</span></div>
+    <div class="stockflow-title">StockFlow <span>v2.5.1</span></div>
 </div>
 
 <div id="viewLogin" class="view-container active-view">
@@ -156,7 +156,7 @@
 </button>
 
 <div class="footer-copy">
-    © StockFlow v2.5.0 • Desenvolvido por Wagner Gomes dos Santos
+    © StockFlow v2.5.1 • Desenvolvido por Wagner Gomes dos Santos
 </div>
         </div>
     </div>
@@ -182,10 +182,11 @@
         </div>
     </div>
 
-    <div id="viewReman" class="view-container">
+<div id="viewReman" class="view-container">
         <div class="card-internal">
-            <button class="btn-main" style="background:#7c3aed; margin-bottom: 15px;" onclick="app.iniciarCamera('readerReman', 'reman')">📸 ABRIR CÂMERA SCANNER</button>
-            <div id="readerReman" class="reader-box"></div>
+            <!-- Botão antigo do topo agora também abre o Pop-up -->
+            <button class="btn-main" style="background:#7c3aed; margin-bottom: 15px;" onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'reman')">📸 ABRIR CÂMERA SCANNER</button>
+            
             <input type="text" id="inputBipReman" placeholder="BIPAR PRODUTO REMAN" onchange="app.biparReman(this.value)">
             
             <button class="btn-main" style="background:#22c55e; margin-top:15px; font-size: 0.8em;" onclick="app.exportarReman()">📊 EXPORTAR SEPARADOS (EXCEL)</button>
@@ -195,7 +196,26 @@
                 <div id="corpoFeedbackTop" style="display:flex; flex-direction:column; gap:8px;"></div>
             </div>
         </div>
+        
         <div id="remanListaSincronizada" class="reman-container-lista" style="margin-top:15px; width: 100%; max-width: 450px;"></div>
+
+        <!-- Botão Flutuante da Câmera (Fixo no canto direito) -->
+        <button onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'reman')" 
+                style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: #6200ee; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9998; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s;">
+            <img src="img/icons/camera.svg" style="width: 30px; height: 30px; filter: brightness(0) invert(1);">
+        </button>
+
+        <!-- NOVO: Pop-up Flutuante da Câmera -->
+        <div id="modalScannerReman" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; display:none; flex-direction:column; justify-content:center; align-items:center;">
+            <div style="background:white; padding:15px; border-radius:20px; width:90%; max-width:400px; text-align:center;">
+                <h3 style="margin-top:0; color:#25105f; text-transform:uppercase;">📸 Escanear Produto</h3>
+                
+                <!-- A caixa da câmera agora mora aqui dentro! -->
+                <div id="readerReman" style="width: 100%; min-height: 250px; background: #000; border-radius: 12px; overflow: hidden; margin-bottom:15px;"></div>
+                
+                <button style="background:#ef4444; color:white; width:100%; padding:14px; border:none; border-radius:12px; font-weight:900; cursor:pointer;" onclick="document.getElementById('modalScannerReman').style.display='none'; document.getElementById('readerReman').innerHTML='';">FECHAR CÂMERA</button>
+            </div>
+        </div>
     </div>
 
 <div id="viewEstoque" class="view-container">
