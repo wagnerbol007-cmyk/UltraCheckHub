@@ -36,7 +36,6 @@ export async function biparReman(bip) {
 
         database.ref().update(pacotaoDeAtualizacoes).then(() => {
             document.getElementById('cardBipResultadoTop').style.display = "none";
-            // document.getElementById('inputBipReman').focus(); // <-- REMOVIDO PARA A TELA NÃO PULAR
             window.mostrarAviso("✅ Salvo! Quantidades atualizadas com sucesso.", "sucesso");
         }).catch(erro => {
             window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
@@ -50,11 +49,9 @@ export async function biparReman(bip) {
 
     document.getElementById('inputBipReman').value = "";
 
-    // Esconde o Pop-up da câmera assim que o produto for bipado
     const modalCamera = document.getElementById('modalScannerReman');
     if (modalCamera) modalCamera.style.display = "none";
 
-    // TRANSFORMA O CARD EM UM POP-UP FLUTUANTE
     cardTop.style.position = "fixed";
     cardTop.style.top = "20px";
     cardTop.style.left = "5%";
@@ -67,6 +64,7 @@ export async function biparReman(bip) {
     const itemNoSap = state.sapCompleto.find(i => normalizarCodigo(i.EAN) === bipLimpo || normalizarCodigo(i.Material || i.SKU) === bipLimpo);
 
     if (!itemNoSap) {
+        tocarSomScanner('erro');
         cardTop.style.borderLeftColor = "var(--danger)";
         tagTop.style.background = "var(--danger)";
         tagTop.classList.remove("reman-laranja");
@@ -88,6 +86,7 @@ export async function biparReman(bip) {
     });
 
     if (pertenceAoReman.length > 0) {
+        tocarSomScanner('reman');
         cardTop.style.borderLeftColor = "#f97316";
         tagTop.style.background = "linear-gradient(135deg, #f97316, #c2410c)";
         tagTop.style.color = "#ffffff";
@@ -118,7 +117,7 @@ export async function biparReman(bip) {
                     bordaCor = '#fb923c';
                 }
             }
-
+            
             return `
             <div id="linha-reman-top-${skuReman13}" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:10px; border:1px solid ${bordaCor}; border-radius:12px; background:${bgCor}; transition: 0.3s ease;">
                 <div>
@@ -158,6 +157,7 @@ export async function biparReman(bip) {
             </button>
         `;
     } else {
+        tocarSomScanner('erro');
         cardTop.style.borderLeftColor = "var(--success)";
         tagTop.style.background = "var(--success)";
         tagTop.classList.remove("reman-laranja");
@@ -250,7 +250,6 @@ export function renderizarListaCompletaReman() {
         if (percent > 100) percent = 100;
         let corBarra = percent === 100 ? '#10b981' : '#3b82f6';
         
-        // Barra de progresso mais moderna
         container.innerHTML = `
             <div style="background:#f1f5f9; border-radius:12px; height:22px; width:100%; position:relative; overflow:hidden; margin-bottom:20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
                 <div style="height:100%; background:${corBarra}; width:${percent}%; transition: width 0.4s ease;"></div>
@@ -271,12 +270,11 @@ export function renderizarListaCompletaReman() {
                 const registro = statusDb[sku13] || { qtd: 0 };
                 const ticado = registro.qtd;
 
-                // Cores em tons pastéis mais profissionais (Tailwind CSS Palette)
                 let bgCor = ticado === 0 ? '#ffffff' : (ticado < info.saldo ? '#fffbeb' : '#f0fdf4');
                 let bordaCor = ticado === 0 ? '#e5e7eb' : (ticado < info.saldo ? '#fde68a' : '#bbf7d0');
                 let corTexto = ticado === 0 ? '#64748b' : (ticado < info.saldo ? '#d97706' : '#15803d');
                 let statusBtnBg = ticado > 0 ? '#10b981' : '#f97316';
-                let statusBtnIcon = ticado > 0 ? '✓' : '✓';
+                let statusBtnIcon = ticado > 0 ? '✓' : '📦';
 
                 gradeHtml += `
                     <div id="linha-reman-lista-${sku13}" style="background:${bgCor}; border:1px solid ${bordaCor}; padding:12px; margin-bottom:8px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; transition: 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
@@ -289,17 +287,14 @@ export function renderizarListaCompletaReman() {
                             </span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            <!-- Ícone de Lupa em SVG (Moderno e não distorce) -->
                             <button style="display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; border:1px solid #e2e8f0; background:#f8fafc; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s;" onclick="app.gerarQRReman('${info.tam}', '${sku13}')">
                                 <svg width="18" height="18" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
                             </button>
                             
-                            <!-- Botão +1 (Substituiu o ++ para ficar mais limpo) -->
                             <button style="display:flex; align-items:center; justify-content:center; height:38px; min-width:44px; padding:0 12px; border-radius:10px; border:1px solid #bfdbfe; background:#eff6ff; color:#2563eb; font-weight:900; font-size:14px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s;" onclick="app.ticarContadorReman('${sku13}', ${info.saldo})">
                                 +1
                             </button>
                             
-                            <!-- Botão de Status (Envio) -->
                             <button id="btn-status-lista-${sku13}" style="display:flex; align-items:center; justify-content:center; height:38px; min-width:44px; padding:0 12px; border-radius:10px; border:none; cursor:pointer; background:${statusBtnBg}; color:white; font-weight:900; font-size:16px; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:0.2s;" onclick="app.alternarStatusReman('${base8}', '${sku13}')">
                                 ${statusBtnIcon}
                             </button>
@@ -308,10 +303,8 @@ export function renderizarListaCompletaReman() {
                 `;
             });
 
-            // Card Externo Moderno
             card.innerHTML = `
                 <div style="background:#ffffff; border-radius:16px; border:1px solid #e2e8f0; margin-bottom:20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); overflow:hidden;">
-                    <!-- Cabeçalho do Card -->
                     <div style="padding:16px; display:flex; gap:14px; align-items:center; background:#f8fafc; border-bottom:1px solid #f1f5f9;">
                         <div style="width:65px; height:65px; flex-shrink:0; border-radius:12px; border:1px solid #e2e8f0; overflow:hidden; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="app.zoomFoto('https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg')">
                             <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="max-width:100%; max-height:100%; object-fit:contain;">
@@ -323,7 +316,6 @@ export function renderizarListaCompletaReman() {
                             </span>
                         </div>
                     </div>
-                    <!-- Lista de Tamanhos -->
                     <div style="padding:16px; background:#ffffff;">
                         ${gradeHtml}
                     </div>
@@ -346,9 +338,8 @@ export function ticarContadorReman(sku13, saldoTotal) {
 
     const linha = document.getElementById(`linha-reman-lista-${sku13}`);
     const btnStatus = document.getElementById(`btn-status-lista-${sku13}`);
-    const textQtd = document.getElementById(`texto-qtd-lista-${sku13}`); // Pega o texto da quantidade
+    const textQtd = document.getElementById(`texto-qtd-lista-${sku13}`); 
 
-    // Aplica as novas cores profissionais dinamicamente
     if (linha) {
         linha.style.background = atual === 0 ? '#ffffff' : (atual < saldo ? '#fffbeb' : '#f0fdf4');
         linha.style.borderColor = atual === 0 ? '#e5e7eb' : (atual < saldo ? '#fde68a' : '#bbf7d0');
@@ -358,7 +349,7 @@ export function ticarContadorReman(sku13, saldoTotal) {
     }
     if (btnStatus) {
         btnStatus.style.background = atual > 0 ? '#10b981' : '#f97316';
-        btnStatus.innerHTML = atual > 0 ? '✓' : '✓';
+        btnStatus.innerHTML = atual > 0 ? '✓' : '📦';
     }
 }
 
@@ -429,4 +420,38 @@ export function exportarRemanExcel() {
         XLSX.utils.book_append_sheet(wb, ws, "Reman Separados");
         XLSX.writeFile(wb, `Reman_Separados_Loja_${state.lojaAtual}.xlsx`);
     });
+}
+
+// ==========================================
+// MÓDULO DE ÁUDIO (Bipes do Scanner)
+// ==========================================
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function tocarSomScanner(tipo) {
+    if (!audioCtx) return;
+    
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    if (tipo === 'reman') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.15);
+    } else {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.4);
+    }
 }
