@@ -53,7 +53,7 @@ export async function biparReman(bip) {
     // Esconde o Pop-up da câmera assim que o produto for bipado
     const modalCamera = document.getElementById('modalScannerReman');
     if (modalCamera) modalCamera.style.display = "none";
-    
+
     // TRANSFORMA O CARD EM UM POP-UP FLUTUANTE
     cardTop.style.position = "fixed";
     cardTop.style.top = "20px";
@@ -248,12 +248,13 @@ export function renderizarListaCompletaReman() {
 
         let percent = totalEsperado > 0 ? Math.floor((totalColetado / totalEsperado) * 100) : 0;
         if (percent > 100) percent = 100;
-        let corBarra = percent === 100 ? '#22c55e' : '#3b82f6';
+        let corBarra = percent === 100 ? '#10b981' : '#3b82f6';
         
+        // Barra de progresso mais moderna
         container.innerHTML = `
-            <div style="background:#e2e8f0; border-radius:10px; height:24px; width:100%; position:relative; overflow:hidden; margin-bottom:15px; border: 1px solid #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="background:#f1f5f9; border-radius:12px; height:22px; width:100%; position:relative; overflow:hidden; margin-bottom:20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
                 <div style="height:100%; background:${corBarra}; width:${percent}%; transition: width 0.4s ease;"></div>
-                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:900; color:#1e293b; text-shadow: 0px 0px 3px rgba(255,255,255,0.8);">
+                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.75em; font-weight:800; color:#0f172a; text-shadow: 0px 0px 2px rgba(255,255,255,0.9);">
                     PROGRESSO DA LOJA: ${totalColetado} / ${totalEsperado} (${percent}%)
                 </div>
             </div>
@@ -262,7 +263,6 @@ export function renderizarListaCompletaReman() {
         Object.entries(agrupado).forEach(([base8, lista]) => {
             const desc = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU).startsWith(base8))?.["Descrição material"] || "Produto Reman";
             const card = document.createElement('div');
-            card.className = "reman-card-item";
             
             let gradeHtml = "";
             lista.forEach(sku13 => {
@@ -271,31 +271,63 @@ export function renderizarListaCompletaReman() {
                 const registro = statusDb[sku13] || { qtd: 0 };
                 const ticado = registro.qtd;
 
-                let bgCor = ticado === 0 ? '#ffffff' : (ticado < info.saldo ? '#fff7ed' : '#dcfce7');
-                let bordaCor = ticado === 0 ? '#e2e8f0' : (ticado < info.saldo ? '#fb923c' : '#22c55e');
+                // Cores em tons pastéis mais profissionais (Tailwind CSS Palette)
+                let bgCor = ticado === 0 ? '#ffffff' : (ticado < info.saldo ? '#fffbeb' : '#f0fdf4');
+                let bordaCor = ticado === 0 ? '#e5e7eb' : (ticado < info.saldo ? '#fde68a' : '#bbf7d0');
+                let corTexto = ticado === 0 ? '#64748b' : (ticado < info.saldo ? '#d97706' : '#15803d');
+                let statusBtnBg = ticado > 0 ? '#10b981' : '#f97316';
+                let statusBtnIcon = ticado > 0 ? '✓' : '✓';
 
                 gradeHtml += `
-                    <div id="linha-reman-lista-${sku13}" style="background:${bgCor}; border:1px solid ${bordaCor}; padding:10px; margin:5px 0; border-radius:8px; display:flex; justify-content:space-between; align-items:center; transition: 0.2s ease;">
-                        <div style="font-weight:bold;">
-                            TAM: ${info.tam} (<span id="qtd-reman-lista-${sku13}">${ticado}</span>/${info.saldo})
+                    <div id="linha-reman-lista-${sku13}" style="background:${bgCor}; border:1px solid ${bordaCor}; padding:12px; margin-bottom:8px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; transition: 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <span style="font-weight:800; font-size:13px; color:#1e293b;">TAM: ${info.tam}</span>
+                            <span id="texto-qtd-lista-${sku13}" style="font-size:12px; font-weight:700; color:${corTexto}; display:flex; align-items:center;">
+                                <span style="background:rgba(0,0,0,0.04); padding:2px 8px; border-radius:6px; font-variant-numeric: tabular-nums;">
+                                    <span id="qtd-reman-lista-${sku13}">${ticado}</span> / ${info.saldo}
+                                </span>
+                            </span>
                         </div>
-                        <div style="display:flex; gap:6px;">
-                            <button style="padding:6px 10px; border-radius:6px; border:1px solid #ccc;" onclick="app.gerarQRReman('${info.tam}', '${sku13}')">🔍</button>
-                            <button style="padding:6px 10px; border-radius:6px; border:1px solid #ccc; font-weight:bold; background:#fff; cursor:pointer;" onclick="app.ticarContadorReman('${sku13}', ${info.saldo})">++</button>
-                            <button id="btn-status-lista-${sku13}" style="padding:6px 10px; border-radius:6px; border:none; cursor:pointer; background:${ticado > 0 ? '#22c55e' : '#f97316'}; color:white;" onclick="app.alternarStatusReman('${base8}', '${sku13}')">
-                                ${ticado > 0 ? '✅' : '📦'}
+                        <div style="display:flex; gap:8px;">
+                            <!-- Ícone de Lupa em SVG (Moderno e não distorce) -->
+                            <button style="display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; border:1px solid #e2e8f0; background:#f8fafc; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s;" onclick="app.gerarQRReman('${info.tam}', '${sku13}')">
+                                <svg width="18" height="18" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                            </button>
+                            
+                            <!-- Botão +1 (Substituiu o ++ para ficar mais limpo) -->
+                            <button style="display:flex; align-items:center; justify-content:center; height:38px; min-width:44px; padding:0 12px; border-radius:10px; border:1px solid #bfdbfe; background:#eff6ff; color:#2563eb; font-weight:900; font-size:14px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s;" onclick="app.ticarContadorReman('${sku13}', ${info.saldo})">
+                                +1
+                            </button>
+                            
+                            <!-- Botão de Status (Envio) -->
+                            <button id="btn-status-lista-${sku13}" style="display:flex; align-items:center; justify-content:center; height:38px; min-width:44px; padding:0 12px; border-radius:10px; border:none; cursor:pointer; background:${statusBtnBg}; color:white; font-weight:900; font-size:16px; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:0.2s;" onclick="app.alternarStatusReman('${base8}', '${sku13}')">
+                                ${statusBtnIcon}
                             </button>
                         </div>
                     </div>
                 `;
             });
 
+            // Card Externo Moderno
             card.innerHTML = `
-                <div style="padding:10px; display:flex; gap:10px; align-items:center; border-bottom:1px solid #eee;">
-                    <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:50px; height:50px; border-radius:8px; cursor:pointer;" onclick="app.zoomFoto(this.src)">
-                    <div><b>${desc}</b><br><small>REF: ${base8}</small></div>
+                <div style="background:#ffffff; border-radius:16px; border:1px solid #e2e8f0; margin-bottom:20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); overflow:hidden;">
+                    <!-- Cabeçalho do Card -->
+                    <div style="padding:16px; display:flex; gap:14px; align-items:center; background:#f8fafc; border-bottom:1px solid #f1f5f9;">
+                        <div style="width:65px; height:65px; flex-shrink:0; border-radius:12px; border:1px solid #e2e8f0; overflow:hidden; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="app.zoomFoto('https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg')">
+                            <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="max-width:100%; max-height:100%; object-fit:contain;">
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <b style="font-size:13px; color:#0f172a; line-height:1.3; text-transform:uppercase; font-weight:800;">${desc}</b>
+                            <span style="font-size:12px; color:#64748b; font-weight:600; display:flex; align-items:center; gap:6px;">
+                                <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#cbd5e1;"></span> REF: ${base8}
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Lista de Tamanhos -->
+                    <div style="padding:16px; background:#ffffff;">
+                        ${gradeHtml}
+                    </div>
                 </div>
-                <div style="padding:10px;">${gradeHtml}</div>
             `;
             container.appendChild(card);
         });
@@ -314,14 +346,19 @@ export function ticarContadorReman(sku13, saldoTotal) {
 
     const linha = document.getElementById(`linha-reman-lista-${sku13}`);
     const btnStatus = document.getElementById(`btn-status-lista-${sku13}`);
+    const textQtd = document.getElementById(`texto-qtd-lista-${sku13}`); // Pega o texto da quantidade
 
+    // Aplica as novas cores profissionais dinamicamente
     if (linha) {
-        linha.style.background = atual === 0 ? '#ffffff' : (atual < saldo ? '#fff7ed' : '#dcfce7');
-        linha.style.borderColor = atual === 0 ? '#e2e8f0' : (atual < saldo ? '#fb923c' : '#22c55e');
+        linha.style.background = atual === 0 ? '#ffffff' : (atual < saldo ? '#fffbeb' : '#f0fdf4');
+        linha.style.borderColor = atual === 0 ? '#e5e7eb' : (atual < saldo ? '#fde68a' : '#bbf7d0');
+    }
+    if (textQtd) {
+        textQtd.style.color = atual === 0 ? '#64748b' : (atual < saldo ? '#d97706' : '#15803d');
     }
     if (btnStatus) {
-        btnStatus.style.background = atual > 0 ? '#22c55e' : '#f97316';
-        btnStatus.innerHTML = atual > 0 ? '✅' : '📦';
+        btnStatus.style.background = atual > 0 ? '#10b981' : '#f97316';
+        btnStatus.innerHTML = atual > 0 ? '✓' : '✓';
     }
 }
 
