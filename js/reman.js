@@ -274,7 +274,7 @@ export function renderizarListaCompletaReman() {
                 let bordaCor = ticado === 0 ? '#e5e7eb' : (ticado < info.saldo ? '#fde68a' : '#bbf7d0');
                 let corTexto = ticado === 0 ? '#64748b' : (ticado < info.saldo ? '#d97706' : '#15803d');
                 let statusBtnBg = ticado > 0 ? '#10b981' : '#f97316';
-                let statusBtnIcon = ticado > 0 ? '✓' : '📦';
+                let statusBtnIcon = ticado > 0 ? '✓' : '✓';
 
                 gradeHtml += `
                     <div id="linha-reman-lista-${sku13}" style="background:${bgCor}; border:1px solid ${bordaCor}; padding:12px; margin-bottom:8px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; transition: 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
@@ -349,7 +349,7 @@ export function ticarContadorReman(sku13, saldoTotal) {
     }
     if (btnStatus) {
         btnStatus.style.background = atual > 0 ? '#10b981' : '#f97316';
-        btnStatus.innerHTML = atual > 0 ? '✓' : '📦';
+        btnStatus.innerHTML = atual > 0 ? '✓' : '✓';
     }
 }
 
