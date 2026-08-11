@@ -14,7 +14,7 @@ function extrairInfoSAP(item) {
 
 export async function biparReman(bip) {
     
-window.app.salvarColetaParcial = function(base8) {
+    window.app.salvarColetaParcial = function(base8) {
         const pertence = state.dadosReman.filter(i => normalizarCodigo(i.SKU || i.Material).startsWith(base8));
         
         let pacotaoDeAtualizacoes = {};
@@ -34,31 +34,11 @@ window.app.salvarColetaParcial = function(base8) {
             }
         });
 
-        // 🔄 INÍCIO DO EFEITO DE CARREGAMENTO
-        const btnSalvar = document.getElementById(`btn-salvar-top-${base8}`);
-        if(btnSalvar) {
-            btnSalvar.innerHTML = "⏳ SALVANDO...";
-            btnSalvar.style.opacity = "0.7";
-            btnSalvar.disabled = true; // Bloqueia duplo clique
-        }
-
         database.ref().update(pacotaoDeAtualizacoes).then(() => {
             document.getElementById('cardBipResultadoTop').style.display = "none";
             window.mostrarAviso("✅ Salvo! Quantidades atualizadas com sucesso.", "sucesso");
-            
-            // Restaura o botão caso ele seja aberto de novo
-            if(btnSalvar) {
-                btnSalvar.innerHTML = "✅ SALVAR O QUE ENCONTREI";
-                btnSalvar.style.opacity = "1";
-                btnSalvar.disabled = false;
-            }
         }).catch(erro => {
             window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
-            if(btnSalvar) {
-                btnSalvar.innerHTML = "✅ SALVAR O QUE ENCONTREI";
-                btnSalvar.style.opacity = "1";
-                btnSalvar.disabled = false;
-            }
         });
     };
 
@@ -80,25 +60,6 @@ window.app.salvarColetaParcial = function(base8) {
     cardTop.style.boxShadow = "0 15px 35px rgba(0,0,0,0.4)";
     cardTop.style.backgroundColor = "#ffffff";
     cardTop.style.display = "block";
-    corpoTop.innerHTML = `
-            <div style="display:flex;align-items:center;gap:12px;">
-                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" class="thumb" style="width:55px;height:55px;cursor:pointer;" onclick="app.zoomFoto(this.src)">
-                <div style="flex:1;">
-                    <b>${descricaoItem}</b><br>
-                    REF: ${base8}
-                </div>
-            </div>
-            ${linesTopHtml}
-            
-            <!-- AQUI FOI ADICIONADA A ID 'btn-salvar-top-${base8}' NO BOTÃO -->
-            <button id="btn-salvar-top-${base8}" class="btn-main" style="margin-top:15px;background:#22c55e; transition:0.2s;" onclick="app.salvarColetaParcial('${base8}')">
-                ✅ SALVAR O QUE ENCONTREI
-            </button>
-            
-            <button class="btn-main" style="margin-top:8px;background:#ef4444;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'">
-                FECHAR
-            </button>
-        `;
 
     const itemNoSap = state.sapCompleto.find(i => normalizarCodigo(i.EAN) === bipLimpo || normalizarCodigo(i.Material || i.SKU) === bipLimpo);
 
@@ -399,16 +360,6 @@ export function alternarStatusReman(base8, sku13) {
     const qtdLocal = Number(spanNumero.innerText) || 0;
     const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
 
-    // 🔄 INÍCIO DO EFEITO DE CARREGAMENTO
-    const btnStatus = document.getElementById(`btn-status-lista-${sku13}`);
-    let htmlOriginal = "";
-    if (btnStatus) {
-        htmlOriginal = btnStatus.innerHTML; // Salva se era ✓ ou ✓
-        btnStatus.innerHTML = "⏳";
-        btnStatus.style.opacity = "0.7";
-        btnStatus.disabled = true; // Bloqueia duplo clique
-    }
-
     ref.update({
         qtd: qtdLocal,
         quem: state.operador,
@@ -419,20 +370,8 @@ export function alternarStatusReman(base8, sku13) {
         } else {
             window.mostrarAviso("✅ Coleta salva para o tamanho selecionado!", "sucesso");
         }
-        
-        // A lista se atualiza sozinha por causa do Firebase, mas por garantia:
-        if (btnStatus) {
-            btnStatus.style.opacity = "1";
-            btnStatus.disabled = false;
-        }
     }).catch(erro => {
         window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
-        // Se der erro de internet, devolve o botão ao normal
-        if (btnStatus) {
-            btnStatus.innerHTML = htmlOriginal;
-            btnStatus.style.opacity = "1";
-            btnStatus.disabled = false;
-        }
     });
 }
 
