@@ -34,12 +34,23 @@ export async function biparReman(bip) {
             }
         });
 
-        database.ref().update(pacotaoDeAtualizacoes).then(() => {
-            document.getElementById('cardBipResultadoTop').style.display = "none";
-            window.mostrarAviso("✅ Salvo! Quantidades atualizadas com sucesso.", "sucesso");
-        }).catch(erro => {
-            window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
-        });
+        // 1. FECHA O POP-UP IMEDIATAMENTE (Libera a tela pro usuário na hora)
+        document.getElementById('cardBipResultadoTop').style.display = "none";
+        
+        const modalCamera = document.getElementById('modalScannerReman');
+        if (modalCamera) modalCamera.style.display = "none";
+        
+        window.mostrarAviso("🔄 Salvando em segundo plano...", "sucesso");
+
+        // 2. A MÁGICA: Joga o Firebase para o final da fila (100ms depois da tela fechar)
+        setTimeout(() => {
+            database.ref().update(pacotaoDeAtualizacoes).then(() => {
+                // Não precisa de aviso na tela aqui para não poluir, já salvou em background!
+                console.log("Coleta parcial salva no Firebase.");
+            }).catch(erro => {
+                window.mostrarAviso("❌ Erro ao salvar no banco: " + erro.message, "erro");
+            });
+        }, 100);
     };
 
     const bipLimpo = normalizarCodigo(bip);
@@ -52,10 +63,13 @@ export async function biparReman(bip) {
     const modalCamera = document.getElementById('modalScannerReman');
     if (modalCamera) modalCamera.style.display = "none";
 
+    // Card flutuante com barra de rolagem
     cardTop.style.position = "fixed";
-    cardTop.style.top = "20px";
+    cardTop.style.top = "5%";
     cardTop.style.left = "5%";
     cardTop.style.width = "90%";
+    cardTop.style.maxHeight = "85vh"; 
+    cardTop.style.overflowY = "auto"; 
     cardTop.style.zIndex = "9999";
     cardTop.style.boxShadow = "0 15px 35px rgba(0,0,0,0.4)";
     cardTop.style.backgroundColor = "#ffffff";
@@ -119,10 +133,10 @@ export async function biparReman(bip) {
             }
             
             return `
-            <div id="linha-reman-top-${skuReman13}" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:10px; border:1px solid ${bordaCor}; border-radius:12px; background:${bgCor}; transition: 0.3s ease;">
+            <div id="linha-reman-top-${skuReman13}" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:8px; border:1px solid ${bordaCor}; border-radius:12px; background:${bgCor}; transition: 0.3s ease;">
                 <div>
-                    <b style="font-size: 1.1em;">TAM ${info.tam}</b><br>
-                    <span style="font-size:12px; color:#64748b;">Estoque SAP: <b style="color:#0f172a;">${saldo}</b></span>
+                    <b style="font-size: 1.05em;">TAM ${info.tam}</b><br>
+                    <span style="font-size:11px; color:#64748b;">Estoque SAP: <b style="color:#0f172a;">${saldo}</b></span>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;">
                     <button style="padding:6px 12px; font-weight:bold; border:1px solid #ccc; border-radius:6px; background:#fff; cursor:pointer;" onclick="app.diminuirReman('${skuReman13}', ${saldo})">−</button>
@@ -148,7 +162,11 @@ export async function biparReman(bip) {
                     REF: ${base8}
                 </div>
             </div>
-            ${linesTopHtml}
+            
+            <div style="margin-top:10px;">
+                ${linesTopHtml}
+            </div>
+            
             <button class="btn-main" style="margin-top:15px;background:#22c55e;" onclick="app.salvarColetaParcial('${base8}')">
                 ✅ SALVAR O QUE ENCONTREI
             </button>
@@ -274,7 +292,7 @@ export function renderizarListaCompletaReman() {
                 let bordaCor = ticado === 0 ? '#e5e7eb' : (ticado < info.saldo ? '#fde68a' : '#bbf7d0');
                 let corTexto = ticado === 0 ? '#64748b' : (ticado < info.saldo ? '#d97706' : '#15803d');
                 let statusBtnBg = ticado > 0 ? '#10b981' : '#f97316';
-                let statusBtnIcon = ticado > 0 ? '✓' : '✓';
+                let statusBtnIcon = ticado > 0 ? '✓' : '📦';
 
                 gradeHtml += `
                     <div id="linha-reman-lista-${sku13}" style="background:${bgCor}; border:1px solid ${bordaCor}; padding:12px; margin-bottom:8px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; transition: 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
@@ -349,7 +367,7 @@ export function ticarContadorReman(sku13, saldoTotal) {
     }
     if (btnStatus) {
         btnStatus.style.background = atual > 0 ? '#10b981' : '#f97316';
-        btnStatus.innerHTML = atual > 0 ? '✓' : '✓';
+        btnStatus.innerHTML = atual > 0 ? '✓' : '📦';
     }
 }
 
@@ -360,19 +378,20 @@ export function alternarStatusReman(base8, sku13) {
     const qtdLocal = Number(spanNumero.innerText) || 0;
     const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
 
-    ref.update({
-        qtd: qtdLocal,
-        quem: state.operador,
-        hora: getHoraCerta()
-    }).then(() => {
-        if (qtdLocal === 0) {
-            window.mostrarAviso("🗑️ Coleta zerada com sucesso!", "sucesso");
-        } else {
-            window.mostrarAviso("✅ Coleta salva para o tamanho selecionado!", "sucesso");
-        }
-    }).catch(erro => {
-        window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
-    });
+    window.mostrarAviso("🔄 Salvando em segundo plano...", "sucesso");
+
+    // Usa o setTimeout na lista de baixo também para evitar engasgos da rede!
+    setTimeout(() => {
+        ref.update({
+            qtd: qtdLocal,
+            quem: state.operador,
+            hora: getHoraCerta()
+        }).then(() => {
+            console.log("Coleta individual salva no Firebase.");
+        }).catch(erro => {
+            window.mostrarAviso("❌ Erro ao salvar: " + erro.message, "erro");
+        });
+    }, 100);
 }
 
 export function exportarRemanExcel() {
