@@ -34,18 +34,18 @@ export async function biparReman(bip) {
             }
         });
 
-        // 1. FECHA O POP-UP IMEDIATAMENTE (Libera a tela pro usuário na hora)
+        // FECHA POP-UP E LIBERA A ROLAGEM DA TELA DE FUNDO
         document.getElementById('cardBipResultadoTop').style.display = "none";
+        document.body.style.overflow = ""; 
         
         const modalCamera = document.getElementById('modalScannerReman');
         if (modalCamera) modalCamera.style.display = "none";
         
         window.mostrarAviso("🔄 Salvando em segundo plano...", "sucesso");
 
-        // 2. A MÁGICA: Joga o Firebase para o final da fila (100ms depois da tela fechar)
+        // MÁGICA DO SEGUNDO PLANO
         setTimeout(() => {
             database.ref().update(pacotaoDeAtualizacoes).then(() => {
-                // Não precisa de aviso na tela aqui para não poluir, já salvou em background!
                 console.log("Coleta parcial salva no Firebase.");
             }).catch(erro => {
                 window.mostrarAviso("❌ Erro ao salvar no banco: " + erro.message, "erro");
@@ -63,17 +63,30 @@ export async function biparReman(bip) {
     const modalCamera = document.getElementById('modalScannerReman');
     if (modalCamera) modalCamera.style.display = "none";
 
-    // Card flutuante com barra de rolagem
+    // TRAVA A ROLAGEM DA TELA DE FUNDO
+    document.body.style.overflow = "hidden";
+
+    // CSS ATUALIZADO: Card no centro exato da tela com layout Flexbox
     cardTop.style.position = "fixed";
-    cardTop.style.top = "5%";
-    cardTop.style.left = "5%";
-    cardTop.style.width = "90%";
-    cardTop.style.maxHeight = "85vh"; 
-    cardTop.style.overflowY = "auto"; 
+    cardTop.style.top = "50%";
+    cardTop.style.left = "50%";
+    cardTop.style.transform = "translate(-50%, -50%)"; // Centraliza
+    cardTop.style.width = "92%";
+    cardTop.style.maxWidth = "420px";
+    cardTop.style.maxHeight = "92vh"; // Nunca vaza da tela
     cardTop.style.zIndex = "9999";
-    cardTop.style.boxShadow = "0 15px 35px rgba(0,0,0,0.4)";
+    cardTop.style.boxShadow = "0 20px 50px rgba(0,0,0,0.6)";
     cardTop.style.backgroundColor = "#ffffff";
-    cardTop.style.display = "block";
+    cardTop.style.display = "flex"; // Transforma em Flex container
+    cardTop.style.flexDirection = "column"; // Empilha os itens
+    cardTop.style.borderRadius = "16px";
+    cardTop.style.overflow = "hidden"; // Corta qualquer vazamento externo
+
+    // Prepara o corpo para segurar o cabeçalho, a lista rolável e o rodapé
+    corpoTop.style.display = "flex";
+    corpoTop.style.flexDirection = "column";
+    corpoTop.style.flexGrow = "1";
+    corpoTop.style.overflow = "hidden";
 
     const itemNoSap = state.sapCompleto.find(i => normalizarCodigo(i.EAN) === bipLimpo || normalizarCodigo(i.Material || i.SKU) === bipLimpo);
 
@@ -82,10 +95,12 @@ export async function biparReman(bip) {
         cardTop.style.borderLeftColor = "var(--danger)";
         tagTop.style.background = "var(--danger)";
         tagTop.classList.remove("reman-laranja");
-        tagTop.innerText = "❌ PRODUTO DESCONHECIDO NO SAP!";
+        tagTop.innerText = "❌ PRODUTO DESCONHECIDO!";
         corpoTop.innerHTML = `
-            <div style="font-size:0.85em; font-weight:700; color:var(--dark-blue);">O código ${bip} não foi localizado na última extração do SAP.</div>
-            <button class="btn-main" style="margin-top:15px;background:#64748b;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'">FECHAR</button>
+            <div style="font-size:0.9em; font-weight:700; color:#0f172a; margin-bottom:15px; padding:10px 0;">O código ${bip} não foi localizado na última extração do SAP.</div>
+            <div style="margin-top:auto;">
+                <button class="btn-main" style="width:100%; background:#ef4444; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">FECHAR</button>
+            </div>
         `;
         return;
     }
@@ -133,19 +148,19 @@ export async function biparReman(bip) {
             }
             
             return `
-            <div id="linha-reman-top-${skuReman13}" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:8px; border:1px solid ${bordaCor}; border-radius:12px; background:${bgCor}; transition: 0.3s ease;">
+            <div id="linha-reman-top-${skuReman13}" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:10px; border:1px solid ${bordaCor}; border-radius:12px; background:${bgCor}; transition: 0.3s ease;">
                 <div>
-                    <b style="font-size: 1.05em;">TAM ${info.tam}</b><br>
+                    <b style="font-size: 1.05em; color:#0f172a;">TAM ${info.tam}</b><br>
                     <span style="font-size:11px; color:#64748b;">Estoque SAP: <b style="color:#0f172a;">${saldo}</b></span>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;">
-                    <button style="padding:6px 12px; font-weight:bold; border:1px solid #ccc; border-radius:6px; background:#fff; cursor:pointer;" onclick="app.diminuirReman('${skuReman13}', ${saldo})">−</button>
+                    <button style="padding:6px 12px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px; background:#fff; color:#0f172a; cursor:pointer;" onclick="app.diminuirReman('${skuReman13}', ${saldo})">−</button>
                     
                     <span id="qtd-reman-${skuReman13}" style="font-size:18px; font-weight:bold; min-width:30px; text-align:center; color:#2563eb;">
                         ${qtd}
                     </span>
                     
-                    <button style="padding:6px 12px; font-weight:bold; border:1px solid #ccc; border-radius:6px; background:#fff; cursor:pointer;" onclick="app.aumentarReman('${skuReman13}',${saldo})">+</button>
+                    <button style="padding:6px 12px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px; background:#fff; color:#0f172a; cursor:pointer;" onclick="app.aumentarReman('${skuReman13}',${saldo})">+</button>
                 </div>
             </div>
             `;
@@ -154,41 +169,52 @@ export async function biparReman(bip) {
         const linhasResolvidas = await Promise.all(promessas);
         const linesTopHtml = linhasResolvidas.join('');
 
+        // ESTRUTURA DO POP-UP DIVIDIDA EM 3 PARTES (Header, Scroll e Footer)
         corpoTop.innerHTML = `
-            <div style="display:flex;align-items:center;gap:12px;">
-                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" class="thumb" style="width:55px;height:55px;cursor:pointer;" onclick="app.zoomFoto(this.src)">
+            <!-- CABEÇALHO CONGELADO -->
+            <div style="display:flex;align-items:center;gap:12px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; flex-shrink: 0;">
+                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:60px;height:60px;cursor:pointer; border-radius:8px; object-fit:contain;" onclick="app.zoomFoto(this.src)">
                 <div style="flex:1;">
-                    <b>${descricaoItem}</b><br>
-                    REF: ${base8}
+                    <b style="color:#0f172a; font-size:13px; line-height:1.2; display:block;">${descricaoItem}</b>
+                    <span style="color:#64748b; font-size:12px;">REF: ${base8}</span>
                 </div>
             </div>
             
-            <div style="margin-top:10px;">
+            <!-- LISTA ROLÁVEL BLINDADA -->
+            <div style="overflow-y: auto; overscroll-behavior: contain; max-height: 48vh; padding-right: 5px; margin-top: 12px; margin-bottom: 12px; flex-grow: 1;">
                 ${linesTopHtml}
             </div>
             
-            <button class="btn-main" style="margin-top:15px;background:#22c55e;" onclick="app.salvarColetaParcial('${base8}')">
-                ✅ SALVAR O QUE ENCONTREI
-            </button>
-            <button class="btn-main" style="margin-top:8px;background:#ef4444;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'">
-                FECHAR
-            </button>
+            <!-- RODAPÉ CONGELADO COM BOTÕES -->
+            <div style="flex-shrink: 0; display:flex; flex-direction:column; gap:8px;">
+                <button class="btn-main" style="width:100%; background:#22c55e; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="app.salvarColetaParcial('${base8}')">
+                    ✅ SALVAR QUANTIDADES
+                </button>
+                <button class="btn-main" style="width:100%; background:#ef4444; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">
+                    FECHAR SEM SALVAR
+                </button>
+            </div>
         `;
     } else {
         tocarSomScanner('erro');
         cardTop.style.borderLeftColor = "var(--success)";
         tagTop.style.background = "var(--success)";
         tagTop.classList.remove("reman-laranja");
-        tagTop.innerText = "✅ NÃO PERTENCE À LISTA DE REMANEJAMENTO";
+        tagTop.innerText = "✅ NÃO PERTENCE AO REMANEJAMENTO";
         corpoTop.innerHTML = `
-            <div style="display:flex; align-items:center; gap:12px;">
-                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" class="thumb" style="width:55px; height:55px; cursor:pointer;" onclick="app.zoomFoto(this.src)">
-                <div style="flex:1; font-size:0.75em; line-height:1.2;">
-                    <b>${descricaoItem}</b><br>
-                    <span style="color:var(--success); font-weight:800;">PERTENCE À LISTA DE PLANEJAMENTO</span>
+            <!-- CABEÇALHO CONGELADO -->
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9;">
+                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:60px; height:60px; cursor:pointer; border-radius:8px; object-fit:contain;" onclick="app.zoomFoto(this.src)">
+                <div style="flex:1; line-height:1.2;">
+                    <b style="color:#0f172a; font-size:13px;">${descricaoItem}</b><br>
+                    <span style="color:var(--success); font-weight:800; font-size:11px;">PERTENCE À LISTA DE PLANEJAMENTO</span>
                 </div>
             </div>
-            <button class="btn-main" style="margin-top:15px;background:#64748b;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'">FECHAR</button>
+            
+            <!-- RODAPÉ CONGELADO -->
+            <div style="margin-top:auto;">
+                <button class="btn-main" style="width:100%; background:#64748b; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">FECHAR</button>
+            </div>
         `;
     }
 }
@@ -380,7 +406,6 @@ export function alternarStatusReman(base8, sku13) {
 
     window.mostrarAviso("🔄 Salvando em segundo plano...", "sucesso");
 
-    // Usa o setTimeout na lista de baixo também para evitar engasgos da rede!
     setTimeout(() => {
         ref.update({
             qtd: qtdLocal,
