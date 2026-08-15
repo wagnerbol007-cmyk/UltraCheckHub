@@ -38,7 +38,6 @@ export async function biparReman(bip) {
             }
         });
 
-        // Libera a tela imediatamente para o usuário não travar a câmera
         document.getElementById('cardBipResultadoTop').style.display = "none";
         document.body.style.overflow = ""; 
         
@@ -48,12 +47,10 @@ export async function biparReman(bip) {
         const inputBip = document.getElementById('inputBipReman');
         if (inputBip) {
             inputBip.value = "";
-            inputBip.focus();
         }
         
         window.mostrarAviso("Salvando coleta...", "sucesso");
 
-        // Grava no Firebase em segundo plano
         Promise.resolve().then(() => {
             database.ref().update(pacotaoDeAtualizacoes).then(() => {
                 console.log("Coleta salva.");
@@ -75,46 +72,72 @@ export async function biparReman(bip) {
 
     document.body.style.overflow = "hidden";
 
-    cardTop.style.position = "fixed";
-    cardTop.style.top = "50%";
-    cardTop.style.left = "50%";
-    cardTop.style.transform = "translate(-50%, -50%)"; 
-    cardTop.style.width = "92%";
-    cardTop.style.maxWidth = "420px";
-    cardTop.style.maxHeight = "92vh"; 
-    cardTop.style.zIndex = "9999";
-    cardTop.style.boxShadow = "0 20px 50px rgba(0,0,0,0.6)";
-    cardTop.style.backgroundColor = "#ffffff";
-    cardTop.style.display = "flex"; 
-    cardTop.style.flexDirection = "column"; 
-    cardTop.style.borderRadius = "16px";
-    cardTop.style.overflow = "hidden"; 
-
-    corpoTop.style.display = "flex";
-    corpoTop.style.flexDirection = "column";
-    corpoTop.style.flexGrow = "1";
-    corpoTop.style.overflow = "hidden";
-
-    const itemNoSap = state.sapCompleto.find(i => normalizarCodigo(i.EAN) === bipLimpo || normalizarCodigo(i.Material || i.SKU) === bipLimpo);
-
-    if (!itemNoSap) {
-        tocarSomScanner('erro');
-        cardTop.style.borderLeftColor = "var(--danger)";
-        tagTop.style.background = "var(--danger)";
-        tagTop.classList.remove("reman-laranja");
-        tagTop.innerText = "PRODUTO NÃO LOCALIZADO";
-        corpoTop.innerHTML = `
-            <div style="font-size:0.9em; font-weight:700; color:#0f172a; margin-bottom:15px; padding:10px 0;">O código ${bip} não foi localizado na base do SAP.</div>
-            <div style="margin-top:auto;">
-                <button class="btn-main" style="width:100%; background:#ef4444; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">FECHAR</button>
-            </div>
-        `;
-        return;
+    if (cardTop) {
+        cardTop.style.position = "fixed";
+        cardTop.style.top = "50%";
+        cardTop.style.left = "50%";
+        cardTop.style.transform = "translate(-50%, -50%)"; 
+        cardTop.style.width = "92%";
+        cardTop.style.maxWidth = "420px";
+        cardTop.style.maxHeight = "92vh"; 
+        cardTop.style.zIndex = "9999";
+        cardTop.style.boxShadow = "0 20px 50px rgba(0,0,0,0.6)";
+        cardTop.style.backgroundColor = "#ffffff";
+        cardTop.style.display = "flex"; 
+        cardTop.style.flexDirection = "column"; 
+        cardTop.style.borderRadius = "16px";
+        cardTop.style.overflow = "hidden"; 
     }
 
-    const sku13Sap = normalizarCodigo(itemNoSap.Material || itemNoSap.SKU);
-    const base8 = sku13Sap.substring(0, 8);
-    const descricaoItem = itemNoSap["Descrição material"] || itemNoSap["Texto breve material"];
+    if (corpoTop) {
+        corpoTop.style.display = "flex";
+        corpoTop.style.flexDirection = "column";
+        corpoTop.style.flexGrow = "1";
+        corpoTop.style.overflow = "hidden";
+    }
+
+    // ====================================================
+    // BUSCA DUPLA: SAP + PLANILHA DE REMAN
+    // ====================================================
+    const itemNoSap = state.sapCompleto.find(i => normalizarCodigo(i.EAN) === bipLimpo || normalizarCodigo(i.Material || i.SKU) === bipLimpo);
+    
+    let sku13Sap = bipLimpo;
+    let base8 = bipLimpo.substring(0, 8);
+    let descricaoItem = "Produto Desconhecido";
+
+    if (itemNoSap) {
+        sku13Sap = normalizarCodigo(itemNoSap.Material || itemNoSap.SKU);
+        base8 = sku13Sap.substring(0, 8);
+        descricaoItem = itemNoSap["Descrição material"] || itemNoSap["Texto breve material"] || "Produto Reman";
+    } else {
+        // Se não achou no SAP, procura na planilha de Reman para forçar o reconhecimento
+        const itemNoReman = state.dadosReman.find(i => normalizarCodigo(i.SKU || i.Material) === bipLimpo);
+        if (itemNoReman) {
+            sku13Sap = normalizarCodigo(itemNoReman.SKU || itemNoReman.Material);
+            base8 = sku13Sap.substring(0, 8);
+            descricaoItem = itemNoReman["Descrição material"] || itemNoReman["Texto breve material"] || "Produto Reman";
+        } else {
+            const temNoReman = state.dadosReman.some(i => normalizarCodigo(i.SKU || i.Material).startsWith(base8));
+            if (!temNoReman) {
+                tocarSomScanner('erro');
+                if (cardTop) cardTop.style.borderLeftColor = "var(--danger)";
+                if (tagTop) {
+                    tagTop.style.background = "var(--danger)";
+                    tagTop.classList.remove("reman-laranja");
+                    tagTop.innerText = "PRODUTO NÃO LOCALIZADO";
+                }
+                if (corpoTop) {
+                    corpoTop.innerHTML = `
+                        <div style="font-size:0.9em; font-weight:700; color:#0f172a; margin-bottom:15px; padding:10px 0;">O código ${bip} não foi localizado na base do SAP e nem na lista de Remanejamento.</div>
+                        <div style="margin-top:auto;">
+                            <button class="btn-main" style="width:100%; background:#ef4444; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">FECHAR</button>
+                        </div>
+                    `;
+                }
+                return;
+            }
+        }
+    }
 
     const pertenceAoReman = state.dadosReman.filter(i => {
         let skuPlanilha = normalizarCodigo(i.SKU || i.Material);
@@ -123,18 +146,20 @@ export async function biparReman(bip) {
 
     if (pertenceAoReman.length > 0) {
         tocarSomScanner('reman');
-        cardTop.style.borderLeftColor = "#f97316";
-        tagTop.style.background = "linear-gradient(135deg, #f97316, #c2410c)";
-        tagTop.style.color = "#ffffff";
-        tagTop.style.boxShadow = "0 10px 24px rgba(249,115,22,0.35)";
-        tagTop.style.border = "none";
-        tagTop.classList.add("reman-laranja");
-        tagTop.innerText = "SEPARAR PARA REMANEJAMENTO";
+        if (cardTop) cardTop.style.borderLeftColor = "#f97316";
+        if (tagTop) {
+            tagTop.style.background = "linear-gradient(135deg, #f97316, #c2410c)";
+            tagTop.style.color = "#ffffff";
+            tagTop.style.boxShadow = "0 10px 24px rgba(249,115,22,0.35)";
+            tagTop.style.border = "none";
+            tagTop.classList.add("reman-laranja");
+            tagTop.innerText = "SEPARAR PARA REMANEJAMENTO";
+        }
 
         const promessas = pertenceAoReman.map(async (itemPlan) => {
             const skuReman13 = normalizarCodigo(itemPlan.SKU || itemPlan.Material);
             const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === skuReman13);
-            const info = itemSap ? extrairInfoSAP(itemSap) : { saldo: 0, tam: "UN" };
+            const info = itemSap ? extrairInfoSAP(itemSap) : { saldo: 0, tam: itemPlan.Tamanho || itemPlan.Tam || "UN" };
 
             const snap = await database.ref(`status_reman_loja/${state.lojaAtual}/${skuReman13}`).once("value");
             
@@ -145,7 +170,8 @@ export async function biparReman(bip) {
             let bordaCor = '#e2e8f0'; 
 
             if (qtd > 0) {
-                if (qtd >= saldo) {
+                // Se não tem saldo mas tem quantidade, também fica verde indicando separação feita
+                if (saldo === 0 || qtd >= saldo) {
                     bgCor = '#dcfce7'; 
                     bordaCor = '#22c55e';
                 } else {
@@ -176,47 +202,53 @@ export async function biparReman(bip) {
         const linhasResolvidas = await Promise.all(promessas);
         const linesTopHtml = linhasResolvidas.join('');
 
-        corpoTop.innerHTML = `
-            <div style="display:flex;align-items:center;gap:12px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; flex-shrink: 0;">
-                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:60px;height:60px;cursor:pointer; border-radius:8px; object-fit:contain;" onclick="app.zoomFoto(this.src)">
-                <div style="flex:1;">
-                    <b style="color:#0f172a; font-size:13px; line-height:1.2; display:block;">${descricaoItem}</b>
-                    <span style="color:#64748b; font-size:12px;">REF: ${base8}</span>
+        if (corpoTop) {
+            corpoTop.innerHTML = `
+                <div style="display:flex;align-items:center;gap:12px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; flex-shrink: 0;">
+                    <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:60px;height:60px;cursor:pointer; border-radius:8px; object-fit:contain;" onclick="app.zoomFoto(this.src)">
+                    <div style="flex:1;">
+                        <b style="color:#0f172a; font-size:13px; line-height:1.2; display:block;">${descricaoItem}</b>
+                        <span style="color:#64748b; font-size:12px;">REF: ${base8}</span>
+                    </div>
                 </div>
-            </div>
-            
-            <div style="overflow-y: auto; overscroll-behavior: contain; max-height: 48vh; padding-right: 5px; margin-top: 12px; margin-bottom: 12px; flex-grow: 1;">
-                ${linesTopHtml}
-            </div>
-            
-            <div style="flex-shrink: 0; display:flex; flex-direction:column; gap:8px;">
-                <button class="btn-main" style="width:100%; background:#22c55e; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="app.salvarColetaParcial('${base8}')">
-                    SALVAR QUANTIDADES
-                </button>
-                <button class="btn-main" style="width:100%; background:#ef4444; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">
-                    FECHAR
-                </button>
-            </div>
-        `;
+                
+                <div style="overflow-y: auto; overscroll-behavior: contain; max-height: 48vh; padding-right: 5px; margin-top: 12px; margin-bottom: 12px; flex-grow: 1;">
+                    ${linesTopHtml}
+                </div>
+                
+                <div style="flex-shrink: 0; display:flex; flex-direction:column; gap:8px;">
+                    <button class="btn-main" style="width:100%; background:#22c55e; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="app.salvarColetaParcial('${base8}')">
+                        SALVAR QUANTIDADES
+                    </button>
+                    <button class="btn-main" style="width:100%; background:#ef4444; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">
+                        FECHAR
+                    </button>
+                </div>
+            `;
+        }
     } else {
         tocarSomScanner('erro');
-        cardTop.style.borderLeftColor = "var(--success)";
-        tagTop.style.background = "var(--success)";
-        tagTop.classList.remove("reman-laranja");
-        tagTop.innerText = "NÃO PERTENCE AO REMANEJAMENTO";
-        corpoTop.innerHTML = `
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9;">
-                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:60px; height:60px; cursor:pointer; border-radius:8px; object-fit:contain;" onclick="app.zoomFoto(this.src)">
-                <div style="flex:1; line-height:1.2;">
-                    <b style="color:#0f172a; font-size:13px;">${descricaoItem}</b><br>
-                    <span style="color:var(--success); font-weight:800; font-size:11px;">MANTENHA NO ESTOQUE NORMAL</span>
+        if (cardTop) cardTop.style.borderLeftColor = "var(--success)";
+        if (tagTop) {
+            tagTop.style.background = "var(--success)";
+            tagTop.classList.remove("reman-laranja");
+            tagTop.innerText = "NÃO PERTENCE AO REMANEJAMENTO";
+        }
+        if (corpoTop) {
+            corpoTop.innerHTML = `
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9;">
+                    <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:60px; height:60px; cursor:pointer; border-radius:8px; object-fit:contain;" onclick="app.zoomFoto(this.src)">
+                    <div style="flex:1; line-height:1.2;">
+                        <b style="color:#0f172a; font-size:13px;">${descricaoItem}</b><br>
+                        <span style="color:var(--success); font-weight:800; font-size:11px;">MANTENHA NO ESTOQUE NORMAL</span>
+                    </div>
                 </div>
-            </div>
-            
-            <div style="margin-top:auto;">
-                <button class="btn-main" style="width:100%; background:#64748b; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">FECHAR</button>
-            </div>
-        `;
+                
+                <div style="margin-top:auto;">
+                    <button class="btn-main" style="width:100%; background:#64748b; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">FECHAR</button>
+                </div>
+            `;
+        }
     }
 }
 
@@ -226,14 +258,19 @@ export function aumentarReman(sku13, saldoTotal) {
     
     if (spanNumero) {
         let qtdLocal = Number(spanNumero.innerText) || 0;
-        if (qtdLocal < saldo) {
+        
+        // ==========================================================
+        // TRAVA LIBERADA PARA ZERADOS
+        // Se o saldo for 0 (no SAP), permite somar livremente
+        // ==========================================================
+        if (saldo === 0 || qtdLocal < saldo) {
             qtdLocal++;
             spanNumero.innerText = qtdLocal; 
             
             const linha = document.getElementById(`linha-reman-top-${sku13}`);
             if (linha) {
-                linha.style.background = qtdLocal < saldo ? '#fff7ed' : '#dcfce7';
-                linha.style.borderColor = qtdLocal < saldo ? '#fb923c' : '#22c55e';
+                linha.style.background = (saldo > 0 && qtdLocal < saldo) ? '#fff7ed' : '#dcfce7';
+                linha.style.borderColor = (saldo > 0 && qtdLocal < saldo) ? '#fb923c' : '#22c55e';
             }
         }
     }
@@ -251,8 +288,8 @@ export function diminuirReman(sku13, saldoTotal) {
             
             const linha = document.getElementById(`linha-reman-top-${sku13}`);
             if (linha) {
-                linha.style.background = qtdLocal === 0 ? '#ffffff' : (qtdLocal < saldo ? '#fff7ed' : '#dcfce7');
-                linha.style.borderColor = qtdLocal === 0 ? '#e2e8f0' : (qtdLocal < saldo ? '#fb923c' : '#22c55e');
+                linha.style.background = qtdLocal === 0 ? '#ffffff' : ((saldo > 0 && qtdLocal < saldo) ? '#fff7ed' : '#dcfce7');
+                linha.style.borderColor = qtdLocal === 0 ? '#e2e8f0' : ((saldo > 0 && qtdLocal < saldo) ? '#fb923c' : '#22c55e');
             }
         }
     }
@@ -267,7 +304,6 @@ export function renderizarListaCompletaReman() {
     database.ref(`status_reman_loja/${state.lojaAtual}`).on('value', snapshot => {
         const statusDb = snapshot.val() || {};
 
-        // =========== ATUALIZAÇÃO RÁPIDA DA TELA ===========
         const listaJaRenderizada = document.getElementById('reman-cards-container');
 
         if (listaJaRenderizada) {
@@ -292,11 +328,11 @@ export function renderizarListaCompletaReman() {
                     const textQtd = document.getElementById(`texto-qtd-lista-${sku}`);
 
                     if (linha) {
-                        linha.style.background = ticado === 0 ? '#ffffff' : (ticado < info.saldo ? '#fffbeb' : '#f0fdf4');
-                        linha.style.borderColor = ticado === 0 ? '#e5e7eb' : (ticado < info.saldo ? '#fde68a' : '#bbf7d0');
+                        linha.style.background = ticado === 0 ? '#ffffff' : ((info.saldo > 0 && ticado < info.saldo) ? '#fffbeb' : '#f0fdf4');
+                        linha.style.borderColor = ticado === 0 ? '#e5e7eb' : ((info.saldo > 0 && ticado < info.saldo) ? '#fde68a' : '#bbf7d0');
                     }
                     if (textQtd) {
-                        textQtd.style.color = ticado === 0 ? '#64748b' : (ticado < info.saldo ? '#d97706' : '#15803d');
+                        textQtd.style.color = ticado === 0 ? '#64748b' : ((info.saldo > 0 && ticado < info.saldo) ? '#d97706' : '#15803d');
                     }
                     if (btnStatus) {
                         btnStatus.style.background = ticado > 0 ? '#10b981' : '#f97316';
@@ -322,7 +358,6 @@ export function renderizarListaCompletaReman() {
             return; 
         }
 
-        // PRIMEIRA CONSTRUÇÃO DA TELA (SEM FILTRO)
         container.innerHTML = "";
 
         let agrupado = {};
@@ -413,9 +448,9 @@ export function renderizarListaCompletaReman() {
                 const registro = statusDb[sku13] || { qtd: 0 };
                 const ticado = registro.qtd;
 
-                let bgCor = ticado === 0 ? '#ffffff' : (ticado < info.saldo ? '#fffbeb' : '#f0fdf4');
-                let bordaCor = ticado === 0 ? '#e5e7eb' : (ticado < info.saldo ? '#fde68a' : '#bbf7d0');
-                let corTexto = ticado === 0 ? '#64748b' : (ticado < info.saldo ? '#d97706' : '#15803d');
+                let bgCor = ticado === 0 ? '#ffffff' : ((info.saldo > 0 && ticado < info.saldo) ? '#fffbeb' : '#f0fdf4');
+                let bordaCor = ticado === 0 ? '#e5e7eb' : ((info.saldo > 0 && ticado < info.saldo) ? '#fde68a' : '#bbf7d0');
+                let corTexto = ticado === 0 ? '#64748b' : ((info.saldo > 0 && ticado < info.saldo) ? '#d97706' : '#15803d');
                 let statusBtnBg = ticado > 0 ? '#10b981' : '#f97316';
                 let statusBtnIcon = ticado > 0 ? SVG_CHECK : SVG_BOX;
 
@@ -479,7 +514,15 @@ export function ticarContadorReman(sku13, saldoTotal) {
     let atual = Number(spanNumero.innerText) || 0;
     const saldo = Number(saldoTotal);
 
-    atual = (atual < saldo) ? atual + 1 : 0;
+    // ==========================================================
+    // TRAVA LIBERADA PARA ZERADOS (Lista principal)
+    // ==========================================================
+    if (saldo === 0) {
+        atual++; 
+    } else {
+        atual = (atual < saldo) ? atual + 1 : 0;
+    }
+    
     spanNumero.innerText = atual;
 
     const linha = document.getElementById(`linha-reman-lista-${sku13}`);
@@ -487,11 +530,11 @@ export function ticarContadorReman(sku13, saldoTotal) {
     const textQtd = document.getElementById(`texto-qtd-lista-${sku13}`); 
 
     if (linha) {
-        linha.style.background = atual === 0 ? '#ffffff' : (atual < saldo ? '#fffbeb' : '#f0fdf4');
-        linha.style.borderColor = atual === 0 ? '#e5e7eb' : (atual < saldo ? '#fde68a' : '#bbf7d0');
+        linha.style.background = atual === 0 ? '#ffffff' : ((saldo > 0 && atual < saldo) ? '#fffbeb' : '#f0fdf4');
+        linha.style.borderColor = atual === 0 ? '#e5e7eb' : ((saldo > 0 && atual < saldo) ? '#fde68a' : '#bbf7d0');
     }
     if (textQtd) {
-        textQtd.style.color = atual === 0 ? '#64748b' : (atual < saldo ? '#d97706' : '#15803d');
+        textQtd.style.color = atual === 0 ? '#64748b' : ((saldo > 0 && atual < saldo) ? '#d97706' : '#15803d');
     }
     if (btnStatus) {
         btnStatus.style.background = atual > 0 ? '#10b981' : '#f97316';
