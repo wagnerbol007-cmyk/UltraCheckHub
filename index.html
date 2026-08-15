@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StockFlow v2.5.6</title>
+    <title>StockFlow v2.5.7</title>
 
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
@@ -55,7 +55,7 @@
         LOJA: <span id="displayLoja"></span>
     </div>
 
-    <div class="stockflow-title">StockFlow <span>v2.5.6</span></div>
+    <div class="stockflow-title">StockFlow <span>v2.5.7</span></div>
 </div>
 
 <div id="viewLogin" class="view-container active-view">
@@ -156,7 +156,7 @@
 </button>
 
 <div class="footer-copy">
-    © StockFlow v2.5.6 • Desenvolvido por Wagner Gomes dos Santos
+    © StockFlow v2.5.7 • Desenvolvido por Wagner Gomes dos Santos
 </div>
         </div>
     </div>
@@ -184,31 +184,31 @@
 
     <!-- TELA REMAN -->
     <div id="viewReman" class="view-container">
-        <!-- Card de Busca Profissional e Clean -->
-        <div style="background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; box-sizing: border-box;">
+        <!-- Card de Busca Profissional, Menor e Alinhado -->
+        <div style="background: white; padding: 12px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; box-sizing: border-box;">
 
-            <!-- CAMPO DE BUSCA E CÂMERA PERFEITAMENTE ALINHADOS -->
-            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
-                <div style="flex: 1; position: relative;">
-                    <input type="text" id="inputBipReman" placeholder="Bipar Ref ou EAN..." onchange="app.biparReman(this.value)" style="width: 100%; height: 52px; padding: 0 14px 0 42px; border-radius: 10px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: bold; color: #0f172a; box-sizing: border-box; outline: none; transition: 0.2s;">
-                    <svg style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8;" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 5v14M8 5v14M12 5v14M16 5v14M20 5v14"></path></svg>
+            <!-- CAMPO DE BUSCA, CÂMERA E EXPORTAR NA MESMA LINHA -->
+            <div style="display: flex; gap: 8px; align-items: center; height: 50px;">
+                
+                <!-- Campo de digitação com ícone discreto -->
+                <div style="flex: 1; position: relative; height: 100%;">
+                    <input type="text" id="inputBipReman" placeholder="Bipar Ref ou EAN..." onchange="app.biparReman(this.value)" style="width: 100%; height: 100%; margin: 0; padding: 0 14px 0 40px; border-radius: 10px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: bold; color: #0f172a; box-sizing: border-box; outline: none; transition: 0.2s;">
+                    <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 5v14M8 5v14M12 5v14M16 5v14M20 5v14"></path></svg>
                 </div>
                 
-                <button style="background: #2563eb; color: white; border: none; border-radius: 10px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); flex-shrink: 0; box-sizing: border-box;" onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'reman')">
+                <!-- Botão da Câmera (Tamanho exato do input) -->
+                <button style="background: #2563eb; color: white; border: none; border-radius: 10px; width: 50px; height: 100%; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); flex-shrink: 0; box-sizing: border-box;" onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'reman')">
                     <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                 </button>
-            </div>
 
-            <!-- BOTÃO EXPORTAR DISCRETO E ALINHADO À DIREITA -->
-            <div style="display: flex; justify-content: flex-end; align-items: center;">
-                <button style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;" onclick="app.exportarReman()">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    EXPORTAR EXCEL
+                <!-- Botão Exportar (Apenas ícone, super discreto) -->
+                <button style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; border-radius: 10px; width: 50px; height: 100%; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-sizing: border-box; transition: 0.2s;" onclick="app.exportarReman()" title="Exportar Excel">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                 </button>
             </div>
 
             <!-- Modal de Resposta no Topo -->
-            <div id="cardBipResultadoTop" style="display:none; margin-top:15px; padding:15px; border-radius:15px; border-left:6px solid #22c55e;">
+            <div id="cardBipResultadoTop" style="display:none; margin-top:12px; padding:15px; border-radius:12px; border-left:6px solid #22c55e;">
                 <div id="tagFeedbackTop" class="reman-tag"></div>
                 <div id="corpoFeedbackTop" style="display:flex; flex-direction:column; gap:8px;"></div>
             </div>

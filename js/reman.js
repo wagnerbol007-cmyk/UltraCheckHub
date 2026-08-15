@@ -38,21 +38,29 @@ export async function biparReman(bip) {
             }
         });
 
+        // Libera a tela imediatamente para o usuário não travar a câmera
         document.getElementById('cardBipResultadoTop').style.display = "none";
         document.body.style.overflow = ""; 
         
         const modalCamera = document.getElementById('modalScannerReman');
         if (modalCamera) modalCamera.style.display = "none";
         
+        const inputBip = document.getElementById('inputBipReman');
+        if (inputBip) {
+            inputBip.value = "";
+            inputBip.focus();
+        }
+        
         window.mostrarAviso("Salvando coleta...", "sucesso");
 
-        setTimeout(() => {
+        // Grava no Firebase em segundo plano
+        Promise.resolve().then(() => {
             database.ref().update(pacotaoDeAtualizacoes).then(() => {
                 console.log("Coleta salva.");
             }).catch(erro => {
                 window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
             });
-        }, 100);
+        });
     };
 
     const bipLimpo = normalizarCodigo(bip);
@@ -258,69 +266,79 @@ export function renderizarListaCompletaReman() {
 
     database.ref(`status_reman_loja/${state.lojaAtual}`).on('value', snapshot => {
         const statusDb = snapshot.val() || {};
+
+        // =========== ATUALIZAÇÃO RÁPIDA DA TELA ===========
+        const listaJaRenderizada = document.getElementById('reman-cards-container');
+
+        if (listaJaRenderizada) {
+            let totalColetado = 0;
+            const totalEsperado = Number(container.getAttribute('data-total-esperado') || 0);
+
+            state.dadosReman.forEach(item => {
+                let sku = normalizarCodigo(item.SKU || item.Material);
+                if(!sku) return;
+
+                const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === sku);
+                const info = extrairInfoSAP(itemSap || {});
+                const ticado = statusDb[sku]?.qtd || 0;
+                totalColetado += ticado;
+
+                const spanNumero = document.getElementById(`qtd-reman-lista-${sku}`);
+                if (spanNumero) {
+                    spanNumero.innerText = ticado;
+
+                    const linha = document.getElementById(`linha-reman-lista-${sku}`);
+                    const btnStatus = document.getElementById(`btn-status-lista-${sku}`);
+                    const textQtd = document.getElementById(`texto-qtd-lista-${sku}`);
+
+                    if (linha) {
+                        linha.style.background = ticado === 0 ? '#ffffff' : (ticado < info.saldo ? '#fffbeb' : '#f0fdf4');
+                        linha.style.borderColor = ticado === 0 ? '#e5e7eb' : (ticado < info.saldo ? '#fde68a' : '#bbf7d0');
+                    }
+                    if (textQtd) {
+                        textQtd.style.color = ticado === 0 ? '#64748b' : (ticado < info.saldo ? '#d97706' : '#15803d');
+                    }
+                    if (btnStatus) {
+                        btnStatus.style.background = ticado > 0 ? '#10b981' : '#f97316';
+                        btnStatus.innerHTML = ticado > 0 ? SVG_CHECK : SVG_BOX;
+                    }
+                }
+            });
+
+            let percent = totalEsperado > 0 ? Math.floor((totalColetado / totalEsperado) * 100) : 0;
+            if (percent > 100) percent = 100;
+            let corBarra = percent === 100 ? '#10b981' : '#3b82f6';
+
+            const barFill = document.getElementById('remanBarFill');
+            const barTxt = document.getElementById('remanBarTxt');
+            if (barFill) {
+                barFill.style.width = percent + '%';
+                barFill.style.background = corBarra;
+            }
+            if (barTxt) {
+                barTxt.innerText = `PROGRESSO DA LOJA: ${totalColetado} / ${totalEsperado} (${percent}%)`;
+            }
+
+            return; 
+        }
+
+        // PRIMEIRA CONSTRUÇÃO DA TELA (SEM FILTRO)
         container.innerHTML = "";
 
         let agrupado = {};
         let totalEsperado = 0;
         let totalColetado = 0;
 
-        const filtroSelect = document.getElementById('filtroMarcaReman');
-        const marcaSelecionada = filtroSelect ? filtroSelect.value : "TODAS";
-        let marcasUnicas = new Set();
-
         state.dadosReman.forEach(item => {
             let sku = normalizarCodigo(item.SKU || item.Material);
             if(!sku) return;
             let base8 = sku.substring(0, 8);
             
-            const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === sku);
-            
-            let marcaEncontrada = "DIVERSAS";
-            
-            // BUSCA CEGA DE MARCA: Ignora formatações do Excel e varre todas as propriedades
-            let alvoParaBusca = itemSap || item; 
-            if (alvoParaBusca) {
-                for (let key in alvoParaBusca) {
-                    let chaveLimpa = key.toLowerCase().trim();
-                    // Se o cabeçalho tiver as palavras abaixo, ele rouba o valor daquela célula
-                    if (chaveLimpa === "marca" || chaveLimpa === "fabricante" || chaveLimpa === "fornecedor") {
-                        if (alvoParaBusca[key]) {
-                            marcaEncontrada = String(alvoParaBusca[key]).toUpperCase().trim();
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if(!marcaEncontrada || marcaEncontrada === "UNDEFINED" || marcaEncontrada === "NULL" || marcaEncontrada === "") {
-                marcaEncontrada = "DIVERSAS";
-            }
-
-            marcasUnicas.add(marcaEncontrada);
-
-            // Regra do Filtro: ignora o item se não for da marca selecionada
-            if (marcaSelecionada !== "TODAS" && marcaEncontrada !== marcaSelecionada) return;
-
             if (!agrupado[base8]) agrupado[base8] = [];
             if(!agrupado[base8].includes(sku)) {
                 agrupado[base8].push(sku);
             }
         });
-
-        // Constrói o menu de filtro e o auto-atualiza se tiver marcas novas
-        if (filtroSelect) {
-            let opcoesAtuais = Array.from(filtroSelect.options).map(o => o.value).filter(v => v !== "TODAS");
-            let opcoesNovas = Array.from(marcasUnicas).sort();
-            
-            // Checa se o menu precisa ser desenhado ou atualizado
-            if (JSON.stringify(opcoesAtuais) !== JSON.stringify(opcoesNovas) || filtroSelect.options.length <= 1) {
-                let optionsHtml = '<option value="TODAS">Todas as Marcas</option>';
-                opcoesNovas.forEach(m => {
-                    optionsHtml += `<option value="${m}" ${m === marcaSelecionada ? 'selected' : ''}>${m}</option>`;
-                });
-                filtroSelect.innerHTML = optionsHtml;
-            }
-        }
 
         let gruposComEstoque = [];
         let gruposSemEstoque = [];
@@ -344,6 +362,8 @@ export function renderizarListaCompletaReman() {
             }
         });
 
+        container.setAttribute('data-total-esperado', totalEsperado);
+
         let percent = totalEsperado > 0 ? Math.floor((totalColetado / totalEsperado) * 100) : 0;
         if (percent > 100) percent = 100;
         let corBarra = percent === 100 ? '#10b981' : '#3b82f6';
@@ -360,8 +380,8 @@ export function renderizarListaCompletaReman() {
         divProgresso.style.boxSizing = 'border-box';
         divProgresso.innerHTML = `
             <div style="background:#f1f5f9; border-radius:12px; height:22px; width:100%; position:relative; overflow:hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="height:100%; background:${corBarra}; width:${percent}%; transition: width 0.4s ease;"></div>
-                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.75em; font-weight:800; color:#0f172a; text-shadow: 0px 0px 2px rgba(255,255,255,0.9);">
+                <div id="remanBarFill" style="height:100%; background:${corBarra}; width:${percent}%; transition: width 0.4s ease;"></div>
+                <div id="remanBarTxt" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.75em; font-weight:800; color:#0f172a; text-shadow: 0px 0px 2px rgba(255,255,255,0.9);">
                     PROGRESSO DA LOJA: ${totalColetado} / ${totalEsperado} (${percent}%)
                 </div>
             </div>
@@ -369,6 +389,7 @@ export function renderizarListaCompletaReman() {
         container.appendChild(divProgresso);
 
         const containerCards = document.createElement('div');
+        containerCards.id = 'reman-cards-container'; 
         const spacer = document.createElement('div');
         spacer.style.paddingBottom = '70px'; 
 
@@ -500,7 +521,6 @@ export function alternarStatusReman(base8, sku13) {
     }, 100);
 }
 
-// CORRIGIDO: Nome exato que o seu main.js procura
 export function exportarRemanExcel() {
     database.ref(`status_reman_loja/${state.lojaAtual}`).once('value', snapshot => {
         const status = snapshot.val() || {};
@@ -521,10 +541,10 @@ export function exportarRemanExcel() {
             let tam = "UN";
             let saldoEstoque = 0;
             
-            if(itemSap) {
-                for(let key in itemSap) {
-                    if(key.toLowerCase().includes("tamanho") || key.toLowerCase().includes("tam")) tam = String(itemSap[key]);
-                    if(key.toLowerCase().includes("utiliza") || key.toLowerCase().includes("estoque")) saldoEstoque = parseInt(itemSap[key] || 0);
+            if (itemSap) {
+                for (let key in itemSap) {
+                    if (key.toLowerCase().includes("tamanho") || key.toLowerCase().includes("tam")) tam = String(itemSap[key]);
+                    if (key.toLowerCase().includes("utiliza") || key.toLowerCase().includes("estoque")) saldoEstoque = parseInt(itemSap[key] || 0);
                 }
             }
 
@@ -548,12 +568,8 @@ export function exportarRemanExcel() {
     });
 }
 
-// REDUNDÂNCIA PARA NÃO QUEBRAR O MAIN.JS
 export const exportarReman = exportarRemanExcel;
 
-// ==========================================
-// MÓDULO DE ÁUDIO BLINDADO (Sem Auto-Play)
-// ==========================================
 let audioCtx = null;
 
 function initAudio() {
