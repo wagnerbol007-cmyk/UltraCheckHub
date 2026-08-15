@@ -2,6 +2,10 @@
 import { state, normalizarCodigo, getHoraCerta } from './state.js';
 import { database } from './firebase.js';
 
+const SVG_BOX = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`;
+const SVG_CHECK = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+const SVG_SEARCH = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>`;
+
 function extrairInfoSAP(item) {
     let saldo = 0, tam = "---";
     for(let key in item) {
@@ -34,21 +38,19 @@ export async function biparReman(bip) {
             }
         });
 
-        // FECHA POP-UP E LIBERA A ROLAGEM DA TELA DE FUNDO
         document.getElementById('cardBipResultadoTop').style.display = "none";
         document.body.style.overflow = ""; 
         
         const modalCamera = document.getElementById('modalScannerReman');
         if (modalCamera) modalCamera.style.display = "none";
         
-        window.mostrarAviso("🔄 Salvando em segundo plano...", "sucesso");
+        window.mostrarAviso("Salvando coleta...", "sucesso");
 
-        // MÁGICA DO SEGUNDO PLANO
         setTimeout(() => {
             database.ref().update(pacotaoDeAtualizacoes).then(() => {
-                console.log("Coleta parcial salva no Firebase.");
+                console.log("Coleta salva.");
             }).catch(erro => {
-                window.mostrarAviso("❌ Erro ao salvar no banco: " + erro.message, "erro");
+                window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
             });
         }, 100);
     };
@@ -63,26 +65,23 @@ export async function biparReman(bip) {
     const modalCamera = document.getElementById('modalScannerReman');
     if (modalCamera) modalCamera.style.display = "none";
 
-    // TRAVA A ROLAGEM DA TELA DE FUNDO
     document.body.style.overflow = "hidden";
 
-    // CSS ATUALIZADO: Card no centro exato da tela com layout Flexbox
     cardTop.style.position = "fixed";
     cardTop.style.top = "50%";
     cardTop.style.left = "50%";
-    cardTop.style.transform = "translate(-50%, -50%)"; // Centraliza
+    cardTop.style.transform = "translate(-50%, -50%)"; 
     cardTop.style.width = "92%";
     cardTop.style.maxWidth = "420px";
-    cardTop.style.maxHeight = "92vh"; // Nunca vaza da tela
+    cardTop.style.maxHeight = "92vh"; 
     cardTop.style.zIndex = "9999";
     cardTop.style.boxShadow = "0 20px 50px rgba(0,0,0,0.6)";
     cardTop.style.backgroundColor = "#ffffff";
-    cardTop.style.display = "flex"; // Transforma em Flex container
-    cardTop.style.flexDirection = "column"; // Empilha os itens
+    cardTop.style.display = "flex"; 
+    cardTop.style.flexDirection = "column"; 
     cardTop.style.borderRadius = "16px";
-    cardTop.style.overflow = "hidden"; // Corta qualquer vazamento externo
+    cardTop.style.overflow = "hidden"; 
 
-    // Prepara o corpo para segurar o cabeçalho, a lista rolável e o rodapé
     corpoTop.style.display = "flex";
     corpoTop.style.flexDirection = "column";
     corpoTop.style.flexGrow = "1";
@@ -95,9 +94,9 @@ export async function biparReman(bip) {
         cardTop.style.borderLeftColor = "var(--danger)";
         tagTop.style.background = "var(--danger)";
         tagTop.classList.remove("reman-laranja");
-        tagTop.innerText = "❌ PRODUTO DESCONHECIDO!";
+        tagTop.innerText = "PRODUTO NÃO LOCALIZADO";
         corpoTop.innerHTML = `
-            <div style="font-size:0.9em; font-weight:700; color:#0f172a; margin-bottom:15px; padding:10px 0;">O código ${bip} não foi localizado na última extração do SAP.</div>
+            <div style="font-size:0.9em; font-weight:700; color:#0f172a; margin-bottom:15px; padding:10px 0;">O código ${bip} não foi localizado na base do SAP.</div>
             <div style="margin-top:auto;">
                 <button class="btn-main" style="width:100%; background:#ef4444; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">FECHAR</button>
             </div>
@@ -122,7 +121,7 @@ export async function biparReman(bip) {
         tagTop.style.boxShadow = "0 10px 24px rgba(249,115,22,0.35)";
         tagTop.style.border = "none";
         tagTop.classList.add("reman-laranja");
-        tagTop.innerText = "🚨 ITEM DE REMAN! SEPARAR";
+        tagTop.innerText = "SEPARAR PARA REMANEJAMENTO";
 
         const promessas = pertenceAoReman.map(async (itemPlan) => {
             const skuReman13 = normalizarCodigo(itemPlan.SKU || itemPlan.Material);
@@ -169,9 +168,7 @@ export async function biparReman(bip) {
         const linhasResolvidas = await Promise.all(promessas);
         const linesTopHtml = linhasResolvidas.join('');
 
-        // ESTRUTURA DO POP-UP DIVIDIDA EM 3 PARTES (Header, Scroll e Footer)
         corpoTop.innerHTML = `
-            <!-- CABEÇALHO CONGELADO -->
             <div style="display:flex;align-items:center;gap:12px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; flex-shrink: 0;">
                 <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:60px;height:60px;cursor:pointer; border-radius:8px; object-fit:contain;" onclick="app.zoomFoto(this.src)">
                 <div style="flex:1;">
@@ -180,18 +177,16 @@ export async function biparReman(bip) {
                 </div>
             </div>
             
-            <!-- LISTA ROLÁVEL BLINDADA -->
             <div style="overflow-y: auto; overscroll-behavior: contain; max-height: 48vh; padding-right: 5px; margin-top: 12px; margin-bottom: 12px; flex-grow: 1;">
                 ${linesTopHtml}
             </div>
             
-            <!-- RODAPÉ CONGELADO COM BOTÕES -->
             <div style="flex-shrink: 0; display:flex; flex-direction:column; gap:8px;">
                 <button class="btn-main" style="width:100%; background:#22c55e; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="app.salvarColetaParcial('${base8}')">
-                    ✅ SALVAR QUANTIDADES
+                    SALVAR QUANTIDADES
                 </button>
                 <button class="btn-main" style="width:100%; background:#ef4444; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">
-                    FECHAR SEM SALVAR
+                    FECHAR
                 </button>
             </div>
         `;
@@ -200,18 +195,16 @@ export async function biparReman(bip) {
         cardTop.style.borderLeftColor = "var(--success)";
         tagTop.style.background = "var(--success)";
         tagTop.classList.remove("reman-laranja");
-        tagTop.innerText = "✅ NÃO PERTENCE AO REMANEJAMENTO";
+        tagTop.innerText = "NÃO PERTENCE AO REMANEJAMENTO";
         corpoTop.innerHTML = `
-            <!-- CABEÇALHO CONGELADO -->
             <div style="display:flex; align-items:center; gap:12px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9;">
                 <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:60px; height:60px; cursor:pointer; border-radius:8px; object-fit:contain;" onclick="app.zoomFoto(this.src)">
                 <div style="flex:1; line-height:1.2;">
                     <b style="color:#0f172a; font-size:13px;">${descricaoItem}</b><br>
-                    <span style="color:var(--success); font-weight:800; font-size:11px;">PERTENCE À LISTA DE PLANEJAMENTO</span>
+                    <span style="color:var(--success); font-weight:800; font-size:11px;">MANTENHA NO ESTOQUE NORMAL</span>
                 </div>
             </div>
             
-            <!-- RODAPÉ CONGELADO -->
             <div style="margin-top:auto;">
                 <button class="btn-main" style="width:100%; background:#64748b; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">FECHAR</button>
             </div>
@@ -261,6 +254,8 @@ export function renderizarListaCompletaReman() {
     const container = document.getElementById('remanListaSincronizada');
     if (!container) return;
 
+    database.ref(`status_reman_loja/${state.lojaAtual}`).off('value');
+
     database.ref(`status_reman_loja/${state.lojaAtual}`).on('value', snapshot => {
         const statusDb = snapshot.val() || {};
         container.innerHTML = "";
@@ -269,44 +264,127 @@ export function renderizarListaCompletaReman() {
         let totalEsperado = 0;
         let totalColetado = 0;
 
+        const filtroSelect = document.getElementById('filtroMarcaReman');
+        const marcaSelecionada = filtroSelect ? filtroSelect.value : "TODAS";
+        let marcasUnicas = new Set();
+
         state.dadosReman.forEach(item => {
             let sku = normalizarCodigo(item.SKU || item.Material);
             if(!sku) return;
             let base8 = sku.substring(0, 8);
-            if (!agrupado[base8]) agrupado[base8] = [];
             
+            const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === sku);
+            
+            let marcaEncontrada = "DIVERSAS";
+            
+            // BUSCA CEGA DE MARCA: Ignora formatações do Excel e varre todas as propriedades
+            let alvoParaBusca = itemSap || item; 
+            if (alvoParaBusca) {
+                for (let key in alvoParaBusca) {
+                    let chaveLimpa = key.toLowerCase().trim();
+                    // Se o cabeçalho tiver as palavras abaixo, ele rouba o valor daquela célula
+                    if (chaveLimpa === "marca" || chaveLimpa === "fabricante" || chaveLimpa === "fornecedor") {
+                        if (alvoParaBusca[key]) {
+                            marcaEncontrada = String(alvoParaBusca[key]).toUpperCase().trim();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if(!marcaEncontrada || marcaEncontrada === "UNDEFINED" || marcaEncontrada === "NULL" || marcaEncontrada === "") {
+                marcaEncontrada = "DIVERSAS";
+            }
+
+            marcasUnicas.add(marcaEncontrada);
+
+            // Regra do Filtro: ignora o item se não for da marca selecionada
+            if (marcaSelecionada !== "TODAS" && marcaEncontrada !== marcaSelecionada) return;
+
+            if (!agrupado[base8]) agrupado[base8] = [];
             if(!agrupado[base8].includes(sku)) {
                 agrupado[base8].push(sku);
             }
         });
 
+        // Constrói o menu de filtro e o auto-atualiza se tiver marcas novas
+        if (filtroSelect) {
+            let opcoesAtuais = Array.from(filtroSelect.options).map(o => o.value).filter(v => v !== "TODAS");
+            let opcoesNovas = Array.from(marcasUnicas).sort();
+            
+            // Checa se o menu precisa ser desenhado ou atualizado
+            if (JSON.stringify(opcoesAtuais) !== JSON.stringify(opcoesNovas) || filtroSelect.options.length <= 1) {
+                let optionsHtml = '<option value="TODAS">Todas as Marcas</option>';
+                opcoesNovas.forEach(m => {
+                    optionsHtml += `<option value="${m}" ${m === marcaSelecionada ? 'selected' : ''}>${m}</option>`;
+                });
+                filtroSelect.innerHTML = optionsHtml;
+            }
+        }
+
+        let gruposComEstoque = [];
+        let gruposSemEstoque = [];
+
         Object.entries(agrupado).forEach(([base8, lista]) => {
+            let saldoGrupo = 0;
+            
             lista.forEach(sku13 => {
                 const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === sku13);
                 const info = extrairInfoSAP(itemSap || {});
+                saldoGrupo += info.saldo; 
                 totalEsperado += info.saldo; 
                 const ticado = statusDb[sku13]?.qtd || 0;
                 totalColetado += ticado; 
             });
+
+            if (saldoGrupo === 0) {
+                gruposSemEstoque.push({ base8, lista });
+            } else {
+                gruposComEstoque.push({ base8, lista });
+            }
         });
 
         let percent = totalEsperado > 0 ? Math.floor((totalColetado / totalEsperado) * 100) : 0;
         if (percent > 100) percent = 100;
         let corBarra = percent === 100 ? '#10b981' : '#3b82f6';
         
-        container.innerHTML = `
-            <div style="background:#f1f5f9; border-radius:12px; height:22px; width:100%; position:relative; overflow:hidden; margin-bottom:20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+        const divProgresso = document.createElement('div');
+        divProgresso.style.position = 'fixed';
+        divProgresso.style.bottom = '0';
+        divProgresso.style.left = '0';
+        divProgresso.style.width = '100%';
+        divProgresso.style.backgroundColor = '#ffffff';
+        divProgresso.style.padding = '12px 20px';
+        divProgresso.style.boxShadow = '0 -4px 15px rgba(0,0,0,0.08)';
+        divProgresso.style.zIndex = '9997'; 
+        divProgresso.style.boxSizing = 'border-box';
+        divProgresso.innerHTML = `
+            <div style="background:#f1f5f9; border-radius:12px; height:22px; width:100%; position:relative; overflow:hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
                 <div style="height:100%; background:${corBarra}; width:${percent}%; transition: width 0.4s ease;"></div>
                 <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.75em; font-weight:800; color:#0f172a; text-shadow: 0px 0px 2px rgba(255,255,255,0.9);">
                     PROGRESSO DA LOJA: ${totalColetado} / ${totalEsperado} (${percent}%)
                 </div>
             </div>
         `;
+        container.appendChild(divProgresso);
 
-        Object.entries(agrupado).forEach(([base8, lista]) => {
+        const containerCards = document.createElement('div');
+        const spacer = document.createElement('div');
+        spacer.style.paddingBottom = '70px'; 
+
+        const todosGrupos = [...gruposComEstoque, ...gruposSemEstoque];
+
+        todosGrupos.forEach(grupo => {
+            const base8 = grupo.base8;
+            const lista = grupo.lista;
+            
             const desc = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU).startsWith(base8))?.["Descrição material"] || "Produto Reman";
             const card = document.createElement('div');
             
+            const isSemEstoque = gruposSemEstoque.includes(grupo);
+            const opacityStyle = isSemEstoque ? "opacity: 0.55; filter: grayscale(0.8);" : "";
+            const badgeSemEstoque = isSemEstoque ? `<span style="background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:8px; border: 1px solid #b91c1c;">ZERADO NO SAP</span>` : "";
+
             let gradeHtml = "";
             lista.forEach(sku13 => {
                 const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === sku13);
@@ -318,7 +396,7 @@ export function renderizarListaCompletaReman() {
                 let bordaCor = ticado === 0 ? '#e5e7eb' : (ticado < info.saldo ? '#fde68a' : '#bbf7d0');
                 let corTexto = ticado === 0 ? '#64748b' : (ticado < info.saldo ? '#d97706' : '#15803d');
                 let statusBtnBg = ticado > 0 ? '#10b981' : '#f97316';
-                let statusBtnIcon = ticado > 0 ? '✓' : '📦';
+                let statusBtnIcon = ticado > 0 ? SVG_CHECK : SVG_BOX;
 
                 gradeHtml += `
                     <div id="linha-reman-lista-${sku13}" style="background:${bgCor}; border:1px solid ${bordaCor}; padding:12px; margin-bottom:8px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; transition: 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
@@ -331,8 +409,8 @@ export function renderizarListaCompletaReman() {
                             </span>
                         </div>
                         <div style="display:flex; gap:8px;">
-                            <button style="display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; border:1px solid #e2e8f0; background:#f8fafc; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s;" onclick="app.gerarQRReman('${info.tam}', '${sku13}')">
-                                <svg width="18" height="18" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                            <button style="display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; border:1px solid #e2e8f0; background:#f8fafc; color:#475569; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s;" onclick="app.gerarQRReman('${info.tam}', '${sku13}')">
+                                ${SVG_SEARCH}
                             </button>
                             
                             <button style="display:flex; align-items:center; justify-content:center; height:38px; min-width:44px; padding:0 12px; border-radius:10px; border:1px solid #bfdbfe; background:#eff6ff; color:#2563eb; font-weight:900; font-size:14px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s;" onclick="app.ticarContadorReman('${sku13}', ${info.saldo})">
@@ -348,15 +426,15 @@ export function renderizarListaCompletaReman() {
             });
 
             card.innerHTML = `
-                <div style="background:#ffffff; border-radius:16px; border:1px solid #e2e8f0; margin-bottom:20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); overflow:hidden;">
+                <div style="background:#ffffff; border-radius:16px; border:1px solid #e2e8f0; margin-bottom:20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); overflow:hidden; ${opacityStyle}">
                     <div style="padding:16px; display:flex; gap:14px; align-items:center; background:#f8fafc; border-bottom:1px solid #f1f5f9;">
                         <div style="width:65px; height:65px; flex-shrink:0; border-radius:12px; border:1px solid #e2e8f0; overflow:hidden; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="app.zoomFoto('https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg')">
                             <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="max-width:100%; max-height:100%; object-fit:contain;">
                         </div>
                         <div style="display:flex; flex-direction:column; gap:4px;">
                             <b style="font-size:13px; color:#0f172a; line-height:1.3; text-transform:uppercase; font-weight:800;">${desc}</b>
-                            <span style="font-size:12px; color:#64748b; font-weight:600; display:flex; align-items:center; gap:6px;">
-                                <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#cbd5e1;"></span> REF: ${base8}
+                            <span style="font-size:12px; color:#64748b; font-weight:600; display:flex; align-items:center; flex-wrap:wrap; gap:6px;">
+                                <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#cbd5e1;"></span> REF: ${base8} ${badgeSemEstoque}
                             </span>
                         </div>
                     </div>
@@ -365,8 +443,11 @@ export function renderizarListaCompletaReman() {
                     </div>
                 </div>
             `;
-            container.appendChild(card);
+            containerCards.appendChild(card);
         });
+
+        container.appendChild(containerCards);
+        container.appendChild(spacer); 
     });
 }
 
@@ -393,7 +474,7 @@ export function ticarContadorReman(sku13, saldoTotal) {
     }
     if (btnStatus) {
         btnStatus.style.background = atual > 0 ? '#10b981' : '#f97316';
-        btnStatus.innerHTML = atual > 0 ? '✓' : '📦';
+        btnStatus.innerHTML = atual > 0 ? SVG_CHECK : SVG_BOX;
     }
 }
 
@@ -404,7 +485,7 @@ export function alternarStatusReman(base8, sku13) {
     const qtdLocal = Number(spanNumero.innerText) || 0;
     const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
 
-    window.mostrarAviso("🔄 Salvando em segundo plano...", "sucesso");
+    window.mostrarAviso("Salvando no sistema...", "sucesso");
 
     setTimeout(() => {
         ref.update({
@@ -414,11 +495,12 @@ export function alternarStatusReman(base8, sku13) {
         }).then(() => {
             console.log("Coleta individual salva no Firebase.");
         }).catch(erro => {
-            window.mostrarAviso("❌ Erro ao salvar: " + erro.message, "erro");
+            window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
         });
     }, 100);
 }
 
+// CORRIGIDO: Nome exato que o seu main.js procura
 export function exportarRemanExcel() {
     database.ref(`status_reman_loja/${state.lojaAtual}`).once('value', snapshot => {
         const status = snapshot.val() || {};
@@ -466,36 +548,56 @@ export function exportarRemanExcel() {
     });
 }
 
+// REDUNDÂNCIA PARA NÃO QUEBRAR O MAIN.JS
+export const exportarReman = exportarRemanExcel;
+
 // ==========================================
-// MÓDULO DE ÁUDIO (Bipes do Scanner)
+// MÓDULO DE ÁUDIO BLINDADO (Sem Auto-Play)
 // ==========================================
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let audioCtx = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                audioCtx = new AudioContext();
+            }
+        } catch (e) {
+            console.log("Áudio bloqueado pelo navegador.", e);
+        }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
 
 function tocarSomScanner(tipo) {
+    initAudio();
     if (!audioCtx) return;
     
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    const osc = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    osc.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    
-    if (tipo === 'reman') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(900, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-        osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.15);
-    } else {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(250, audioCtx.currentTime);
-        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-        osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.4);
-    }
+    try {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        if (tipo === 'reman') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.15);
+        } else {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
+    } catch (e) {}
 }
