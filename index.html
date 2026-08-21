@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StockFlow v2.5.9</title>
+    <title>StockFlow v2.6.0</title>
 
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
@@ -55,7 +55,7 @@
         LOJA: <span id="displayLoja"></span>
     </div>
 
-    <div class="stockflow-title">StockFlow <span>v2.5.9</span></div>
+    <div class="stockflow-title">StockFlow <span>v2.6.0</span></div>
 </div>
 
 <div id="viewLogin" class="view-container active-view">
@@ -156,7 +156,7 @@
 </button>
 
 <div class="footer-copy">
-    © StockFlow v2.5.9 • Desenvolvido por Wagner Gomes dos Santos
+    © StockFlow v2.6.0 • Desenvolvido por Wagner Gomes dos Santos
 </div>
         </div>
     </div>
@@ -518,83 +518,73 @@
 
 <div id="viewMasterBox" class="view-container">
     <div class="card-internal" style="text-align:left;">
-        <h3 style="color:#25105f;font-weight:900;">📦 MASTER BOX</h3>
+        <h3 style="color:#0f172a; font-weight:900; margin-bottom: 20px; display:flex; align-items:center; gap:8px;">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            PAINEL MASTER BOX
+        </h3>
 
-<button class="btn-main"
-    onclick="app.abrirCriarMasterBox()"
-    ontouchend="event.preventDefault(); app.abrirCriarMasterBox();">
-    CRIAR NOVA MASTER
-</button>
+        <!-- Novo Grid de Menu Moderno -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom: 20px;">
+            <div onclick="app.abrirCriarMasterBox()" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px 10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.02); cursor:pointer; transition:0.2s;">
+                <div style="font-size:2.2em; margin-bottom:8px;">📦</div>
+                <b style="font-size:0.8em; color:#0f172a;">CRIAR MASTER</b>
+            </div>
+            <div onclick="app.abrirConsultarMasterBox()" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px 10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.02); cursor:pointer; transition:0.2s;">
+                <div style="font-size:2.2em; margin-bottom:8px;">🔍</div>
+                <b style="font-size:0.8em; color:#0f172a;">CONSULTAR</b>
+            </div>
+            <div onclick="app.abrirBuscarItemMasterBox()" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px 10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.02); cursor:pointer; transition:0.2s;">
+                <div style="font-size:2.2em; margin-bottom:8px;">🎯</div>
+                <b style="font-size:0.8em; color:#0f172a;">BUSCAR ITEM</b>
+            </div>
+            <div onclick="app.listarHistoricoMasters()" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px 10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.02); cursor:pointer; transition:0.2s;">
+                <div style="font-size:2.2em; margin-bottom:8px;">📋</div>
+                <b style="font-size:0.8em; color:#0f172a;">HISTÓRICO</b>
+            </div>
+        </div>
 
-<button class="btn-main"
-    onclick="app.abrirConsultarMasterBox()"
-    ontouchend="event.preventDefault(); app.abrirConsultarMasterBox();">
-    CONSULTAR MASTER
-</button>
+        <!-- Botão para Exportar TODAS AS CAIXAS de uma vez -->
+        <button class="btn-main" style="background:#10b981; margin-top:0; border-radius:12px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="app.exportarTodasMasters()">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            EXPORTAR BASE COMPLETA
+        </button>
 
-<button class="btn-main"
-    onclick="app.abrirBuscarItemMasterBox()"
-    ontouchend="event.preventDefault(); app.abrirBuscarItemMasterBox();">
-    BUSCAR ITEM
-</button>
-
-<button class="btn-main"
-    onclick="app.listarHistoricoMasters()"
-    ontouchend="event.preventDefault(); app.listarHistoricoMasters();">
-    HISTÓRICO DE MASTERS
-</button>
-
-        <div id="historicoMasters" style="margin-top:15px;"></div>
+        <div id="historicoMasters" style="margin-top:20px;"></div>
     </div>
 </div>
 
 <div id="viewMasterCriar" class="view-container">
     <div class="card-internal" style="text-align:left;">
-        <h3 id="tituloMasterCriar" style="color:#25105f;font-weight:900;">
-            MASTER
-        </h3>
+        <h3 id="tituloMasterCriar" style="color:#0f172a; font-weight:900; margin-bottom: 20px;">MASTER</h3>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;">
-            <div class="loja-badge">📦 Itens: <b id="totalItensMaster">0</b></div>
-            <div class="loja-badge">🏷️ SKUs: <b id="totalSkusMaster">0</b></div>
+            <div class="loja-badge" style="background:#f1f5f9; border-color:#e2e8f0; color:#0f172a;">📦 Itens: <b id="totalItensMaster">0</b></div>
+            <div class="loja-badge" style="background:#f1f5f9; border-color:#e2e8f0; color:#0f172a;">🏷️ SKUs: <b id="totalSkusMaster">0</b></div>
         </div>
 
-        <button class="btn-main" onclick="app.iniciarCamera('readerMaster','master')">
-            📸 INICIAR LEITURA CONTÍNUA
+        <button class="btn-main" style="background:#2563eb;" onclick="app.iniciarCamera('readerMaster','master')">
+            📸 INICIAR LEITURA
         </button>
 
         <div id="readerMaster" class="reader-box"></div>
 
-        <input type="text" id="inputBipMaster" placeholder="BIPAR SKU OU EAN">
+        <input type="text" id="inputBipMaster" placeholder="Bipar SKU ou EAN">
 
         <button class="btn-main" onclick="app.biparItemMaster()">
             ADICIONAR ITEM
         </button>
 
-        <div id="listaItensMaster" style="margin-top:15px;"></div>
+        <div id="listaItensMaster" style="margin-top:15px; margin-bottom:15px;"></div>
 
-        <button
-            id="btnEditarMaster"
-            class="btn-main"
-            style="background:#f59e0b;"
-            onclick="app.editarMasterAtual()">
-            ✏️ EDITAR MASTER
-        </button>
+        <button id="btnEditarMaster" class="btn-main" style="background:#f59e0b;" onclick="app.editarMasterAtual()">✏️ EDITAR MASTER</button>
+        <button id="btnSalvarMaster" class="btn-main" style="background:#22c55e;" onclick="app.salvarMasterAtual()">SALVAR MASTER</button>
 
-        <button
-            id="btnSalvarMaster"
-            class="btn-main"
-            style="background:#22c55e;"
-            onclick="app.salvarMasterAtual()">
-            SALVAR MASTER
-        </button>
-
-        <button
-            class="btn-main"
-            style="background:#6200ee;"
-            onclick="app.exportarPDFMaster()">
-            EXPORTAR PDF
-        </button>
+        <!-- Três opções de saída -->
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn-main" style="background:#10b981; margin:0; flex:1; font-size: 11px; padding:12px 5px;" onclick="app.exportarMasterExcel()">📊 EXCEL</button>
+            <button class="btn-main" style="background:#0f172a; margin:0; flex:1; font-size: 11px; padding:12px 5px;" onclick="app.imprimirEtiquetaMaster()">🖨️ ETIQUETA</button>
+            <button class="btn-main" style="background:#64748b; margin:0; flex:1; font-size: 11px; padding:12px 5px;" onclick="app.exportarPDFMaster()">📄 LISTA</button>
+        </div>
     </div>
 </div>
 

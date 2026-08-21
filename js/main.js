@@ -45,7 +45,10 @@ import {
     buscarItemNaMaster,
     exportarPDFMaster,
     listarHistoricoMasters,
-    editarMasterAtual
+    editarMasterAtual,
+    exportarMasterExcel,       // <--- Importação adicionada
+    exportarTodasMasters,      // <--- Importação adicionada
+    imprimirEtiquetaMaster     // <--- Importação adicionada
 } from './masterbox.js';
 
 // Criando a "lista de presença" (window.app) de forma correta
@@ -189,6 +192,14 @@ window.app = {
     listarHistoricoMasters,
     editarMasterAtual,
     abrirIA,
+
+    // ==========================================
+    // NOVAS FUNÇÕES DA MASTER BOX AQUI
+    // ==========================================
+    exportarMasterExcel: exportarMasterExcel,
+    exportarTodasMasters: exportarTodasMasters,
+    imprimirEtiquetaMaster: imprimirEtiquetaMaster
+
 }; // Agora sim o objeto fecha no lugar certo!
 
 document.addEventListener("DOMContentLoaded", () => {
