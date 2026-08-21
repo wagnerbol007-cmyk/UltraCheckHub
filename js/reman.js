@@ -10,32 +10,36 @@ function extrairInfoSAP(item) {
     let saldo = 0, tam = "---";
     for(let key in item) {
         let k = key.toLowerCase();
-        if(k.includes("utiliza") || k.includes("estoque")) saldo = parseInt(item[key] || 0);
-        if(k.includes("tamanho") || k.includes("tam")) tam = String(item[key]);
+        if(k.includes("utiliza") || k.includes("estoque") || k.includes("saldo")) saldo = parseInt(item[key] || 0);
+        if(k.includes("tamanho") || k.includes("tam") || k.includes("caracter")) tam = String(item[key]);
     }
     return { saldo, tam };
+}
+
+function obterSKU13(item, sapCompleto) {
+    let codigo = normalizarCodigo(item.SKU || item.Material || item.EAN);
+    if (!codigo) return null;
+    let itemSap = sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === codigo || normalizarCodigo(i.EAN) === codigo);
+    if (itemSap) return normalizarCodigo(itemSap.Material || itemSap.SKU);
+    return codigo; 
 }
 
 export async function biparReman(bip) {
     
     window.app.salvarColetaParcial = function(base8) {
-        const pertence = state.dadosReman.filter(i => normalizarCodigo(i.SKU || i.Material).startsWith(base8));
-        
+        // Agora salva TODOS os itens que compartilham a base 8
+        const itensNaTela = Array.from(document.querySelectorAll(`[id^="qtd-reman-${base8}"]`));
         let pacotaoDeAtualizacoes = {};
 
-        pertence.forEach(item => {
-            let sku13 = normalizarCodigo(item.SKU || item.Material);
-            let spanNumero = document.getElementById(`qtd-reman-${sku13}`);
+        itensNaTela.forEach(spanNumero => {
+            let sku13 = spanNumero.id.replace('qtd-reman-', '');
+            let qtdLocal = Number(spanNumero.innerText) || 0;
             
-            if (spanNumero) {
-                let qtdLocal = Number(spanNumero.innerText) || 0;
-                
-                pacotaoDeAtualizacoes[`status_reman_loja/${state.lojaAtual}/${sku13}`] = {
-                    qtd: qtdLocal,
-                    quem: state.operador,
-                    hora: getHoraCerta()
-                };
-            }
+            pacotaoDeAtualizacoes[`status_reman_loja/${state.lojaAtual}/${sku13}`] = {
+                qtd: qtdLocal,
+                quem: state.operador,
+                hora: getHoraCerta()
+            };
         });
 
         document.getElementById('cardBipResultadoTop').style.display = "none";
@@ -45,9 +49,7 @@ export async function biparReman(bip) {
         if (modalCamera) modalCamera.style.display = "none";
         
         const inputBip = document.getElementById('inputBipReman');
-        if (inputBip) {
-            inputBip.value = "";
-        }
+        if (inputBip) inputBip.value = "";
         
         window.mostrarAviso("Salvando coleta...", "sucesso");
 
@@ -96,9 +98,6 @@ export async function biparReman(bip) {
         corpoTop.style.overflow = "hidden";
     }
 
-    // ====================================================
-    // BUSCA DUPLA: SAP + PLANILHA DE REMAN
-    // ====================================================
     const itemNoSap = state.sapCompleto.find(i => normalizarCodigo(i.EAN) === bipLimpo || normalizarCodigo(i.Material || i.SKU) === bipLimpo);
     
     let sku13Sap = bipLimpo;
@@ -110,14 +109,13 @@ export async function biparReman(bip) {
         base8 = sku13Sap.substring(0, 8);
         descricaoItem = itemNoSap["Descrição material"] || itemNoSap["Texto breve material"] || "Produto Reman";
     } else {
-        // Se não achou no SAP, procura na planilha de Reman para forçar o reconhecimento
-        const itemNoReman = state.dadosReman.find(i => normalizarCodigo(i.SKU || i.Material) === bipLimpo);
+        const itemNoReman = state.dadosReman.find(i => normalizarCodigo(i.SKU || i.Material || i.EAN) === bipLimpo);
         if (itemNoReman) {
-            sku13Sap = normalizarCodigo(itemNoReman.SKU || itemNoReman.Material);
+            sku13Sap = obterSKU13(itemNoReman, state.sapCompleto) || bipLimpo;
             base8 = sku13Sap.substring(0, 8);
             descricaoItem = itemNoReman["Descrição material"] || itemNoReman["Texto breve material"] || "Produto Reman";
         } else {
-            const temNoReman = state.dadosReman.some(i => normalizarCodigo(i.SKU || i.Material).startsWith(base8));
+            const temNoReman = state.dadosReman.some(i => (obterSKU13(i, state.sapCompleto) || "").startsWith(base8));
             if (!temNoReman) {
                 tocarSomScanner('erro');
                 if (cardTop) cardTop.style.borderLeftColor = "var(--danger)";
@@ -139,12 +137,13 @@ export async function biparReman(bip) {
         }
     }
 
-    const pertenceAoReman = state.dadosReman.filter(i => {
-        let skuPlanilha = normalizarCodigo(i.SKU || i.Material);
-        return skuPlanilha.substring(0, 8) === base8;
+    // Verifica se a BASE8 pertence ao Reman (se qualquer tamanho foi solicitado, puxa todos)
+    const pertenceAoReman = state.dadosReman.some(i => {
+        let skuPlanilha = obterSKU13(i, state.sapCompleto);
+        return skuPlanilha && skuPlanilha.substring(0, 8) === base8;
     });
 
-    if (pertenceAoReman.length > 0) {
+    if (pertenceAoReman) {
         tocarSomScanner('reman');
         if (cardTop) cardTop.style.borderLeftColor = "#f97316";
         if (tagTop) {
@@ -156,13 +155,14 @@ export async function biparReman(bip) {
             tagTop.innerText = "SEPARAR PARA REMANEJAMENTO";
         }
 
-        const promessas = pertenceAoReman.map(async (itemPlan) => {
-            const skuReman13 = normalizarCodigo(itemPlan.SKU || itemPlan.Material);
-            const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === skuReman13);
-            const info = itemSap ? extrairInfoSAP(itemSap) : { saldo: 0, tam: itemPlan.Tamanho || itemPlan.Tam || "UN" };
+        // Monta a grade INTEIRA baseada no SAP para essa referência
+        const gradeCompletaSap = state.sapCompleto.filter(i => normalizarCodigo(i.Material || i.SKU).startsWith(base8));
+        
+        const promessas = gradeCompletaSap.map(async (itemSap) => {
+            const skuReman13 = normalizarCodigo(itemSap.Material || itemSap.SKU);
+            const info = extrairInfoSAP(itemSap);
 
             const snap = await database.ref(`status_reman_loja/${state.lojaAtual}/${skuReman13}`).once("value");
-            
             const qtd = Number(snap.val()?.qtd || 0);
             const saldo = Number(info.saldo || 0);
 
@@ -170,7 +170,6 @@ export async function biparReman(bip) {
             let bordaCor = '#e2e8f0'; 
 
             if (qtd > 0) {
-                // Se não tem saldo mas tem quantidade, também fica verde indicando separação feita
                 if (saldo === 0 || qtd >= saldo) {
                     bgCor = '#dcfce7'; 
                     bordaCor = '#22c55e';
@@ -259,10 +258,6 @@ export function aumentarReman(sku13, saldoTotal) {
     if (spanNumero) {
         let qtdLocal = Number(spanNumero.innerText) || 0;
         
-        // ==========================================================
-        // TRAVA LIBERADA PARA ZERADOS
-        // Se o saldo for 0 (no SAP), permite somar livremente
-        // ==========================================================
         if (saldo === 0 || qtdLocal < saldo) {
             qtdLocal++;
             spanNumero.innerText = qtdLocal; 
@@ -303,41 +298,37 @@ export function renderizarListaCompletaReman() {
 
     database.ref(`status_reman_loja/${state.lojaAtual}`).on('value', snapshot => {
         const statusDb = snapshot.val() || {};
-
         const listaJaRenderizada = document.getElementById('reman-cards-container');
 
         if (listaJaRenderizada) {
             let totalColetado = 0;
             const totalEsperado = Number(container.getAttribute('data-total-esperado') || 0);
 
-            state.dadosReman.forEach(item => {
-                let sku = normalizarCodigo(item.SKU || item.Material);
-                if(!sku) return;
-
+            // Varre a tela rápida
+            const spans = document.querySelectorAll('[id^="qtd-reman-lista-"]');
+            spans.forEach(spanNumero => {
+                let sku = spanNumero.id.replace('qtd-reman-lista-', '');
                 const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === sku);
                 const info = extrairInfoSAP(itemSap || {});
                 const ticado = statusDb[sku]?.qtd || 0;
                 totalColetado += ticado;
 
-                const spanNumero = document.getElementById(`qtd-reman-lista-${sku}`);
-                if (spanNumero) {
-                    spanNumero.innerText = ticado;
+                spanNumero.innerText = ticado;
 
-                    const linha = document.getElementById(`linha-reman-lista-${sku}`);
-                    const btnStatus = document.getElementById(`btn-status-lista-${sku}`);
-                    const textQtd = document.getElementById(`texto-qtd-lista-${sku}`);
+                const linha = document.getElementById(`linha-reman-lista-${sku}`);
+                const btnStatus = document.getElementById(`btn-status-lista-${sku}`);
+                const textQtd = document.getElementById(`texto-qtd-lista-${sku}`);
 
-                    if (linha) {
-                        linha.style.background = ticado === 0 ? '#ffffff' : ((info.saldo > 0 && ticado < info.saldo) ? '#fffbeb' : '#f0fdf4');
-                        linha.style.borderColor = ticado === 0 ? '#e5e7eb' : ((info.saldo > 0 && ticado < info.saldo) ? '#fde68a' : '#bbf7d0');
-                    }
-                    if (textQtd) {
-                        textQtd.style.color = ticado === 0 ? '#64748b' : ((info.saldo > 0 && ticado < info.saldo) ? '#d97706' : '#15803d');
-                    }
-                    if (btnStatus) {
-                        btnStatus.style.background = ticado > 0 ? '#10b981' : '#f97316';
-                        btnStatus.innerHTML = ticado > 0 ? SVG_CHECK : SVG_BOX;
-                    }
+                if (linha) {
+                    linha.style.background = ticado === 0 ? '#ffffff' : ((info.saldo > 0 && ticado < info.saldo) ? '#fffbeb' : '#f0fdf4');
+                    linha.style.borderColor = ticado === 0 ? '#e5e7eb' : ((info.saldo > 0 && ticado < info.saldo) ? '#fde68a' : '#bbf7d0');
+                }
+                if (textQtd) {
+                    textQtd.style.color = ticado === 0 ? '#64748b' : ((info.saldo > 0 && ticado < info.saldo) ? '#d97706' : '#15803d');
+                }
+                if (btnStatus) {
+                    btnStatus.style.background = ticado > 0 ? '#10b981' : '#f97316';
+                    btnStatus.innerHTML = ticado > 0 ? SVG_CHECK : SVG_BOX;
                 }
             });
 
@@ -354,7 +345,6 @@ export function renderizarListaCompletaReman() {
             if (barTxt) {
                 barTxt.innerText = `PROGRESSO DA LOJA: ${totalColetado} / ${totalEsperado} (${percent}%)`;
             }
-
             return; 
         }
 
@@ -364,12 +354,24 @@ export function renderizarListaCompletaReman() {
         let totalEsperado = 0;
         let totalColetado = 0;
 
+        // Ao invés de usar apenas as linhas exatas do reman, puxa todas as referências (base8) solicitadas.
         state.dadosReman.forEach(item => {
-            let sku = normalizarCodigo(item.SKU || item.Material);
+            let sku = obterSKU13(item, state.sapCompleto);
             if(!sku) return;
             let base8 = sku.substring(0, 8);
             
-            if (!agrupado[base8]) agrupado[base8] = [];
+            if (!agrupado[base8]) {
+                agrupado[base8] = [];
+                
+                // INVERSÃO DE LÓGICA: Se a base8 está no Reman, traz todos os tamanhos dessa base do SAP!
+                state.sapCompleto.forEach(sapItem => {
+                    let sSku = normalizarCodigo(sapItem.Material || sapItem.SKU);
+                    if (sSku.startsWith(base8)) {
+                        if (!agrupado[base8].includes(sSku)) agrupado[base8].push(sSku);
+                    }
+                });
+            }
+            
             if(!agrupado[base8].includes(sku)) {
                 agrupado[base8].push(sku);
             }
@@ -444,7 +446,7 @@ export function renderizarListaCompletaReman() {
             let gradeHtml = "";
             lista.forEach(sku13 => {
                 const itemSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU) === sku13);
-                const info = extrairInfoSAP(itemSap || {});
+                const info = itemSap ? extrairInfoSAP(itemSap) : { saldo: 0, tam: "UN" };
                 const registro = statusDb[sku13] || { qtd: 0 };
                 const ticado = registro.qtd;
 
@@ -514,9 +516,6 @@ export function ticarContadorReman(sku13, saldoTotal) {
     let atual = Number(spanNumero.innerText) || 0;
     const saldo = Number(saldoTotal);
 
-    // ==========================================================
-    // TRAVA LIBERADA PARA ZERADOS (Lista principal)
-    // ==========================================================
     if (saldo === 0) {
         atual++; 
     } else {
