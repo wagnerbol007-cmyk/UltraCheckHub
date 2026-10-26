@@ -191,15 +191,10 @@ export async function biparReman(bip) {
             let qtd = Number(valDb.qtd || 0);
             const saldo = Number(info.saldo || 0);
 
-            // =========================================================
-            // AUTO-HEALING: SUBTRAÇÃO PROPORCIONAL
-            // Calcula a diferença e abate do que já foi separado
-            // =========================================================
             if (qtd > 0 && valDb.saldo_sap !== undefined && saldo < valDb.saldo_sap) {
                 let diferenca = valDb.saldo_sap - saldo;
                 qtd = qtd - diferenca;
                 if (qtd < 0) qtd = 0;
-                
                 database.ref(`status_reman_loja/${state.lojaAtual}/${skuReman13}`).update({ qtd: qtd, saldo_sap: saldo });
             }
 
@@ -224,11 +219,9 @@ export async function biparReman(bip) {
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;">
                     <button style="padding:6px 12px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px; background:#fff; color:#0f172a; cursor:pointer;" onclick="app.diminuirReman('${skuReman13}', ${saldo})">−</button>
-                    
                     <span id="qtd-reman-${skuReman13}" style="font-size:18px; font-weight:bold; min-width:30px; text-align:center; color:#2563eb;">
                         ${qtd}
                     </span>
-                    
                     <button style="padding:6px 12px; font-weight:bold; border:1px solid #cbd5e1; border-radius:6px; background:#fff; color:#0f172a; cursor:pointer;" onclick="app.aumentarReman('${skuReman13}',${saldo})">+</button>
                 </div>
             </div>
@@ -247,11 +240,9 @@ export async function biparReman(bip) {
                         <span style="color:#64748b; font-size:12px;">REF: ${base8}</span>
                     </div>
                 </div>
-                
                 <div style="overflow-y: auto; overscroll-behavior: contain; max-height: 48vh; padding-right: 5px; margin-top: 12px; margin-bottom: 12px; flex-grow: 1;">
                     ${linesTopHtml}
                 </div>
-                
                 <div style="flex-shrink: 0; display:flex; flex-direction:column; gap:8px;">
                     <button class="btn-main" style="width:100%; background:#22c55e; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="app.salvarColetaParcial('${base8}')">
                         SALVAR QUANTIDADES
@@ -279,7 +270,6 @@ export async function biparReman(bip) {
                         <span style="color:var(--success); font-weight:800; font-size:11px;">MANTENHA NO ESTOQUE NORMAL</span>
                     </div>
                 </div>
-                
                 <div style="margin-top:auto;">
                     <button class="btn-main" style="width:100%; background:#64748b; border:none; padding:14px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;" onclick="document.getElementById('cardBipResultadoTop').style.display='none'; document.body.style.overflow='';">FECHAR</button>
                 </div>
@@ -291,14 +281,11 @@ export async function biparReman(bip) {
 export function aumentarReman(sku13, saldoTotal) {
     const saldo = Number(saldoTotal);
     const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
-    
     if (spanNumero) {
         let qtdLocal = Number(spanNumero.innerText) || 0;
-        
         if (saldo === 0 || qtdLocal < saldo) {
             qtdLocal++;
             spanNumero.innerText = qtdLocal; 
-            
             const linha = document.getElementById(`linha-reman-top-${sku13}`);
             if (linha) {
                 linha.style.background = (saldo > 0 && qtdLocal < saldo) ? '#fff7ed' : '#dcfce7';
@@ -311,13 +298,11 @@ export function aumentarReman(sku13, saldoTotal) {
 export function diminuirReman(sku13, saldoTotal) {
     const saldo = Number(saldoTotal);
     const spanNumero = document.getElementById(`qtd-reman-${sku13}`);
-    
     if (spanNumero) {
         let qtdLocal = Number(spanNumero.innerText) || 0;
         if (qtdLocal > 0) {
             qtdLocal--;
             spanNumero.innerText = qtdLocal;
-            
             const linha = document.getElementById(`linha-reman-top-${sku13}`);
             if (linha) {
                 linha.style.background = qtdLocal === 0 ? '#ffffff' : ((saldo > 0 && qtdLocal < saldo) ? '#fff7ed' : '#dcfce7');
@@ -332,15 +317,12 @@ export function renderizarListaCompletaReman() {
     if (!container) return;
 
     const dicionarios = criarDicionariosSap();
-
     database.ref(`status_reman_loja/${state.lojaAtual}`).off('value');
-
     database.ref(`status_reman_loja/${state.lojaAtual}`).on('value', snapshot => {
         const statusDb = snapshot.val() || {};
         const listaJaRenderizada = document.getElementById('reman-cards-container');
         let pacotaoAutoHealing = {};
 
-        // ATUALIZAÇÃO RÁPIDA DE TELA (Evita travamentos)
         if (listaJaRenderizada) {
             let totalColetado = 0;
             const totalEsperado = Number(container.getAttribute('data-total-esperado') || 0);
@@ -350,18 +332,13 @@ export function renderizarListaCompletaReman() {
                 let sku = spanNumero.id.replace('qtd-reman-lista-', '');
                 const itemSap = dicionarios.dictSKU[sku];
                 const info = extrairInfoSAP(itemSap || {});
-                
                 let registro = statusDb[sku] || { qtd: 0 };
                 let ticado = Number(registro.qtd || 0);
 
-                // =========================================================
-                // AUTO-HEALING PROPORCIONAL
-                // =========================================================
                 if (ticado > 0 && registro.saldo_sap !== undefined && info.saldo < registro.saldo_sap) {
                     let diferenca = registro.saldo_sap - info.saldo;
                     ticado = ticado - diferenca;
                     if (ticado < 0) ticado = 0;
-                    
                     pacotaoAutoHealing[sku] = { qtd: ticado, saldo_sap: info.saldo };
                 }
 
@@ -405,9 +382,7 @@ export function renderizarListaCompletaReman() {
             return; 
         }
 
-        // PRIMEIRA CONSTRUÇÃO DA TELA
         container.innerHTML = "";
-
         let agrupado = {};
         let totalEsperado = 0;
         let totalColetado = 0;
@@ -416,7 +391,6 @@ export function renderizarListaCompletaReman() {
             let sku = traduzirParaSKU13(item, dicionarios);
             if(!sku) return;
             let base8 = sku.substring(0, 8);
-            
             if (!agrupado[base8]) {
                 agrupado[base8] = [];
                 if (dicionarios.gradePorBase8[base8]) {
@@ -425,7 +399,6 @@ export function renderizarListaCompletaReman() {
                     });
                 }
             }
-            
             if(!agrupado[base8].includes(sku)) {
                 agrupado[base8].push(sku);
             }
@@ -436,7 +409,6 @@ export function renderizarListaCompletaReman() {
 
         Object.entries(agrupado).forEach(([base8, lista]) => {
             let saldoGrupo = 0;
-            
             lista.forEach(sku13 => {
                 const itemSap = dicionarios.dictSKU[sku13];
                 const info = extrairInfoSAP(itemSap || {});
@@ -446,25 +418,17 @@ export function renderizarListaCompletaReman() {
                 let registro = statusDb[sku13] || { qtd: 0 };
                 let ticado = Number(registro.qtd || 0);
 
-                // =========================================================
-                // AUTO-HEALING PROPORCIONAL
-                // =========================================================
                 if (ticado > 0 && registro.saldo_sap !== undefined && info.saldo < registro.saldo_sap) {
                     let diferenca = registro.saldo_sap - info.saldo;
                     ticado = ticado - diferenca;
                     if (ticado < 0) ticado = 0;
-                    
                     pacotaoAutoHealing[sku13] = { qtd: ticado, saldo_sap: info.saldo };
                 }
-
                 totalColetado += ticado; 
             });
 
-            if (saldoGrupo === 0) {
-                gruposSemEstoque.push({ base8, lista });
-            } else {
-                gruposComEstoque.push({ base8, lista });
-            }
+            if (saldoGrupo === 0) gruposSemEstoque.push({ base8, lista });
+            else gruposComEstoque.push({ base8, lista });
         });
 
         if (Object.keys(pacotaoAutoHealing).length > 0) {
@@ -472,7 +436,6 @@ export function renderizarListaCompletaReman() {
         }
 
         container.setAttribute('data-total-esperado', totalEsperado);
-
         let percent = totalEsperado > 0 ? Math.floor((totalColetado / totalEsperado) * 100) : 0;
         if (percent > 100) percent = 100;
         let corBarra = percent === 100 ? '#10b981' : '#3b82f6';
@@ -507,7 +470,6 @@ export function renderizarListaCompletaReman() {
         todosGrupos.forEach(grupo => {
             const base8 = grupo.base8;
             const lista = grupo.lista;
-            
             const itemRefSap = state.sapCompleto.find(i => normalizarCodigo(i.Material || i.SKU).startsWith(base8));
             const desc = itemRefSap ? (itemRefSap["Descrição material"] || itemRefSap["Texto breve material"]) : "Produto Reman";
             const card = document.createElement('div');
@@ -520,7 +482,6 @@ export function renderizarListaCompletaReman() {
             lista.forEach(sku13 => {
                 const itemSap = dicionarios.dictSKU[sku13];
                 const info = itemSap ? extrairInfoSAP(itemSap) : { saldo: 0, tam: "UN" };
-                
                 const registro = statusDb[sku13] || { qtd: 0 };
                 let ticado = Number(registro.qtd || 0);
 
@@ -550,11 +511,9 @@ export function renderizarListaCompletaReman() {
                             <button style="display:flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; border:1px solid #e2e8f0; background:#f8fafc; color:#475569; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s;" onclick="app.gerarQRReman('${info.tam}', '${sku13}')">
                                 ${SVG_SEARCH}
                             </button>
-                            
                             <button style="display:flex; align-items:center; justify-content:center; height:38px; min-width:44px; padding:0 12px; border-radius:10px; border:1px solid #bfdbfe; background:#eff6ff; color:#2563eb; font-weight:900; font-size:14px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s;" onclick="app.ticarContadorReman('${sku13}', ${info.saldo})">
                                 +1
                             </button>
-                            
                             <button id="btn-status-lista-${sku13}" style="display:flex; align-items:center; justify-content:center; height:38px; min-width:44px; padding:0 12px; border-radius:10px; border:none; cursor:pointer; background:${statusBtnBg}; color:white; font-weight:900; font-size:16px; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:0.2s;" onclick="app.alternarStatusReman('${base8}', '${sku13}')">
                                 ${statusBtnIcon}
                             </button>
@@ -583,7 +542,6 @@ export function renderizarListaCompletaReman() {
             `;
             containerCards.appendChild(card);
         });
-
         container.appendChild(containerCards);
         container.appendChild(spacer); 
     });
@@ -592,18 +550,12 @@ export function renderizarListaCompletaReman() {
 export function ticarContadorReman(sku13, saldoTotal) {
     const spanNumero = document.getElementById(`qtd-reman-lista-${sku13}`);
     if (!spanNumero) return;
-
     let atual = Number(spanNumero.innerText) || 0;
     const saldo = Number(saldoTotal);
-
-    if (saldo === 0) {
-        atual++; 
-    } else {
-        atual = (atual < saldo) ? atual + 1 : 0;
-    }
+    if (saldo === 0) atual++; 
+    else atual = (atual < saldo) ? atual + 1 : 0;
     
     spanNumero.innerText = atual;
-
     const linha = document.getElementById(`linha-reman-lista-${sku13}`);
     const btnStatus = document.getElementById(`btn-status-lista-${sku13}`);
     const textQtd = document.getElementById(`texto-qtd-lista-${sku13}`); 
@@ -624,24 +576,21 @@ export function ticarContadorReman(sku13, saldoTotal) {
 export function alternarStatusReman(base8, sku13) {
     const spanNumero = document.getElementById(`qtd-reman-lista-${sku13}`);
     if (!spanNumero) return;
-
     const qtdLocal = Number(spanNumero.innerText) || 0;
     const ref = database.ref(`status_reman_loja/${state.lojaAtual}/${sku13}`);
-
     const dicionarios = criarDicionariosSap();
     const itemSap = dicionarios.dictSKU[sku13];
     const info = extrairInfoSAP(itemSap || {});
 
     window.mostrarAviso("Salvando no sistema...", "sucesso");
-
     setTimeout(() => {
         ref.update({
             qtd: qtdLocal,
             quem: state.operador,
             hora: getHoraCerta(),
-            saldo_sap: info.saldo // Fotografia do estoque
+            saldo_sap: info.saldo 
         }).then(() => {
-            console.log("Coleta individual salva no Firebase.");
+            console.log("Coleta salva.");
         }).catch(erro => {
             window.mostrarAviso("Erro ao salvar: " + erro.message, "erro");
         });
@@ -650,21 +599,15 @@ export function alternarStatusReman(base8, sku13) {
 
 export function exportarRemanExcel() {
     const dicionarios = criarDicionariosSap();
-
     database.ref(`status_reman_loja/${state.lojaAtual}`).once('value', snapshot => {
         const status = snapshot.val() || {};
         const listaSkus = Object.keys(status);
-
-        if (listaSkus.length === 0) {
-            return window.mostrarAviso("Nenhum item foi separado ainda para exportar.", "erro");
-        }
+        if (listaSkus.length === 0) return window.mostrarAviso("Nenhum item separado.", "erro");
 
         let dadosExportacao = [];
-        
         listaSkus.forEach(sku13 => {
             const registro = status[sku13]; 
             const itemSap = dicionarios.dictSKU[sku13];
-            
             const base8 = sku13.substring(0, 8);
             const descricao = itemSap ? (itemSap["Descrição material"] || itemSap["Texto breve material"]) : "Produto Reman";
             const info = extrairInfoSAP(itemSap || {});
@@ -681,42 +624,352 @@ export function exportarRemanExcel() {
                 "Data/Hora Export": getHoraCerta()
             });
         });
-
         const ws = XLSX.utils.json_to_sheet(dadosExportacao);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Reman Separados");
         XLSX.writeFile(wb, `Reman_Separados_Loja_${state.lojaAtual}.xlsx`);
     });
 }
-
 export const exportarReman = exportarRemanExcel;
 
-let audioCtx = null;
+// =========================================================================
+// MÓDULO: HUB DO REMANEJAMENTO E SUGESTÕES (POSSÍVEL REMAN)
+// =========================================================================
 
+export function abrirSubTelaReman(tela) {
+    const hub = document.getElementById('remanMenuPrincipal');
+    const telaConferir = document.getElementById('remanTelaConferir');
+    const telaPossivelBipar = document.getElementById('remanTelaPossivelBipar');
+    const telaPossivelLista = document.getElementById('remanTelaPossivelLista');
+
+    hub.style.display = 'none';
+    telaConferir.style.display = 'none';
+    telaPossivelBipar.style.display = 'none';
+    telaPossivelLista.style.display = 'none';
+
+    if (tela === 'hub') {
+        hub.style.display = 'block';
+    } else if (tela === 'conferir') {
+        telaConferir.style.display = 'block';
+    } else if (tela === 'bipar_possivel') {
+        telaPossivelBipar.style.display = 'block';
+        document.getElementById('resultadoPossivelReman').innerHTML = '';
+        atualizarDashboardPossivelReman();
+    } else if (tela === 'lista_possivel') {
+        telaPossivelLista.style.display = 'block';
+        renderizarListaPossivelReman();
+    }
+}
+
+function atualizarDashboardPossivelReman() {
+    database.ref(`possivel_reman_loja/${state.lojaAtual}`).once("value", snap => {
+        let dados = snap.val() || {};
+        let totalModelos = Object.keys(dados).length;
+        let totalPecas = 0;
+
+        Object.values(dados).forEach(produto => {
+            if(produto.tamanhos) {
+                Object.values(produto.tamanhos).forEach(tam => {
+                    totalPecas += Number(tam.saldo || 0);
+                });
+            }
+        });
+
+        const elSkus = document.getElementById('lblTotalSkusPossivel');
+        const elItens = document.getElementById('lblTotalItensPossivel');
+        if(elSkus) elSkus.innerText = totalModelos;
+        if(elItens) elItens.innerText = totalPecas;
+    });
+}
+
+// ----------------------------------------------------
+// VERIFICAÇÃO INTELIGENTE DE GRADE (Com Tradutor SAP Centauro)
+// ----------------------------------------------------
+function verificarGradeMinima(itensGrade) {
+    let qtds = { P: 0, M: 0, G: 0, GG: 0 };
+    let tamanhosDistintos = 0;
+    let totalPecas = 0;
+
+    itensGrade.forEach(item => {
+        let info = extrairInfoSAP(item);
+        let tam = String(info.tam).toUpperCase();
+        let saldo = Number(info.saldo);
+
+        if (saldo > 0) {
+            tamanhosDistintos++;
+            totalPecas += saldo;
+        }
+
+        // Identificação com nomes da base SAP Centauro
+        if (tam === 'P' || tam === 'S' || tam.includes('PEQUENO')) {
+            qtds.P += saldo;
+        } else if (tam === 'M' || tam.includes('MEDIO') || tam.includes('MÉDIO')) {
+            qtds.M += saldo;
+        } else if (tam === 'GG' || tam === 'XL' || tam === 'XG' || tam.includes('GRANDE GRA') || tam.includes('X-GRANDE')) {
+            qtds.GG += saldo;
+        } else if (tam === 'G' || tam === 'L' || tam.includes('GRANDE')) {
+            qtds.G += saldo;
+        }
+    });
+
+    // 1. Regra para Roupas (1-P, 2-M, 2-G, 1-GG)
+    if (qtds.P >= 1 && qtds.M >= 2 && qtds.G >= 2 && qtds.GG >= 1) {
+        return true; 
+    }
+
+    // 2. Regra Geral / Calçados (Pelo menos 4 tamanhos diferentes e 6 peças totais)
+    if (tamanhosDistintos >= 4 && totalPecas >= 6) {
+        return true; 
+    }
+
+    return false; // Grade está de fato quebrada
+}
+
+export async function biparPossivelReman(bip) {
+    const input = document.getElementById('inputBipPossivelReman');
+    const modal = document.getElementById('modalScannerReman');
+    const boxResult = document.getElementById('resultadoPossivelReman');
+    const chk = document.getElementById('chkRemanAuto');
+    const modoAuto = chk ? chk.checked : false;
+
+    if (input) input.value = '';
+    if (modal) modal.style.display = 'none';
+    boxResult.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">Analisando SAP...</div>';
+
+    const codigoLimpo = normalizarCodigo(bip);
+    const dicionarios = criarDicionariosSap();
+    const itemEncontrado = dicionarios.dictSKU[codigoLimpo] || dicionarios.dictEAN[codigoLimpo];
+
+    if (!itemEncontrado) {
+        tocarSomScanner('erro');
+        boxResult.innerHTML = `
+            <div style="background:#fef2f2; border:1px solid #f87171; border-radius:16px; padding:20px; text-align:center;">
+                <b style="color:#991b1b; font-size:1.1em;">Produto Não Localizado!</b><br>
+                <span style="color:#ef4444; font-size:0.9em;">O código ${codigoLimpo} não consta na base do SAP.</span>
+            </div>`;
+        return;
+    }
+
+    const sku13 = normalizarCodigo(itemEncontrado.Material || itemEncontrado.SKU);
+    const base8 = sku13.substring(0, 8);
+    const descricao = itemEncontrado["Descrição material"] || itemEncontrado["Texto breve material"] || "Produto";
+    
+    const gradeCompletaSAP = (dicionarios.gradePorBase8[base8] || [])
+        .map(sku => dicionarios.dictSKU[sku])
+        .filter(item => extrairInfoSAP(item).saldo > 0);
+
+    if (gradeCompletaSAP.length === 0) {
+        tocarSomScanner('erro');
+        boxResult.innerHTML = `
+            <div style="background:#fffbeb; border:1px solid #fbbf24; border-radius:16px; padding:20px; text-align:center;">
+                <b style="color:#b45309; font-size:1.1em;">Estoque Zerado</b><br>
+                <span style="color:#d97706; font-size:0.9em;">Não há saldo físico no SAP para este produto.</span>
+            </div>`;
+        return;
+    }
+
+    const snap = await database.ref(`possivel_reman_loja/${state.lojaAtual}/${base8}`).once("value");
+    const jaEstaNaLista = snap.exists();
+    const temGrade = verificarGradeMinima(gradeCompletaSAP);
+
+    if (modoAuto && !jaEstaNaLista) {
+        if (!temGrade) {
+            tocarSomScanner('reman'); 
+            salvarPossivelRemanNoBanco(base8, gradeCompletaSAP, descricao);
+            window.mostrarAviso("Adicionado! Grade Quebrada.", "sucesso");
+            boxResult.innerHTML = ''; 
+            atualizarDashboardPossivelReman();
+            if(input) input.focus();
+            return;
+        } else {
+            tocarSomScanner('erro'); 
+        }
+    } else {
+        tocarSomScanner('padrao'); 
+    }
+    
+    let htmlGrade = gradeCompletaSAP.map(item => {
+        let info = extrairInfoSAP(item);
+        return `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:10px 12px; border-radius:10px; margin-bottom:6px;">
+            <b style="color:#0f172a; font-size:1em;">TAM ${info.tam}</b>
+            <span style="background:#eff6ff; color:#2563eb; padding:4px 10px; border-radius:8px; font-weight:900; font-size:1.1em;">${info.saldo}</span>
+        </div>`;
+    }).join('');
+
+    let alertaGrade = "";
+    if (!jaEstaNaLista && temGrade) {
+        alertaGrade = `
+        <div style="background:#fffbeb; border:1px solid #fde68a; color:#b45309; padding:12px; border-radius:12px; margin-bottom:15px; font-size:0.85em; line-height:1.4; text-align:center;">
+            ⚠️ <b>ATENÇÃO: GRADE COMPLETA!</b><br>
+            Este produto possui grade mínima para venda. Deseja realmente sugeri-lo para remanejamento?
+        </div>`;
+    }
+
+    let botoesAcao = jaEstaNaLista 
+        ? `<button class="btn-main" style="background:#ef4444; width:100%; border-radius:12px; font-weight:800;" onclick="app.removerPossivelReman('${base8}')">🗑️ REMOVER DA LISTA</button>`
+        : `<button class="btn-main" style="background:#7c3aed; width:100%; border-radius:12px; font-weight:800;" onclick="app.adicionarPossivelReman('${base8}')">➕ ADICIONAR À LISTA</button>`;
+
+    boxResult.innerHTML = `
+        <div style="background:${jaEstaNaLista ? "#f0fdf4" : "#ffffff"}; border:2px solid ${jaEstaNaLista ? "#22c55e" : "#e2e8f0"}; border-radius:18px; padding:18px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align:left;">
+            ${jaEstaNaLista ? `<div style="background:#22c55e; color:white; font-size:11px; font-weight:900; padding:4px 10px; border-radius:6px; display:inline-block; margin-bottom:12px;">✅ JÁ ADICIONADO</div>` : ''}
+            <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:15px;">
+                <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:70px; height:70px; border-radius:12px; object-fit:contain; border:1px solid #e2e8f0;" onclick="app.zoomFoto(this.src)">
+                <div>
+                    <b style="color:#0f172a; font-size:14px; line-height:1.2; display:block;">${descricao}</b>
+                    <span style="color:#64748b; font-size:12px; margin-top:4px; display:block;">REF: ${base8}</span>
+                </div>
+            </div>
+            ${alertaGrade}
+            <div style="margin-bottom:15px;">
+                <h5 style="color:#475569; margin:0 0 10px 0; font-size:11px; text-transform:uppercase;">Grade Disponível na Loja</h5>
+                ${htmlGrade}
+            </div>
+            ${botoesAcao}
+        </div>
+    `;
+
+    window.__produtoTempPossivelReman = { base8: base8, descricao: descricao, itensGrade: gradeCompletaSAP };
+}
+
+function salvarPossivelRemanNoBanco(base8, itensGradeSAP, descricao) {
+    let dadosSalvar = {
+        descricao: descricao,
+        adicionadoEm: getHoraCerta(),
+        quem: state.operador,
+        tamanhos: {}
+    };
+    itensGradeSAP.forEach(item => {
+        let sku13 = normalizarCodigo(item.Material || item.SKU);
+        let info = extrairInfoSAP(item);
+        dadosSalvar.tamanhos[sku13] = { tam: info.tam, saldo: info.saldo };
+    });
+    database.ref(`possivel_reman_loja/${state.lojaAtual}/${base8}`).set(dadosSalvar);
+}
+
+export function adicionarPossivelReman(base8) {
+    const temp = window.__produtoTempPossivelReman;
+    if (temp && temp.base8 === base8) {
+        salvarPossivelRemanNoBanco(temp.base8, temp.itensGrade, temp.descricao);
+        window.mostrarAviso("Produto adicionado à lista!", "sucesso");
+        atualizarDashboardPossivelReman();
+        biparPossivelReman(base8); 
+    }
+}
+
+export function removerPossivelReman(base8) {
+    database.ref(`possivel_reman_loja/${state.lojaAtual}/${base8}`).remove().then(() => {
+        window.mostrarAviso("Removido da lista.", "sucesso");
+        atualizarDashboardPossivelReman();
+        biparPossivelReman(base8); 
+    });
+}
+
+export function renderizarListaPossivelReman() {
+    const container = document.getElementById('listaCompletaPossivelReman');
+    if (!container) return;
+
+    container.innerHTML = '<div style="text-align:center; padding:20px; color:#64748b;">Carregando lista...</div>';
+
+    database.ref(`possivel_reman_loja/${state.lojaAtual}`).once("value", snap => {
+        const dados = snap.val() || {};
+        const chaves = Object.keys(dados);
+
+        if (chaves.length === 0) {
+            container.innerHTML = `<div style="color:#64748b; font-weight:800; text-align:center;">Nenhum produto adicionado na lista de sugestões.</div>`;
+            return;
+        }
+
+        let html = '';
+        chaves.forEach(base8 => {
+            const produto = dados[base8];
+            let gradeTags = [];
+            let totalPecas = 0;
+
+            Object.values(produto.tamanhos || {}).forEach(t => {
+                totalPecas += Number(t.saldo);
+                gradeTags.push(`<span style="background:#f1f5f9; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:800; color:#475569;">${t.tam}: ${t.saldo}</span>`);
+            });
+
+            html += `
+            <div style="background:white; border:1px solid #e2e8f0; border-radius:16px; padding:15px; margin-bottom:12px; box-shadow:0 2px 5px rgba(0,0,0,0.02); text-align:left;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div style="display:flex; gap:12px; flex:1;">
+                        <img src="https://imgcentauro-a.akamaihd.net/100x100/${base8}.jpg" style="width:50px; height:50px; border-radius:10px; object-fit:contain; border:1px solid #e2e8f0;" onclick="app.zoomFoto(this.src)">
+                        <div>
+                            <b style="color:#0f172a; font-size:13px; line-height:1.2; display:block;">${produto.descricao}</b>
+                            <span style="color:#64748b; font-size:11px; margin-top:4px; display:block;">REF: ${base8} | Peças: ${totalPecas}</span>
+                        </div>
+                    </div>
+                    <button onclick="app.removerPossivelRemanLista('${base8}')" style="background:#fef2f2; color:#ef4444; border:1px solid #fecaca; border-radius:8px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </div>
+                <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:6px;">
+                    ${gradeTags.join('')}
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    });
+}
+
+export function removerPossivelRemanLista(base8) {
+    if (confirm("Remover este produto das solicitações de remanejamento?")) {
+        database.ref(`possivel_reman_loja/${state.lojaAtual}/${base8}`).remove().then(() => {
+            window.mostrarAviso("Produto excluído da lista.", "sucesso");
+            renderizarListaPossivelReman(); 
+        });
+    }
+}
+
+export async function exportarPossivelReman() {
+    const snap = await database.ref(`possivel_reman_loja/${state.lojaAtual}`).once("value");
+    const dados = snap.val() || {};
+
+    const chaves = Object.keys(dados);
+    if (chaves.length === 0) return window.mostrarAviso("A lista está vazia.", "erro");
+
+    let dadosExportacao = [];
+    chaves.forEach(base8 => {
+        const produto = dados[base8];
+        Object.keys(produto.tamanhos).forEach(sku13 => {
+            const tamInfo = produto.tamanhos[sku13];
+            dadosExportacao.push({
+                "REF (8)": base8,
+                "SKU 13": sku13,
+                "Descrição": produto.descricao,
+                "Tamanho": tamInfo.tam,
+                "Estoque Loja (SAP)": tamInfo.saldo,
+                "Sugerido Por": produto.quem,
+                "Data/Hora": produto.adicionadoEm
+            });
+        });
+    });
+
+    const ws = XLSX.utils.json_to_sheet(dadosExportacao);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sugestões de Reman");
+    XLSX.writeFile(wb, `Sugestoes_Reman_Loja_${state.lojaAtual}.xlsx`);
+}
+
+let audioCtx = null;
 function initAudio() {
     if (!audioCtx) {
         try {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) {
-                audioCtx = new AudioContext();
-            }
-        } catch (e) {
-            console.log("Áudio bloqueado pelo navegador.", e);
-        }
+            if (AudioContext) audioCtx = new AudioContext();
+        } catch (e) {}
     }
-    if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 }
 
 function tocarSomScanner(tipo) {
     initAudio();
     if (!audioCtx) return;
-    
     try {
         const osc = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
-        
         osc.connect(gainNode);
         gainNode.connect(audioCtx.destination);
         

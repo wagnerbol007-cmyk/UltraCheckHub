@@ -8,7 +8,7 @@ import { ouvirEstoque, ouvirAnalise, limparAnalise, finalizarColetaGeral, ouvirH
 import { processarSAP, processarReman, processarUploadApp2 } from './upload.js';
 import { abrirIA } from "./ia.js";
 
-// Importação limpa e corrigida do Reman
+// Nas importações do Reman no início do main.js:
 import {
     biparReman,
     alternarStatusReman,
@@ -16,7 +16,14 @@ import {
     exportarRemanExcel,
     ticarContadorReman,
     aumentarReman,
-    diminuirReman
+    diminuirReman,
+    abrirSubTelaReman,
+    biparPossivelReman,
+    adicionarPossivelReman,
+    removerPossivelReman,
+    exportarPossivelReman,
+    renderizarListaPossivelReman,
+    removerPossivelRemanLista    // <--- ADICIONAR AQUI
 } from './reman.js';
 
 import {
@@ -46,12 +53,12 @@ import {
     exportarPDFMaster,
     listarHistoricoMasters,
     editarMasterAtual,
-    exportarMasterExcel,       // <--- Importação adicionada
-    exportarTodasMasters,      // <--- Importação adicionada
-    imprimirEtiquetaMaster     // <--- Importação adicionada
+    exportarMasterExcel,
+    exportarTodasMasters,
+    imprimirEtiquetaMaster
 } from './masterbox.js';
 
-// Criando a "lista de presença" (window.app) de forma correta
+// Criando a "lista de presença" (window.app)
 window.app = {
     voltarMenu: () => voltarTela(),
 
@@ -65,7 +72,11 @@ window.app = {
                 if (painelId === 'viewEstoque') ouvirEstoque();
                 if (painelId === 'viewAnalise') ouvirAnalise();
                 if (painelId === 'viewRelatorio') ouvirHistorico();
-                if (painelId === 'viewReman') renderizarListaCompletaReman();
+                if (painelId === 'viewReman') {
+                    // Quando abre o painel Reman, sempre joga pro Hub Inicial
+                    window.app.abrirSubTelaReman('hub'); 
+                    renderizarListaCompletaReman();
+                }
 
                 setTimeout(() => {
                     mostrarLoading(false);
@@ -93,7 +104,11 @@ window.app = {
             }
             else if (contexto === 'reman') {
                 document.getElementById('inputBipReman').value = codigoLido;
-                biparReman(codigoLido);
+                window.app.biparReman(codigoLido);
+            }
+            else if (contexto === 'possivel_reman') {
+                document.getElementById('inputBipPossivelReman').value = codigoLido;
+                window.app.biparPossivelReman(codigoLido);
             }
             else if (contexto === 'master') {
                 const agora = Date.now();
@@ -119,7 +134,7 @@ window.app = {
     biparReposicao: analisarDisponibilidade,
     enviarPedidoFaltantes,
 
-    // Funções do Reman conectadas corretamente
+    // Funções do Reman (Antigas e Novas)
     biparReman: biparReman,
     alternarStatusReman: alternarStatusReman,
     ticarContadorReman: ticarContadorReman,
@@ -127,6 +142,14 @@ window.app = {
     exportarReman: exportarRemanExcel,
     aumentarReman: aumentarReman,
     diminuirReman: diminuirReman,
+    
+    abrirSubTelaReman: abrirSubTelaReman,          // <--- NOME CORRETO
+    biparPossivelReman: biparPossivelReman,
+    adicionarPossivelReman: adicionarPossivelReman,
+    removerPossivelReman: removerPossivelReman,
+    exportarPossivelReman: exportarPossivelReman,
+    renderizarListaPossivelReman: renderizarListaPossivelReman, // <--- NOME CORRETO
+    removerPossivelRemanLista: removerPossivelRemanLista,       // <--- ADICIONAR AQUI
 
     gerarQRReman: (tamanho, sku) => {
         event.stopPropagation();
@@ -191,16 +214,14 @@ window.app = {
     exportarPDFMaster,
     listarHistoricoMasters,
     editarMasterAtual,
-    abrirIA,
-
-    // ==========================================
-    // NOVAS FUNÇÕES DA MASTER BOX AQUI
-    // ==========================================
+    
+    // Funções de Exportação da Master Box
     exportarMasterExcel: exportarMasterExcel,
     exportarTodasMasters: exportarTodasMasters,
-    imprimirEtiquetaMaster: imprimirEtiquetaMaster
-
-}; // Agora sim o objeto fecha no lugar certo!
+    imprimirEtiquetaMaster: imprimirEtiquetaMaster,
+    
+    abrirIA: abrirIA
+}; 
 
 document.addEventListener("DOMContentLoaded", () => {
     mudarTela('viewLogin');
