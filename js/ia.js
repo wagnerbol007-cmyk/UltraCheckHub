@@ -5,6 +5,9 @@ import { state, normalizarCodigo } from './state.js';
 import { mudarTela } from './ui.js';
 import { iniciarCamera } from './scanner.js'; 
 
+// ==========================================
+// INJEÇÃO DO GERADOR DE CÓDIGO DE BARRAS 128
+// ==========================================
 function injetarDependencias() {
     if (!window.JsBarcode) {
         const script = document.createElement('script');
@@ -13,6 +16,9 @@ function injetarDependencias() {
     }
 }
 
+// ==========================================
+// FUNÇÃO DE EXPORTAÇÃO PRINCIPAL
+// ==========================================
 export function abrirIA() {
     mudarTela("viewIA");
     injetarDependencias();
@@ -53,18 +59,23 @@ export function abrirIA() {
     renderizarInterfaceIA();
 }
 
+// ==========================================
+// RENDERIZAÇÃO DA INTERFACE PRINCIPAL
+// ==========================================
 function renderizarInterfaceIA() {
     const container = document.getElementById("iaConteudo");
     if (!container) return;
 
     container.innerHTML = `
         <div style="background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;">
+            <!-- align-items: stretch força o botão e o input a terem a mesma altura perfeitamente -->
             <div style="display: flex; gap: 10px; align-items: stretch;">
                 <input type="text" id="iaInputBusca" placeholder="Digite o nome, EAN ou bipe o produto..."
                     style="flex: 1; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1em; font-weight: bold; outline: none; transition: 0.3s; box-sizing: border-box;"
                     onfocus="this.style.borderColor='#6200ee'" onblur="this.style.borderColor='#e2e8f0'">
                 
                 <button onclick="app.abrirScannerIA()" style="background: #6200ee; border: none; border-radius: 12px; min-width: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; box-shadow: 0 4px 10px rgba(98, 0, 238, 0.2); padding: 0;">
+                    <!-- O filter: brightness(0) invert(1) transforma o ícone SVG em branco -->
                     <img src="img/icons/camera.svg" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
                 </button>
             </div>
@@ -78,6 +89,7 @@ function renderizarInterfaceIA() {
             </div>
         </div>
 
+        <!-- Modal da Câmera ao Vivo -->
         <div id="modalScannerIA" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9998; display:none; flex-direction:column; justify-content:center; align-items:center;">
             <div style="background:white; padding:15px; border-radius:20px; width:90%; max-width:400px; text-align:center;">
                 <h3 style="margin-top:0; color:#25105f; text-transform:uppercase;">📸 Leitor IA</h3>
@@ -86,6 +98,7 @@ function renderizarInterfaceIA() {
             </div>
         </div>
 
+        <!-- Modal para Código de Barras 128 -->
         <div id="modalBarcodeIA" onclick="this.style.display='none'" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; display:none; justify-content:center; align-items:center; padding:20px;">
             <div class="card-internal" onclick="event.stopPropagation()" style="background: white; padding:25px; text-align:center; max-width:340px; border-radius: 20px; width: 100%; box-sizing: border-box;">
                 <h3 id="barcodeTitulo" style="margin-top:0; font-size: 0.9em; color:#1e293b; text-transform: uppercase;"></h3>
@@ -103,10 +116,13 @@ function renderizarInterfaceIA() {
     
     input.addEventListener("input", (e) => {
         clearTimeout(timeoutBusca);
-        timeoutBusca = setTimeout(() => realizarBuscaAgrupada(e.target.value), 450);
+        timeoutBusca = setTimeout(() => realizarBuscaAgrupada(e.target.value), 350);
     });
 }
 
+// ==========================================
+// LÓGICA DE BUSCA E AGRUPAMENTO (Busca por Família)
+// ==========================================
 function extrairDetalhes(item) {
     let saldo = 0, tam = "UN", cor = "";
     for(let key in item) {
@@ -118,33 +134,8 @@ function extrairDetalhes(item) {
     return { saldo, tam, cor };
 }
 
-// ==========================================
-// CÉREBRO DA BUSCA INTELIGENTE (ATUALIZADO)
-// ==========================================
-function normalizarTexto(texto) {
-    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
-const dicionarioVarejo = {
-    "camisa": ["camiseta", "manto", "camis", "tee"],
-    "camiseta": ["camisa", "manto", "camis", "tee"],
-    "campo": ["fg", "field", "cpo"],
-    "society": ["tf", "soc", "society", "soçaite"],
-    "futsal": ["in", "ic", "salao", "indoor", "futsal"],
-    "chuteira": ["chut"],
-    "agasalho": ["conjunto", "moletom", "jaqueta", "blusao"],
-    "short": ["shorts", "bermuda"],
-    "bermuda": ["short", "shorts"],
-    "tenis": ["tênis", "calcado", "sneaker", "boot"],
-    "infantil": ["inf", "jr", "junior", "kids", "criança", "crianca"],
-    "feminino": ["fem", "wmns", "mulher"],
-    "masculino": ["masc", "mens", "homem"]
-};
-
-const palavrasIgnoradas = ["de", "da", "do", "para", "com", "em", "um", "uma"];
-
 function realizarBuscaAgrupada(termo) {
-    termo = termo.trim();
+    termo = termo.trim().toLowerCase();
     const container = document.getElementById("iaResultados");
     
     if (!termo) {
@@ -158,12 +149,12 @@ function realizarBuscaAgrupada(termo) {
     }
 
     let resultadosBrutos = [];
-    const termoLimpoParaCodigo = normalizarCodigo(termo);
+    const termoNormalizado = normalizarCodigo(termo);
 
     const itemExato = state.sapCompleto.find(item => {
         const sku = normalizarCodigo(item["Material"] || item["SKU"] || "").toLowerCase();
         const ean = normalizarCodigo(item["EAN"] || "").toLowerCase();
-        return (sku === termoLimpoParaCodigo && sku.length > 7) || (ean === termoLimpoParaCodigo && ean.length > 5);
+        return (sku === termoNormalizado && sku.length > 7) || (ean === termoNormalizado && ean.length > 5);
     });
 
     if (itemExato) {
@@ -175,45 +166,19 @@ function realizarBuscaAgrupada(termo) {
             return sku.startsWith(raiz6);
         });
     } else {
-        let palavrasBusca = normalizarTexto(termo)
-            .split(/\s+/)
-            .filter(p => p.length > 1 && !palavrasIgnoradas.includes(p));
-
-        if (palavrasBusca.length === 0) return;
-
-        let termosExpandidos = palavrasBusca.map(palavra => {
-            let variacoes = [palavra];
-            if (palavra.endsWith('s') && palavra.length > 3) variacoes.push(palavra.slice(0, -1));
-            if (dicionarioVarejo[palavra]) {
-                variacoes = variacoes.concat(dicionarioVarejo[palavra]);
-            }
-            return variacoes;
-        });
-
-        let itensAvaliados = [];
-
-        state.sapCompleto.forEach(item => {
-            const desc = normalizarTexto(item["Descrição material"] || item["Texto breve material"] || "");
-            const marca = normalizarTexto(item["Marca"] || item["Brand"] || "");
-            const cor = normalizarTexto(item["Cor"] || item["Color"] || "");
+        resultadosBrutos = state.sapCompleto.filter(item => {
+            const bloco = `
+                ${item["Material"] || item["SKU"] || ""} 
+                ${item["EAN"] || ""} 
+                ${item["Descrição material"] || item["Texto breve material"] || ""}
+            `.toLowerCase();
             
-            const blocoPesquisa = `${desc} ${marca} ${cor}`;
-
-            // AQUI É A MÁGICA DO FILTRO ABSOLUTO
-            let passouNoFiltro = termosExpandidos.every(grupoSinonimos => {
-                return grupoSinonimos.some(sinonimo => blocoPesquisa.includes(sinonimo));
-            });
-
-            if (passouNoFiltro) {
-                itensAvaliados.push(item);
-            }
+            return termo.split(/\s+/).every(t => bloco.includes(t));
         });
-
-        resultadosBrutos = itensAvaliados.slice(0, 150);
     }
 
     if (resultadosBrutos.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding: 30px; font-weight:bold; color: #64748b;">Nenhum produto correspondente encontrado.</div>`;
+        container.innerHTML = `<div style="text-align:center; padding: 30px; font-weight:bold; color: #64748b;">Nenhum produto encontrado.</div>`;
         return;
     }
 
@@ -229,7 +194,7 @@ function realizarBuscaAgrupada(termo) {
             familiasAgrupadas[raiz8] = {
                 descricao: item["Descrição material"] || item["Texto breve material"] || "Sem Nome",
                 raiz8: raiz8,
-                corPrincipal: info.cor, 
+                corPrincipal: info.cor, // Salva a cor logo de cara para o card principal
                 skus: []
             };
         }
@@ -247,6 +212,9 @@ function realizarBuscaAgrupada(termo) {
     renderizarCardsFamilia(familiasAgrupadas);
 }
 
+// ==========================================
+// RENDERIZAÇÃO DA TELA (Com Efeito Sanfona, Cor e Zoom)
+// ==========================================
 function renderizarCardsFamilia(familiasAgrupadas) {
     const container = document.getElementById("iaResultados");
     let html = "";
@@ -276,11 +244,13 @@ function renderizarCardsFamilia(familiasAgrupadas) {
             `;
         });
 
+        // Adiciona a TAG de COR no Card Principal (se o SAP enviou a cor)
         const badgeCor = familia.corPrincipal ? `<div style="background:#e2e8f0; color:#334155; padding:4px 10px; border-radius:8px; font-size:0.75em; font-weight:800; display:inline-block; margin-top:8px;">🎨 COR: ${familia.corPrincipal}</div>` : '';
 
         html += `
             <div style="background: white; border-radius: 20px; padding: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
                 <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 15px;">
+                    <!-- IMAGEM CLICÁVEL: Chama a função nativa com resolução ampliada para ver os detalhes! -->
                     <img src="https://imgcentauro-a.akamaihd.net/100x100/${familia.raiz8}.jpg" 
                          onclick="if(window.app.zoomFoto) window.app.zoomFoto(this.src.replace('100x100', '900x900'));"
                          style="width: 70px; height: 70px; border-radius: 12px; object-fit: contain; border: 1px solid #e2e8f0; background: white; cursor: pointer; transition: 0.2s;"
@@ -311,6 +281,9 @@ function renderizarCardsFamilia(familiasAgrupadas) {
     document.getElementById("iaResultados").innerHTML = html;
 }
 
+// ==========================================
+// ABERTURA DO MODAL DA ETIQUETA (Code 128)
+// ==========================================
 function abrirModalEtiqueta(sku13, tamanho) {
     if (!window.JsBarcode) {
         alert("A biblioteca de código de barras ainda está carregando. Tente novamente em 2 segundos.");
@@ -320,6 +293,7 @@ function abrirModalEtiqueta(sku13, tamanho) {
     document.getElementById("barcodeTitulo").innerText = `TAMANHO ${tamanho}`;
     document.getElementById("barcodeSku").innerText = sku13;
     
+    // Diminuímos a largura nativa das barras (width: 2) para caber melhor códigos compridos
     JsBarcode("#svgBarcode", sku13, {
         format: "CODE128",
         width: 2,

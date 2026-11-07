@@ -27,8 +27,11 @@ import {
 } from './reman.js';
 
 import {
+    alterarQtdInv,
     abrirModoInventario,
     aplicarFiltroCategoriaInv,
+    aplicarFiltrosInventario, // <--- ADICIONE ESTA LINHA AQUI
+    renderInventario,
     navegarInventario,
     salvarContagemRemota,
     espiarMojix
@@ -37,7 +40,11 @@ import {
 import {
     gerarHistAuditoria,
     baixarCSVInventario,
-    limparColetaInventario
+    limparColetaInventario,
+    abrirModalAuditoria,
+    fecharModalAuditoria,
+    salvarEdicaoAuditoria,
+    filtrarTabelaAuditoria
 } from './inventario_relatorio.js';
 
 import {
@@ -180,9 +187,10 @@ window.app = {
 
     limparAnalise,
     finalizarColetaGeral,
-
+    alterarQtdInv,
     abrirModoInventario,
     aplicarFiltroCategoriaInv,
+    aplicarFiltrosInventario, // <--- ADICIONE ESTA LINHA AQUI TAMBÉM
     navegarInventario,
     salvarContagemRemota,
     espiarMojix,
@@ -197,6 +205,10 @@ window.app = {
     gerarHistAuditoria,
     baixarCSVInventario,
     limparColetaInventario,
+    abrirModalAuditoria: abrirModalAuditoria,
+    fecharModalAuditoria: fecharModalAuditoria,
+    salvarEdicaoAuditoria: salvarEdicaoAuditoria,
+    filtrarTabelaAuditoria: filtrarTabelaAuditoria,
 
     processarSAP,
     processarReman,

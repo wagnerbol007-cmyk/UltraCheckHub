@@ -1295,3 +1295,279 @@ select:focus {
     line-height: 1;
     font-weight: bold;
 }
+
+/* Layout Desktop - Auditoria de Inventário (2 Colunas) */
+@media (min-width: 1024px) {
+    .audit-desktop-grid-2-cols {
+        display: grid;
+        grid-template-columns: 280px 1fr; /* Esquerda (Menu Fixo) | Direita (Tabela Fluida) */
+        gap: 20px;
+        align-items: start;
+    }
+}
+@media (max-width: 1023px) {
+    .audit-desktop-grid-2-cols { display: flex; flex-direction: column; gap: 20px; }
+}
+
+.audit-table tr { cursor: pointer; transition: background 0.2s; }
+.audit-table tr:hover { background-color: #f1f5f9; }
+
+.audit-table th {
+    position: sticky;
+    top: 0;
+    background-color: #f8fafc; /* Fundo sólido impede a sobreposição da rolagem */
+    padding: 12px 15px;
+    font-size: 11px;
+    color: #0f172a;
+    font-weight: 900;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+/* =========================================
+   NOVO VISUAL - APP INVENTÁRIO (CARDS)
+========================================= */
+.inv-card-principal {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.inv-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.inv-badge-busca {
+    background: #f3e8ff;
+    color: #5b21b6;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inv-contador {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 800;
+}
+
+.inv-produto-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.inv-produto-img {
+    width: 100px;
+    height: 120px;
+    object-fit: contain;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+    background: #f8fafc;
+}
+
+.inv-produto-dados {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.inv-produto-titulo {
+    margin: 0 0 5px 0;
+    font-size: 15px;
+    font-weight: 900;
+    color: #1e1b4b;
+    line-height: 1.2;
+}
+
+.inv-produto-cor {
+    margin: 0;
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.inv-divisor {
+    border: 0;
+    height: 1px;
+    background: #e2e8f0;
+    margin: 10px 0;
+}
+
+.inv-produto-specs p {
+    margin: 0 0 5px 0;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.inv-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.inv-stat-box {
+    background: #f8fafc;
+    border: 1.5px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 12px 5px;
+    text-align: center;
+}
+
+.inv-stat-label {
+    font-size: 10px;
+    font-weight: 900;
+    color: #64748b;
+    margin-bottom: 5px;
+}
+
+.inv-stat-valor {
+    font-size: 22px;
+    font-weight: 900;
+    color: #1e1b4b;
+}
+
+/* Cores Dinâmicas para a Diferença */
+.inv-stat-box.dif-negativa { background: #fef2f2; border-color: #fee2e2; }
+.inv-stat-box.dif-negativa .inv-stat-valor { color: #ef4444; }
+.inv-stat-box.dif-negativa .inv-stat-label { color: #dc2626; }
+
+.inv-stat-box.dif-positiva { background: #eff6ff; border-color: #dbeafe; }
+.inv-stat-box.dif-positiva .inv-stat-valor { color: #2563eb; }
+.inv-stat-box.dif-positiva .inv-stat-label { color: #1d4ed8; }
+
+.inv-controle-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #f8fafc;
+    padding: 20px 15px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.inv-btn-qr {
+    background: #5b21b6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px;
+    width: 65px;
+    font-size: 9px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(91,33,182,0.25);
+}
+
+.inv-input-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+}
+
+.inv-label-qtd {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 800;
+    position: absolute;
+    top: -18px;
+}
+
+.inv-btn-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.inv-btn-circle:active { background: #cbd5e1; }
+
+.inv-input-qtd {
+    width: 70px;
+    text-align: center;
+    font-size: 32px;
+    font-weight: 900;
+    color: #1e1b4b;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.inv-progresso-container {
+    margin-bottom: 5px;
+}
+
+.inv-progresso-texto {
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.inv-progresso-bar-bg {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.inv-progresso-bar-fill {
+    height: 100%;
+    background: #5b21b6;
+    width: 0%;
+    border-radius: 10px;
+    transition: width 0.3s;
+}
+
+.inv-nav-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.inv-btn-voltar {
+    flex: 1;
+    background: transparent;
+    border: 2px solid #cbd5e1;
+    color: #475569;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.inv-btn-proximo {
+    flex: 1;
+    background: linear-gradient(135deg, #7e22ce, #3b82f6);
+    border: none;
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(126,34,206,0.3);
+}

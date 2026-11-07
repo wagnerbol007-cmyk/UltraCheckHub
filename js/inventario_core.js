@@ -1,5 +1,5 @@
 // js/inventario_core.js
-// StockFlow v2.4.1
+// StockFlow v3.0.0
 // Coletas separadas:
 // 1ª Busca  -> sinc_rfid_primeira/{loja}
 // 2ª Busca  -> sinc_rfid_segunda/{loja}
@@ -12,8 +12,18 @@ function getCaminhoColetaInventario() {
     if (state.modoInventario === 'padrao') {
         return `sinc_rfid_primeira/${state.lojaAtual}`;
     }
-
     return `sinc_rfid_segunda/${state.lojaAtual}`;
+}
+
+// Descobre a cor dinamicamente nas colunas do SAP
+function extrairCorSAP(info) {
+    for (let key in info) {
+        let k = key.toLowerCase();
+        if (k === 'cor' || k.includes('color') || k === 'm') {
+            if (info[key]) return String(info[key]);
+        }
+    }
+    return info.Cor || info.COLOR || info.CorPrincipal || "";
 }
 
 export function abrirModoInventario(modo, label) {
@@ -28,7 +38,8 @@ export function abrirModoInventario(modo, label) {
 
         if (modo === 'padrao') {
             state.listaInventarioOriginal = Object.keys(state.dbMojixGlobal)
-                .filter(k => parseInt(state.dbMojixGlobal[k].Remaining) < 0)
+                // CORREÇÃO AQUI: !== 0 garante que puxa tudo com divergência (Faltas e Sobras)
+                .filter(k => parseInt(state.dbMojixGlobal[k].Remaining) !== 0)
                 .map(k => ({ Material: k }));
         } else {
             state.listaInventarioOriginal = JSON.parse(d.busca || "[]")
@@ -45,22 +56,33 @@ export function abrirModoInventario(modo, label) {
         state.listaInventarioFiltrada = [...state.listaInventarioOriginal];
 
         document.getElementById('labelBuscaNome').innerText = label;
-        document.getElementById('filtroCategoria').value = "TODAS";
+        
+        const selectCat = document.getElementById('filtroCategoria');
+        if (selectCat) selectCat.value = "TODAS";
+        
+        const selectDiv = document.getElementById('filtroDivergencia');
+        if (selectDiv) selectDiv.value = "TODOS";
 
         let cats = new Set();
-
         Object.values(state.dbMojixGlobal).forEach(m => {
             if (m['Dept Name']) cats.add(m['Dept Name']);
         });
 
-        const select = document.getElementById('filtroCategoria');
-        select.innerHTML = '<option value="TODAS">TODAS AS CATEGORIAS</option>';
+        if (selectCat) {
+            selectCat.innerHTML = '<option value="TODAS">TODAS AS CATEGORIAS</option>';
+            Array.from(cats).sort().forEach(c => {
+                selectCat.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+            selectCat.innerHTML += '<option value="MANUAL">📦 ITENS MANUAIS</option>';
+        }
 
-        Array.from(cats).sort().forEach(c => {
-            select.innerHTML += `<option value="${c}">${c}</option>`;
-        });
-
-        select.innerHTML += '<option value="MANUAL">📦 ITENS MANUAIS</option>';
+        if (selectDiv) {
+            selectDiv.innerHTML = `
+                <option value="TODOS">📦 TODOS OS ITENS</option>
+                <option value="SOBRAS">📈 APENAS SOBRAS (Lido > Esperado)</option>
+                <option value="FALTAS">📉 APENAS FALTAS (Lido < Esperado)</option>
+            `;
+        }
 
         iniciarAppInventario();
     });
@@ -84,22 +106,41 @@ function iniciarAppInventario() {
     });
 }
 
-export function aplicarFiltroCategoriaInv() {
-    const cat = document.getElementById('filtroCategoria').value;
+export function aplicarFiltrosInventario() {
+    const cat = document.getElementById('filtroCategoria') ? document.getElementById('filtroCategoria').value : "TODAS";
+    const divTipo = document.getElementById('filtroDivergencia') ? document.getElementById('filtroDivergencia').value : "TODOS";
 
+    // 1. Filtro por Categoria
+    let listaTemp = [];
     if (cat === "TODAS") {
-        state.listaInventarioFiltrada = [...state.listaInventarioOriginal];
+        listaTemp = [...state.listaInventarioOriginal];
     } else if (cat === "MANUAL") {
-        state.listaInventarioFiltrada =
-            state.listaInventarioOriginal.filter(it => !state.dbMojixGlobal[it.Material]);
+        listaTemp = state.listaInventarioOriginal.filter(it => !state.dbMojixGlobal[it.Material]);
     } else {
-        state.listaInventarioFiltrada =
-            state.listaInventarioOriginal.filter(it =>
-                state.dbMojixGlobal[it.Material] &&
-                state.dbMojixGlobal[it.Material]['Dept Name'] === cat
-            );
+        listaTemp = state.listaInventarioOriginal.filter(it =>
+            state.dbMojixGlobal[it.Material] &&
+            state.dbMojixGlobal[it.Material]['Dept Name'] === cat
+        );
     }
 
+    // 2. Filtro por Sobras ou Faltas
+    if (divTipo === "SOBRAS") {
+        listaTemp = listaTemp.filter(it => {
+            const moj = state.dbMojixGlobal[it.Material] || {};
+            const exp = Number(moj.Expected || 0);
+            const lido = Number(moj.Counted || 0);
+            return lido > exp;
+        });
+    } else if (divTipo === "FALTAS") {
+        listaTemp = listaTemp.filter(it => {
+            const moj = state.dbMojixGlobal[it.Material] || {};
+            const exp = Number(moj.Expected || 0);
+            const lido = Number(moj.Counted || 0);
+            return lido < exp;
+        });
+    }
+
+    state.listaInventarioFiltrada = listaTemp;
     state.indiceInventario = 0;
     renderInventario();
     atualizarChecklistInv(
@@ -109,11 +150,13 @@ export function aplicarFiltroCategoriaInv() {
     atualizarBarraProgressoInv();
 }
 
+// Mantém compatibilidade com chamadas antigas
+export const aplicarFiltroCategoriaInv = aplicarFiltrosInventario;
+
 function obterQuantidadeResposta(resposta) {
     if (resposta && typeof resposta === "object") {
         return resposta.quantidade || "";
     }
-
     return resposta || "";
 }
 
@@ -121,7 +164,6 @@ function obterOperadorResposta(resposta) {
     if (resposta && typeof resposta === "object") {
         return resposta.operador || "";
     }
-
     return "";
 }
 
@@ -129,13 +171,11 @@ function obterDataHoraResposta(resposta) {
     if (resposta && typeof resposta === "object") {
         return resposta.dataHora || "";
     }
-
     return "";
 }
 
 function atualizarBarraProgressoInv() {
     const total = state.listaInventarioFiltrada.length;
-
     const respondidos = state.listaInventarioFiltrada.filter(it => {
         const resposta = state.respostasInventarioNuvem[it.Material];
         return obterQuantidadeResposta(resposta);
@@ -155,67 +195,86 @@ export function renderInventario() {
     const info = state.dbSap[sku] || {};
     const moj = state.dbMojixGlobal[sku] || {};
     const resposta = state.respostasInventarioNuvem[sku];
+    const corProduto = extrairCorSAP(info);
 
-    document.getElementById('viewImgInv').src =
-        `https://imgcentauro-a.akamaihd.net/768x768/${sku.substring(0, 8)}.jpg`;
+    // Imagem
+    document.getElementById('viewImgInv').src = `https://imgcentauro-a.akamaihd.net/768x768/${sku.substring(0, 8)}.jpg`;
 
-    document.getElementById('viewNomeInv').innerText =
-        info["Descrição material"] ||
-        info["Texto breve material"] ||
-        moj["SKU Description"] ||
-        "NÃO CADASTRADO NO SAP";
-
+    // Nome e Cor separados
+    document.getElementById('viewNomeInv').innerText = info["Descrição material"] || info["Texto breve material"] || moj["SKU Description"] || "NÃO CADASTRADO NO SAP";
+    document.getElementById('viewCorInv').innerText = corProduto || "SEM COR REGISTRADA";
+    
+    // Dados
     document.getElementById('viewSKUInv').innerText = sku;
     document.getElementById('viewEANInv').innerText = info.EAN || "---";
 
     let tam = "--";
-
     for (let key in info) {
         if (key.toLowerCase().includes("tam")) tam = info[key];
     }
-
     if (info.Tamanho) tam = info.Tamanho;
-
     document.getElementById('viewTamanhoInv').innerText = tam;
 
-    document.getElementById('statsAreaInv').style.display =
-        (state.modoInventario === 'padrao' ? 'grid' : 'none');
+    // Estatísticas (Apenas na 1ª Busca)
+    document.getElementById('statsAreaInv').style.display = (state.modoInventario === 'padrao' ? 'grid' : 'none');
 
     if (state.modoInventario === 'padrao') {
-        document.getElementById('viewExpInv').innerText = moj.Expected || 0;
-        document.getElementById('viewCountInv').innerText = moj.Counted || 0;
-        document.getElementById('viewDifInv').innerText = moj.Remaining || 0;
+        const exp = Number(moj.Expected || 0);
+        const lido = Number(moj.Counted || 0);
+        const dif = lido - exp; // Cálculo da diferença (Lido - Esperado)
+
+        document.getElementById('viewExpInv').innerText = exp;
+        document.getElementById('viewCountInv').innerText = lido;
+        
+        const boxDif = document.getElementById('boxDifInv');
+        const labelDif = document.getElementById('labelDifInv');
+        const viewDif = document.getElementById('viewDifInv');
+
+        boxDif.className = 'inv-stat-box'; // Reseta as classes de cor
+
+        if (dif < 0) {
+            boxDif.classList.add('dif-negativa'); // Fica Vermelho
+            labelDif.innerText = "⚠️ DIF";
+            viewDif.innerText = dif;
+        } else if (dif > 0) {
+            boxDif.classList.add('dif-positiva'); // Fica Azul
+            labelDif.innerText = "📈 DIF";
+            viewDif.innerText = "+" + dif;
+        } else {
+            labelDif.innerText = "✅ DIF";
+            viewDif.innerText = "0";
+        }
     }
 
     document.getElementById('contadorInv').innerText =
-        (state.indiceInventario + 1).toString().padStart(2, '0') +
-        " / " +
-        state.listaInventarioFiltrada.length;
+        (state.indiceInventario + 1).toString().padStart(2, '0') + " / " + state.listaInventarioFiltrada.length;
 
-    document.getElementById('inputAchadoInv').value =
-        obterQuantidadeResposta(resposta);
+    document.getElementById('inputAchadoInv').value = obterQuantidadeResposta(resposta);
+}
 
-    document.getElementById('btnEspiarInv').style.display =
-        (state.modoInventario === 'padrao' ? 'none' : 'block');
+// NOVA FUNÇÃO: Botões de + e -
+export function alterarQtdInv(valorAjuste) {
+    const inputQtd = document.getElementById('inputAchadoInv');
+    let atual = parseInt(inputQtd.value) || 0;
+    atual += valorAjuste;
+    
+    if (atual < 0) atual = 0; // Não deixa ficar negativo
+    
+    inputQtd.value = atual;
+    salvarContagemRemota(); // Salva no Firebase imediatamente
 }
 
 export function navegarInventario(p) {
     state.indiceInventario += p;
-
-    if (state.indiceInventario < 0) {
-        state.indiceInventario = 0;
-    }
-
+    if (state.indiceInventario < 0) state.indiceInventario = 0;
     if (state.indiceInventario >= state.listaInventarioFiltrada.length) {
         state.indiceInventario = state.listaInventarioFiltrada.length - 1;
     }
-
     renderInventario();
 }
 
 export function salvarContagemRemota() {
     const itemAtual = state.listaInventarioFiltrada[state.indiceInventario];
-
     if (!itemAtual) return;
 
     const sku = itemAtual.Material;
@@ -235,21 +294,12 @@ export function salvarContagemRemota() {
 }
 
 export function espiarMojix() {
-    const m =
-        state.dbMojixGlobal[
-            state.listaInventarioFiltrada[state.indiceInventario].Material
-        ];
-
-    alert(
-        m
-            ? `ESP: ${m.Expected} | LIDO: ${m.Counted}`
-            : "Sem dados de RFID para este item."
-    );
+    const m = state.dbMojixGlobal[state.listaInventarioFiltrada[state.indiceInventario].Material];
+    alert(m ? `ESP: ${m.Expected} | LIDO: ${m.Counted}` : "Sem dados de RFID para este item.");
 }
 
 function atualizarChecklistInv(container, lista) {
     if (!container) return;
-
     container.innerHTML = "";
 
     lista.forEach((it, i) => {
@@ -261,10 +311,10 @@ function atualizarChecklistInv(container, lista) {
         const info = state.dbSap[it.Material] || {};
         const moj = state.dbMojixGlobal[it.Material] || {};
         const base8 = it.Material.substring(0, 8);
+        const corProduto = extrairCorSAP(info);
 
         const d = document.createElement('div');
         d.className = `check-item ${val ? 'concluido' : ''}`;
-
         d.style.background = "#fff";
         d.style.padding = "15px";
         d.style.borderBottom = "1px solid #f1f5f9";
@@ -280,28 +330,19 @@ function atualizarChecklistInv(container, lista) {
             d.style.borderLeft = "8px solid #22c55e";
         }
 
-        const nomeExibicao =
-            info["Descrição material"] ||
-            info["Texto breve material"] ||
-            moj["SKU Description"] ||
-            "Item s/ Nome";
+        let nomeExibicao = info["Descrição material"] || info["Texto breve material"] || moj["SKU Description"] || "Item s/ Nome";
+        if (corProduto) nomeExibicao += ` <span style="color:#64748b; font-weight:normal;">(${corProduto})</span>`;
 
         let tam = "--";
-
         for (let key in info) {
             if (key.toLowerCase().includes("tam")) tam = info[key];
         }
-
         if (info.Tamanho) tam = info.Tamanho;
 
         d.onclick = () => {
             state.indiceInventario = i;
             renderInventario();
-
-            if (container.id !== 'listaProgresso') {
-                mudarTela('viewInventarioApp');
-            }
-
+            if (container.id !== 'listaProgresso') mudarTela('viewInventarioApp');
             window.scrollTo(0, 0);
         };
 
