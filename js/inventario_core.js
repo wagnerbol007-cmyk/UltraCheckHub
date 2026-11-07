@@ -250,6 +250,20 @@ export function renderInventario() {
         (state.indiceInventario + 1).toString().padStart(2, '0') + " / " + state.listaInventarioFiltrada.length;
 
     document.getElementById('inputAchadoInv').value = obterQuantidadeResposta(resposta);
+
+    // ==========================================
+    // CONTROLO DO BOTÃO ESPIAR (FORÇA A REGRA)
+    // ==========================================
+    const btnEspiar = document.getElementById('btnEspiarInv');
+    if (btnEspiar) {
+        if (state.modoInventario === 'padrao') {
+            // 1ª BUSCA: Oculta o botão (já tem as caixas grandes)
+            btnEspiar.style.setProperty('display', 'none', 'important');
+        } else {
+            // 2ª BUSCA: Mostra o botão
+            btnEspiar.style.setProperty('display', 'flex', 'important');
+        }
+    }
 }
 
 // NOVA FUNÇÃO: Botões de + e -

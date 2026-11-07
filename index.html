@@ -475,15 +475,23 @@
             </div>
         </div>
 
-        <!-- CONTROLES (QR MINI + CAIXA ÚNICA DE QUANTIDADE) -->
+<!-- CONTROLES (QR MINI, ESPIAR + CAIXA ÚNICA DE QUANTIDADE) -->
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <!-- Botão QR -->
             <button class="inv-btn-qr-mini" onclick="app.gerarQRInv()">
                 <span style="font-size: 13px; letter-spacing: -1px; line-height: 1;">[||||]</span>
                 <span>QR</span>
             </button>
             
+            <!-- Botão Espiar (Fica visível só na 2ª Busca via JS) -->
+            <button id="btnEspiarInv" class="inv-btn-qr-mini" style="background: linear-gradient(135deg, #475569, #1e293b) !important; box-shadow: 0 3px 8px rgba(71, 85, 105, 0.25) !important;" onclick="app.espiarMojix()">
+                <span style="font-size: 14px; line-height: 1;"></span>
+                <span>ESP</span>
+            </button>
+            
+            <!-- Caixa Quantidade -->
             <div class="inv-box-quantidade-unica">
-                <span style="font-size: 10px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Quantidade localizada</span>
+                <span style="font-size: 10px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Quantidade Encontrada</span>
                 <input type="number" id="inputAchadoInv" placeholder="0" onchange="app.salvarContagemRemota()">
             </div>
         </div>
