@@ -373,464 +373,100 @@
 </div>
 
 <div id="viewInventarioApp" class="view-container">
-    <style>
-        /* =========================================
-           LAYOUT MODERNO - APP INVENTÁRIO
-           ========================================= */
-        .inv-modern-container { 
-            max-width: 900px; 
-            margin: 0 auto; 
-            width: 100%; 
-            padding: 15px; 
-            box-sizing: border-box; 
-        }
+    
+    <!-- FILTROS FINAIS NO TOPO -->
+    <div class="inv-filtros-container" style="display: flex; gap: 8px; margin-bottom: 10px; width: 100%; max-width: 900px;">
+        <select id="filtroCategoria" style="flex: 1; padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #25105f; font-weight: 800; font-size: 0.72em; height: 34px;" onchange="app.aplicarFiltrosInventario()">
+            <option value="TODAS">TODAS AS CATEGORIAS</option>
+        </select>
+        <select id="filtroDivergencia" style="flex: 1; padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #25105f; font-weight: 800; font-size: 0.72em; height: 34px;" onchange="app.aplicarFiltrosInventario()">
+            <option value="TODOS">📦 TODOS OS ITENS</option>
+            <option value="SOBRAS">📈 APENAS SOBRAS</option>
+            <option value="FALTAS">📉 APENAS FALTAS</option>
+        </select>
+    </div>
+
+    <!-- CARTÃO PRINCIPAL DE INVENTÁRIO -->
+    <div id="gestureZoneInv" class="inv-card-principal" style="width: 100%; max-width: 900px; background: #fff; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 15px;">
         
-        /* Filtros */
-        .inv-filters-row { 
-            display: flex; 
-            gap: 15px; 
-            margin-bottom: 20px; 
-            flex-wrap: wrap; 
-        }
-        .inv-filters-row select { 
-            flex: 1; 
-            min-width: 200px; 
-            padding: 14px 15px; 
-            border-radius: 10px; 
-            border: 1px solid #d8b4fe; 
-            background: #fff; 
-            color: #4c1d95; 
-            font-weight: 800; 
-            font-size: 14px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .inv-filters-row select:focus { border-color: #7c3aed; }
-
-        /* Card Principal */
-        .inv-card-modern { 
-            background: #fff; 
-            border-radius: 16px; 
-            padding: 25px 30px; 
-            box-shadow: 0 10px 40px rgba(91,33,182,0.08); 
-            border: 1px solid #f3e8ff; 
-            margin-bottom: 25px; 
-        }
-
-        /* Cabeçalho do Card */
-        .inv-card-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 25px; 
-            border-bottom: 1px solid #f3e8ff; 
-            padding-bottom: 15px; 
-        }
-        .inv-badge-busca { 
-            background: #f3e8ff; 
-            color: #5b21b6; 
-            padding: 6px 14px; 
-            border-radius: 20px; 
-            font-size: 13px; 
-            font-weight: 800; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 8px; 
-        }
-        .inv-contador { font-size: 18px; color: #475569; font-weight: 900; }
-
-        /* Dados do Produto (Responsivo) */
-        .inv-product-split { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 25px; 
-            margin-bottom: 35px; 
-        }
-        @media (min-width: 768px) { 
-            .inv-product-split { flex-direction: row; align-items: stretch; } 
-        }
-
-        /* Imagem e Funcionalidade de Zoom */
-        .inv-product-img-wrapper { 
-            flex-shrink: 0; 
-            width: 100%; 
-            max-width: 240px; 
-            margin: 0 auto; 
-            cursor: pointer; 
-            transition: transform 0.2s; 
-            position: relative; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-        .inv-product-img-wrapper:hover { transform: scale(1.03); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .inv-product-img-wrapper::after { 
-            content: '🔍 Ampliar'; 
-            position: absolute; 
-            bottom: 12px; 
-            right: 12px; 
-            background: rgba(46, 16, 101, 0.85); 
-            color: white; 
-            font-size: 11px; 
-            padding: 6px 10px; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            pointer-events: none; 
-        }
-        .inv-produto-img { 
-            width: 100%; 
-            height: auto; 
-            aspect-ratio: 4/5; 
-            object-fit: contain; 
-            border-radius: 12px; 
-        }
-
-        /* Informações Textuais */
-        .inv-product-info { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-        }
-        .inv-produto-titulo { font-size: 24px; font-weight: 900; color: #2e1065; margin: 0 0 8px 0; line-height: 1.2; }
-        .inv-produto-cor { font-size: 14px; color: #64748b; font-weight: 800; text-transform: uppercase; margin: 0 0 20px 0; }
-        
-        .inv-specs-grid { 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 12px; 
-            background: #f8fafc; 
-            padding: 20px; 
-            border-radius: 12px; 
-            border: 1px solid #f1f5f9; 
-        }
-        @media (min-width: 500px) { .inv-specs-grid { grid-template-columns: 1fr 1fr; } }
-        
-        .inv-spec-item { font-size: 14px; color: #64748b; }
-        .inv-spec-item b { color: #1e293b; }
-        .inv-spec-tam { 
-            grid-column: 1 / -1; 
-            font-size: 18px; 
-            color: #4c1d95; 
-            font-weight: 900; 
-            margin-top: 5px; 
-            padding-top: 15px; 
-            border-top: 1px solid #e2e8f0; 
-        }
-
-        /* Indicadores (ESP, LIDO, DIF) */
-        .inv-stats-modern { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 15px; 
-            margin-bottom: 35px; 
-        }
-        .inv-stat-box { 
-            background: #f8fafc; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px; 
-            padding: 18px 10px; 
-            text-align: center; 
-        }
-        .inv-stat-label { font-size: 12px; font-weight: 900; color: #64748b; margin-bottom: 8px; text-transform: uppercase; }
-        .inv-stat-valor { font-size: 32px; font-weight: 900; color: #0f172a; }
-        
-        .inv-stat-box.dif-negativa { background: #fef2f2; border-color: #fca5a5; }
-        .inv-stat-box.dif-negativa .inv-stat-valor { color: #dc2626; }
-        .inv-stat-box.dif-negativa .inv-stat-label { color: #b91c1c; }
-        
-        .inv-stat-box.dif-positiva { background: #eff6ff; border-color: #93c5fd; }
-        .inv-stat-box.dif-positiva .inv-stat-valor { color: #2563eb; }
-        .inv-stat-box.dif-positiva .inv-stat-label { color: #1d4ed8; }
-
-        /* Área de Digitação e QR */
-        .inv-action-area { 
-            display: flex; 
-            align-items: stretch; 
-            gap: 20px; 
-            background: #f8fafc; 
-            padding: 25px; 
-            border-radius: 16px; 
-            border: 1px solid #e2e8f0; 
-            margin-bottom: 30px; 
-        }
-        .inv-btn-qr-modern { 
-            background: #fff; 
-            color: #5b21b6; 
-            border: 2px solid #ddd6fe; 
-            border-radius: 12px; 
-            padding: 0 20px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center;
-            align-items: center; 
-            gap: 8px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            font-weight: 900; 
-            font-size: 12px; 
-        }
-        .inv-btn-qr-modern:hover { background: #f3e8ff; border-color: #a855f7; transform: translateY(-2px); }
-        .inv-btn-qr-modern svg { width: 28px; height: 28px; stroke: #5b21b6; }
-        
-        .inv-input-group { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-        }
-        .inv-input-label { 
-            font-size: 14px; 
-            color: #475569; 
-            font-weight: 900; 
-            margin-bottom: 12px; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-        }
-        .inv-input-number { 
-            width: 100%; 
-            max-width: 350px; 
-            text-align: center; 
-            font-size: 64px; 
-            font-weight: 900; 
-            color: #2e1065; 
-            background: #fff; 
-            border: 2px solid #cbd5e1; 
-            border-radius: 16px; 
-            padding: 10px; 
-            outline: none; 
-            transition: all 0.2s; 
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.03); 
-        }
-        .inv-input-number:focus { border-color: #8b5cf6; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15); }
-        .inv-input-number::-webkit-inner-spin-button, .inv-input-number::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        .inv-input-number[type=number] { -moz-appearance: textfield; }
-
-        /* Barra de Progresso */
-        .inv-progress-modern { margin-bottom: 35px; }
-        .inv-progress-text { 
-            font-size: 14px; 
-            font-weight: 900; 
-            color: #64748b; 
-            margin-bottom: 12px; 
-            display: flex; 
-            justify-content: space-between; 
-        }
-        .inv-progress-track { height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
-        .inv-progress-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #3b82f6); width: 0%; border-radius: 10px; transition: width 0.4s ease; }
-
-        /* Navegação Inferior */
-        .inv-footer-nav { display: flex; gap: 20px; }
-        .inv-btn-secondary { 
-            flex: 1; 
-            background: #fff; 
-            border: 2px solid #cbd5e1; 
-            color: #475569; 
-            padding: 20px; 
-            border-radius: 14px; 
-            font-weight: 900; 
-            font-size: 16px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-        }
-        .inv-btn-secondary:hover { background: #f1f5f9; color: #1e293b; border-color: #94a3b8; }
-        .inv-btn-primary { 
-            flex: 2; 
-            background: linear-gradient(135deg, #7c3aed, #3b82f6); 
-            border: none; 
-            color: white; 
-            padding: 20px; 
-            border-radius: 14px; 
-            font-weight: 900; 
-            font-size: 16px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.25); 
-        }
-        .inv-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4); }
-
-        /* MODAL DE ZOOM DA IMAGEM */
-        .inv-modal-zoom { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100vw; height: 100vh; 
-            background: rgba(15, 23, 42, 0.92); 
-            z-index: 10000; 
-            justify-content: center; 
-            align-items: center; 
-            flex-direction: column; 
-            backdrop-filter: blur(4px); 
-        }
-        .inv-modal-zoom.active { display: flex; }
-        .inv-modal-close { 
-            position: absolute; 
-            top: 25px; 
-            right: 35px; 
-            color: white; 
-            font-size: 45px; 
-            cursor: pointer; 
-            font-weight: 300; 
-            line-height: 1; 
-            padding: 10px; 
-            z-index: 10001; 
-            transition: color 0.2s;
-        }
-        .inv-modal-close:hover { color: #d8b4fe; }
-        .inv-modal-content { 
-            max-width: 90vw; 
-            max-height: 85vh; 
-            object-fit: contain; 
-            border-radius: 16px; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6); 
-        }
-        .inv-modal-hint { 
-            color: rgba(255,255,255,0.7); 
-            margin-top: 20px; 
-            font-size: 14px; 
-            font-weight: 600; 
-            letter-spacing: 0.5px;
-        }
-    </style>
-
-    <div class="inv-modern-container">
-        
-        <!-- Filtros Superiores -->
-        <div class="inv-filters-row">
-            <select id="filtroCategoria" onchange="app.aplicarFiltrosInventario()">
-                <option value="TODAS">TODAS AS CATEGORIAS</option>
-            </select>
-            <select id="filtroDivergencia" onchange="app.aplicarFiltrosInventario()">
-                <option value="TODOS">📦 TODOS OS ITENS</option>
-                <option value="SOBRAS">📈 APENAS SOBRAS (Lido > Esperado)</option>
-                <option value="FALTAS">📉 APENAS FALTAS (Lido < Esperado)</option>
-            </select>
+        <!-- HEADER DO CARTÃO -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="background: #f3e8ff; color: #4c1d95; padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: 900;">
+                <span>|||||</span> <span id="labelBuscaNome">1ª Busca RFID</span>
+            </div>
+            <div id="contadorInv" style="font-size: 13px; color: #0f172a; font-weight: 900;">01 / 252</div>
         </div>
 
-        <!-- Card Principal (Com suporte a gestos swipe) -->
-        <div id="gestureZoneInv" class="inv-card-modern">
-            
-            <!-- Cabeçalho -->
-            <div class="inv-card-header">
-                <div class="inv-badge-busca">
-                    <span style="letter-spacing: -1px;">|||||</span> <span id="labelBuscaNome">1ª Busca RFID</span>
-                </div>
-                <div class="inv-contador" id="contadorInv">01 / 252</div>
-            </div>
-
-            <!-- Dados do Produto (Imagem clicável e Textos) -->
-            <div class="inv-product-split">
-                <div class="inv-product-img-wrapper" onclick="abrirZoomInventario()">
-                    <img id="viewImgInv" src="" class="inv-produto-img" alt="Foto do Produto">
-                </div>
-                
-                <div class="inv-product-info">
-                    <h3 id="viewNomeInv" class="inv-produto-titulo">NOME DO PRODUTO</h3>
-                    <p id="viewCorInv" class="inv-produto-cor">COR DO PRODUTO</p>
-                    
-                    <div class="inv-specs-grid">
-                        <div class="inv-spec-item"><b>SKU:</b> <span id="viewSKUInv">---</span></div>
-                        <div class="inv-spec-item"><b>EAN:</b> <span id="viewEANInv">---</span></div>
-                        <div class="inv-spec-tam">TAM: <span id="viewTamanhoInv">---</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Indicadores Estatísticos -->
-            <div id="statsAreaInv" class="inv-stats-modern">
-                <div class="inv-stat-box">
-                    <div class="inv-stat-label">📦 ESP</div>
-                    <div id="viewExpInv" class="inv-stat-valor">0</div>
-                </div>
-                <div class="inv-stat-box">
-                    <div class="inv-stat-label">||||| LIDO</div>
-                    <div id="viewCountInv" class="inv-stat-valor">0</div>
-                </div>
-                <div class="inv-stat-box" id="boxDifInv">
-                    <div class="inv-stat-label" id="labelDifInv">⚠️ DIF</div>
-                    <div id="viewDifInv" class="inv-stat-valor">0</div>
-                </div>
-            </div>
-
-            <!-- Ações: Botão QR (Discreto) e Campo de Digitação (Destaque) -->
-            <div class="inv-action-area">
-                <button class="inv-btn-qr-modern" onclick="app.gerarQRInv()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 4h4v4H4z"></path>
-                        <path d="M4 16h4v4H4z"></path>
-                        <path d="M16 4h4v4h-4z"></path>
-                        <path d="M12 16v4"></path>
-                        <path d="M16 16v4"></path>
-                        <path d="M16 20h4"></path>
-                        <path d="M12 12v.01"></path>
-                    </svg>
-                    QR SKU
+        <!-- LINHA DO PRODUTO (FOTO + DADOS LADO A LADO) -->
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-start;">
+            <!-- Wrapper da Imagem -->
+            <div style="position: relative; width: 110px; height: 130px; flex-shrink: 0; border-radius: 12px; background: #f8fafc; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; overflow: hidden;">
+                <img id="viewImgInv" src="" style="width: 100%; height: 100%; object-fit: contain;">
+                <button style="position: absolute; bottom: 5px; right: 5px; background: rgba(76, 29, 149, 0.85); color: white; border: none; border-radius: 6px; padding: 4px 6px; font-size: 9px; font-weight: bold; cursor: pointer;" onclick="app.zoomFoto(document.getElementById('viewImgInv').src)">
+                    🔍 Ampliar
                 </button>
-                
-                <div class="inv-input-group">
-                    <span class="inv-input-label">Quantidade Encontrada</span>
-                    <input type="number" id="inputAchadoInv" class="inv-input-number" placeholder="0" onchange="app.salvarContagemRemota()">
-                </div>
             </div>
-
-            <!-- Progresso -->
-            <div class="inv-progress-modern">
-                <div class="inv-progress-text">
-                    <span>Progresso da Conferência</span>
-                    <span id="labelProgressoPercent">0% (0/0)</span>
+            <!-- Dados do Produto -->
+            <div style="flex: 1; min-width: 0;">
+                <h3 id="viewNomeInv" style="margin: 0 0 4px 0; font-size: 15px; font-weight: 900; color: #2e1065; line-height: 1.2;">NOME DO PRODUTO</h3>
+                <p id="viewCorInv" style="margin: 0; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase;">COR</p>
+                <hr style="border: 0; height: 1px; background: #f1f5f9; margin: 10px 0;">
+                <div style="font-size: 11px; color: #64748b; display: flex; flex-direction: column; gap: 4px;">
+                    <div><b>SKU:</b> <span id="viewSKUInv">---</span></div>
+                    <div><b>EAN:</b> <span id="viewEANInv">---</span></div>
+                    <div><b>TAM:</b> <span id="viewTamanhoInv" style="color: #4c1d95; font-weight: 900;">---</span></div>
                 </div>
-                <div class="inv-progress-track">
-                    <div id="progressBarInv" class="inv-progress-fill"></div>
-                </div>
-            </div>
-
-            <!-- Navegação -->
-            <div class="inv-footer-nav">
-                <button class="inv-btn-secondary" onclick="app.navegarInventario(-1)">← VOLTAR</button>
-                <button class="inv-btn-primary" onclick="app.navegarInventario(1)">PRÓXIMO →</button>
             </div>
         </div>
 
-        <!-- Lista de Progresso Inferior (Preservada) -->
-        <div id="listaProgresso" style="padding-bottom: 80px;"></div>
+        <!-- ESTATÍSTICAS (3 CAIXAS LADO A LADO) -->
+        <div id="statsAreaInv" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 12px 5px; text-align: center;">
+                <div style="font-size: 10px; font-weight: 900; color: #64748b; margin-bottom: 4px;">📦 ESP</div>
+                <div id="viewExpInv" style="font-size: 22px; font-weight: 900; color: #1e1b4b;">0</div>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 12px 5px; text-align: center;">
+                <div style="font-size: 10px; font-weight: 900; color: #64748b; margin-bottom: 4px;">||||| LIDO</div>
+                <div id="viewCountInv" style="font-size: 22px; font-weight: 900; color: #1e1b4b;">0</div>
+            </div>
+            <div id="boxDifInv" style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 12px 5px; text-align: center;">
+                <div id="labelDifInv" style="font-size: 10px; font-weight: 900; color: #64748b; margin-bottom: 4px;">⚠️ DIF</div>
+                <div id="viewDifInv" style="font-size: 22px; font-weight: 900; color: #1e1b4b;">0</div>
+            </div>
+        </div>
+
+        <!-- CONTROLES -->
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <button style="background: linear-gradient(135deg, #6d28d9, #4c1d95); color: white; border: none; border-radius: 16px; width: 85px; height: 85px; font-size: 9px; font-weight: 900; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 4px 12px rgba(76, 29, 149, 0.3); flex-shrink: 0; cursor: pointer;" onclick="app.gerarQRInv()">
+                <span style="font-size: 20px; letter-spacing: -2px;">[||||]</span>
+                QR SKU
+            </button>
+            
+            <!-- CAIXA ÚNICA DE QUANTIDADE -->
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 10px 15px; height: 85px; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+                <span style="font-size: 11px; color: #64748b; font-weight: 800; margin-bottom: 2px;">Quantidade encontrada</span>
+                <input type="number" id="inputAchadoInv" style="width: 100%; text-align: center; font-size: 36px; font-weight: 900; color: #1e1b4b; background: transparent; border: none; outline: none; padding: 0; margin: 0;" placeholder="0" onchange="app.salvarContagemRemota()">
+            </div>
+        </div>
+
+        <!-- BARRA DE PROGRESSO -->
+        <div>
+            <div id="labelProgressoPercent" style="font-size: 11px; font-weight: 800; color: #475569; margin-bottom: 6px;">Progresso: 0% (0/0)</div>
+            <div style="height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden;">
+                <div id="progressBarInv" style="height: 100%; background: #6d28d9; width: 0%; border-radius: 10px; transition: width 0.3s;"></div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- ESTRUTURA DO MODAL DE ZOOM -->
-    <div id="modalZoomImgInv" class="inv-modal-zoom" onclick="fecharZoomInventario()">
-        <span class="inv-modal-close" onclick="fecharZoomInventario()">&times;</span>
-        <img id="imgZoomTargetInv" src="" class="inv-modal-content" onclick="event.stopPropagation()">
-        <div class="inv-modal-hint">Toque fora da imagem ou pressione ESC para fechar</div>
+    <!-- BOTÕES DE NAVEGAÇÃO INFERIORES -->
+    <div style="display: flex; gap: 12px; margin-bottom: 15px; width: 100%; max-width: 900px;">
+        <button style="flex: 1; padding: 15px; border-radius: 14px; font-weight: 900; font-size: 12px; border: none; color: white; background: linear-gradient(135deg, #4c1d95, #2e1065); cursor: pointer;" onclick="app.navegarInventario(-1)">← VOLTAR</button>
+        <button style="flex: 1; padding: 15px; border-radius: 14px; font-weight: 900; font-size: 12px; border: none; color: white; background: linear-gradient(135deg, #4f46e5, #3b82f6); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); cursor: pointer;" onclick="app.navegarInventario(1)">→ PRÓXIMO</button>
     </div>
 
-    <!-- SCRIPT DO MODAL DE ZOOM -->
-    <script>
-        function abrirZoomInventario() {
-            const imgSrc = document.getElementById('viewImgInv').src;
-            if(imgSrc && !imgSrc.endsWith('undefined.jpg')) {
-                // Tenta puxar a imagem em alta resolução (768x768) do CDN da Centauro
-                const highResSrc = imgSrc.replace('100x100', '768x768').replace('400x400', '768x768');
-                document.getElementById('imgZoomTargetInv').src = highResSrc;
-                document.getElementById('modalZoomImgInv').classList.add('active');
-            }
-        }
-        
-        function fecharZoomInventario() {
-            document.getElementById('modalZoomImgInv').classList.remove('active');
-            // Limpa a src para não piscar a foto anterior no próximo clique
-            setTimeout(() => { document.getElementById('imgZoomTargetInv').src = ''; }, 200);
-        }
+    <div id="listaProgresso" style="width: 100%; max-width: 900px; padding-bottom: 80px;"></div>
 
-        // Fecha o modal ao apertar a tecla ESC
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && document.getElementById('modalZoomImgInv').classList.contains('active')) {
-                fecharZoomInventario();
-            }
-        });
-    </script>
 </div>
 
 <div id="viewInventarioRelatorio" class="view-container">

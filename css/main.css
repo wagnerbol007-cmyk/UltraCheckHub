@@ -1326,248 +1326,111 @@ select:focus {
 }
 
 /* =========================================
-   NOVO VISUAL - APP INVENTÁRIO (CARDS)
+   CORREÇÃO DEFINITIVA - INVENTÁRIO COMPACTO
 ========================================= */
-.inv-card-principal {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-}
 
-.inv-card-header {
+/* Filtros com texto visível e finos */
+.inv-filtros-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.inv-badge-busca {
-    background: #f3e8ff;
-    color: #5b21b6;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 900;
-    display: flex;
-    align-items: center;
     gap: 8px;
+    margin-bottom: 10px;
+    width: 100%;
 }
 
-.inv-contador {
-    font-size: 13px;
-    color: #475569;
-    font-weight: 800;
-}
-
-.inv-produto-container {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.inv-produto-img {
-    width: 100px;
-    height: 120px;
-    object-fit: contain;
-    border-radius: 12px;
-    border: 1px solid #f1f5f9;
-    background: #f8fafc;
-}
-
-.inv-produto-dados {
+.inv-filtros-container select {
     flex: 1;
-    display: flex;
-    flex-direction: column;
+    width: 50%;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff !important;
+    color: #25105f !important; /* Texto roxo escuro bem visível */
+    font-weight: 800;
+    font-size: 0.72em;
+    height: 34px;
 }
 
-.inv-produto-titulo {
-    margin: 0 0 5px 0;
-    font-size: 15px;
-    font-weight: 900;
-    color: #1e1b4b;
-    line-height: 1.2;
-}
-
-.inv-produto-cor {
-    margin: 0;
-    font-size: 11px;
-    color: #94a3b8;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.inv-divisor {
-    border: 0;
-    height: 1px;
-    background: #e2e8f0;
-    margin: 10px 0;
-}
-
-.inv-produto-specs p {
-    margin: 0 0 5px 0;
-    font-size: 12px;
-    color: #64748b;
-}
-
-.inv-stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.inv-stat-box {
-    background: #f8fafc;
-    border: 1.5px solid #f1f5f9;
-    border-radius: 12px;
-    padding: 12px 5px;
-    text-align: center;
-}
-
-.inv-stat-label {
-    font-size: 10px;
-    font-weight: 900;
-    color: #64748b;
-    margin-bottom: 5px;
-}
-
-.inv-stat-valor {
-    font-size: 22px;
-    font-weight: 900;
-    color: #1e1b4b;
-}
-
-/* Cores Dinâmicas para a Diferença */
-.inv-stat-box.dif-negativa { background: #fef2f2; border-color: #fee2e2; }
-.inv-stat-box.dif-negativa .inv-stat-valor { color: #ef4444; }
-.inv-stat-box.dif-negativa .inv-stat-label { color: #dc2626; }
-
-.inv-stat-box.dif-positiva { background: #eff6ff; border-color: #dbeafe; }
-.inv-stat-box.dif-positiva .inv-stat-valor { color: #2563eb; }
-.inv-stat-box.dif-positiva .inv-stat-label { color: #1d4ed8; }
-
+/* Remove qualquer duplicação ou moldura extra em volta da quantidade */
 .inv-controle-container {
     display: flex;
     align-items: center;
-    gap: 15px;
-    background: #f8fafc;
-    padding: 20px 15px;
-    border-radius: 16px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 15px;
 }
 
-.inv-btn-qr {
-    background: #5b21b6;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 10px;
-    width: 65px;
-    font-size: 9px;
-    font-weight: 900;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(91,33,182,0.25);
+.inv-controle-container > div {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
 }
 
-.inv-input-wrapper {
+/* Apenas UMA caixa limpa para a quantidade */
+.inv-input-wrapper-clean {
     flex: 1;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 8px 12px;
+    height: 80px;
     position: relative;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
 
 .inv-label-qtd {
     font-size: 11px;
     color: #64748b;
     font-weight: 800;
-    position: absolute;
-    top: -18px;
+    margin-bottom: 2px;
 }
 
-.inv-btn-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: #e2e8f0;
-    color: #475569;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-.inv-btn-circle:active { background: #cbd5e1; }
-
-.inv-input-qtd {
-    width: 70px;
+.inv-input-qtd-clean {
+    width: 100%;
     text-align: center;
     font-size: 32px;
     font-weight: 900;
-    color: #1e1b4b;
-    background: transparent;
-    border: none;
-    outline: none;
+    color: #1e1b4b !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
-.inv-progresso-container {
-    margin-bottom: 5px;
+/* FORÇA A REMOÇÃO DE QUALQUER CONTINENTE DUPLICADO NA QUANTIDADE */
+#viewInventarioApp .inv-controle-container > div:not(:last-child),
+#viewInventarioApp div[style*="border-radius: 40px"],
+#viewInventarioApp div[style*="border-radius: 16px"]:has(.inv-input-wrapper-clean) {
+    display: none !important;
 }
 
-.inv-progresso-texto {
-    font-size: 11px;
-    font-weight: 800;
-    color: #64748b;
-    margin-bottom: 8px;
+/* Garante que o input number não mostre setas nativas feias */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+input[type=number] {
+    -moz-appearance: textfield;
 }
 
-.inv-progresso-bar-bg {
-    height: 8px;
-    background: #e2e8f0;
-    border-radius: 10px;
-    overflow: hidden;
+/* FORÇA A REMOÇÃO DE QUALQUER CONTINENTE DUPLICADO NA QUANTIDADE */
+#viewInventarioApp .inv-controle-container > div:not(:last-child),
+#viewInventarioApp div[style*="border-radius: 40px"],
+#viewInventarioApp div[style*="border-radius: 16px"]:has(.inv-input-wrapper-clean) {
+    display: none !important;
 }
 
-.inv-progresso-bar-fill {
-    height: 100%;
-    background: #5b21b6;
-    width: 0%;
-    border-radius: 10px;
-    transition: width 0.3s;
+/* Garante que o input number não mostre setas nativas feias */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
 }
-
-.inv-nav-buttons {
-    display: flex;
-    gap: 15px;
-}
-
-.inv-btn-voltar {
-    flex: 1;
-    background: transparent;
-    border: 2px solid #cbd5e1;
-    color: #475569;
-    padding: 15px;
-    border-radius: 12px;
-    font-weight: 900;
-    font-size: 12px;
-    cursor: pointer;
-}
-
-.inv-btn-proximo {
-    flex: 1;
-    background: linear-gradient(135deg, #7e22ce, #3b82f6);
-    border: none;
-    color: white;
-    padding: 15px;
-    border-radius: 12px;
-    font-weight: 900;
-    font-size: 12px;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(126,34,206,0.3);
+input[type=number] {
+    -moz-appearance: textfield;
 }
