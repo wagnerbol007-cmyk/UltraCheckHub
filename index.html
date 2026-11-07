@@ -32,21 +32,61 @@
         </div>
     </div>
 
-    <div id="modalFoto" onclick="this.style.display='none'" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2000; display:none; justify-content:center; align-items:center; padding:20px;">
-        <div class="card-internal" onclick="event.stopPropagation()" style="padding:20px; text-align:center; max-width:320px;">
-            <img id="imgGrande" src="" style="width:100%; border-radius:10px; margin-bottom:15px;">
-            <button class="btn-main" onclick="document.getElementById('modalFoto').style.display='none'">FECHAR</button>
-        </div>
+<!-- MODAL UNIVERSAL PARA FOTOS AMPLIADAS -->
+<div id="modalFoto" class="modal-moderno" onclick="fecharModal(event, 'modalFoto')" style="display: none;">
+    <!-- Botão Fechar Topo Direito -->
+    <button class="modal-btn-fechar" onclick="document.getElementById('modalFoto').style.display='none'">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+    
+    <!-- Conteúdo Centralizado -->
+    <div class="modal-conteudo-wrapper">
+        <img id="imgGrande" src="" alt="Imagem Ampliada">
     </div>
+    
+    <!-- Mensagem de Rodapé -->
+    <p class="modal-dica">Toque fora da imagem ou pressione ESC para fechar</p>
+</div>
 
-    <div id="modalQR" onclick="this.style.display='none'" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:2000; display:none; justify-content:center; align-items:center; padding:20px;">
-        <div class="card-internal" onclick="event.stopPropagation()" style="padding:20px; text-align:center; max-width:320px;">
-            <h3 id="qrTitle" style="margin-top:0; font-size: 0.9em; color:#1e293b;"></h3>
-            <div id="qrcode" style="display:flex; justify-content:center; margin: 15px 0;"></div>
-            <p id="qrSku" style="font-weight: 800; font-size: 0.85em; margin-bottom: 20px; color: #e20613; word-break: break-all;"></p>
-            <button class="btn-main" onclick="document.getElementById('modalQR').style.display='none'">CONCLUÍDO</button>
+<!-- MODAL UNIVERSAL PARA QR CODE / CÓDIGO DE BARRAS -->
+<div id="modalQR" class="modal-moderno" onclick="fecharModal(event, 'modalQR')" style="display: none;">
+    <!-- Botão Fechar Topo Direito -->
+    <button class="modal-btn-fechar" onclick="document.getElementById('modalQR').style.display='none'">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+    
+    <!-- Conteúdo Centralizado -->
+    <div class="modal-conteudo-wrapper qr-wrapper">
+        <div id="qrcode"></div>
+        <div class="qr-info">
+            <h3 id="qrTitle">PROCURAR ITEM</h3>
+            <p id="qrSku">SKU</p>
         </div>
     </div>
+    
+    <!-- Mensagem de Rodapé -->
+    <p class="modal-dica">Toque fora da caixa ou pressione ESC para fechar</p>
+</div>
+
+<!-- SCRIPT PARA FECHAR AO CLICAR FORA OU NO ESC (Cole logo a seguir aos modais) -->
+<script>
+    function fecharModal(event, id) {
+        // Se o clique for exatamente no fundo (e não na imagem/qrcode), fecha.
+        if (event.target.id === id) {
+            document.getElementById(id).style.display = 'none';
+        }
+    }
+
+    // Ouve a tecla ESC para fechar qualquer modal moderno aberto
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            const modais = document.querySelectorAll('.modal-moderno');
+            modais.forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+    });
+</script>
 
 <div class="header stockflow-header">
     <button id="btnVoltarHome" onclick="app.voltarMenu()" class="btn-menu-top" style="display:none;">‹</button>
@@ -374,12 +414,12 @@
 
 <div id="viewInventarioApp" class="view-container">
     
-    <!-- FILTROS FINAIS NO TOPO -->
+<!-- FILTROS FINOS NO TOPO -->
     <div class="inv-filtros-container" style="display: flex; gap: 8px; margin-bottom: 10px; width: 100%; max-width: 900px;">
-        <select id="filtroCategoria" style="flex: 1; padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #25105f; font-weight: 800; font-size: 0.72em; height: 34px;" onchange="app.aplicarFiltrosInventario()">
+        <select id="filtroCategoria" onchange="app.aplicarFiltrosInventario()">
             <option value="TODAS">TODAS AS CATEGORIAS</option>
         </select>
-        <select id="filtroDivergencia" style="flex: 1; padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #25105f; font-weight: 800; font-size: 0.72em; height: 34px;" onchange="app.aplicarFiltrosInventario()">
+        <select id="filtroDivergencia" onchange="app.aplicarFiltrosInventario()">
             <option value="TODOS">📦 TODOS OS ITENS</option>
             <option value="SOBRAS">📈 APENAS SOBRAS</option>
             <option value="FALTAS">📉 APENAS FALTAS</option>
@@ -435,17 +475,16 @@
             </div>
         </div>
 
-        <!-- CONTROLES -->
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-            <button style="background: linear-gradient(135deg, #6d28d9, #4c1d95); color: white; border: none; border-radius: 16px; width: 85px; height: 85px; font-size: 9px; font-weight: 900; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 4px 12px rgba(76, 29, 149, 0.3); flex-shrink: 0; cursor: pointer;" onclick="app.gerarQRInv()">
-                <span style="font-size: 20px; letter-spacing: -2px;">[||||]</span>
-                QR SKU
+        <!-- CONTROLES (QR MINI + CAIXA ÚNICA DE QUANTIDADE) -->
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+            <button class="inv-btn-qr-mini" onclick="app.gerarQRInv()">
+                <span style="font-size: 13px; letter-spacing: -1px; line-height: 1;">[||||]</span>
+                <span>QR</span>
             </button>
             
-            <!-- CAIXA ÚNICA DE QUANTIDADE -->
-            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 10px 15px; height: 85px; position: relative; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
-                <span style="font-size: 11px; color: #64748b; font-weight: 800; margin-bottom: 2px;">Quantidade encontrada</span>
-                <input type="number" id="inputAchadoInv" style="width: 100%; text-align: center; font-size: 36px; font-weight: 900; color: #1e1b4b; background: transparent; border: none; outline: none; padding: 0; margin: 0;" placeholder="0" onchange="app.salvarContagemRemota()">
+            <div class="inv-box-quantidade-unica">
+                <span style="font-size: 10px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Quantidade localizada</span>
+                <input type="number" id="inputAchadoInv" placeholder="0" onchange="app.salvarContagemRemota()">
             </div>
         </div>
 
