@@ -1280,3 +1280,80 @@ select:focus {
         height: 235px;
     }
 }
+
+/* =========================================================
+   CORREÇÃO DO GRID DA TELA INICIAL NO MOBILE (SEM ESTOURO)
+========================================================= */
+
+.home-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 450px !important;
+    box-sizing: border-box !important;
+}
+
+.home-card,
+.small-card {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 12px 10px !important;
+    border-radius: 18px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    min-height: 104px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+.home-card .card-icon {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    border-radius: 14px !important;
+    margin-bottom: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+.home-card .menu-icon {
+    width: 26px !important;
+    height: 26px !important;
+}
+
+.home-card .card-text {
+    flex: 1 !important;
+    min-width: 0 !important;
+    text-align: left !important;
+}
+
+.home-card .card-text h4 {
+    margin: 0 0 3px 0 !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: #25105f !important;
+    line-height: 1.15 !important;
+    padding-right: 10px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+.home-card .card-text p {
+    margin: 0 !important;
+    font-size: 10.5px !important;
+    color: #64748b !important;
+    line-height: 1.2 !important;
+    padding-right: 12px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+.home-card .card-arrow {
+    position: absolute !important;
+    bottom: 10px !important;
+    right: 10px !important;
+    font-size: 1.2em !important;
+}
