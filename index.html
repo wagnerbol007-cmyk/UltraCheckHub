@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StockFlow v3.0.0</title>
+    <title>StockFlow v3.0.1</title>
 
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
@@ -95,7 +95,7 @@
         LOJA: <span id="displayLoja"></span>
     </div>
 
-    <div class="stockflow-title">StockFlow <span>v3.0.0</span></div>
+    <div class="stockflow-title">StockFlow <span>v3.0.1</span></div>
 </div>
 
 <div id="viewLogin" class="view-container active-view">
@@ -194,7 +194,7 @@
 </button>
 
 <div class="footer-copy">
-    © StockFlow v3.0.0 • Desenvolvido por Wagner Gomes dos Santos
+    © StockFlow v3.0.1 • Desenvolvido por Wagner Gomes dos Santos
 </div>
         </div>
     </div>
@@ -219,148 +219,187 @@
             </div>
         </div>
     </div>
-
-    <!-- TELA REMAN (HUB E SUBMENUS) -->
+  
     <div id="viewReman" class="view-container">
 
-<!-- 1. HUB (MENU PRINCIPAL) -->
-        <div id="remanMenuPrincipal" class="card-internal" style="text-align:center;">
-            <h3 style="color:#0f172a; font-weight:900; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:8px;">
-                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                REMANEJAMENTO
-            </h3>
+    <!-- 1. HUB (MENU PRINCIPAL) -->
+    <div id="remanMenuPrincipal" class="card-internal" style="text-align:center;">
+        <h3 style="color:#0f172a; font-weight:900; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            REMANEJAMENTO
+        </h3>
 
-            <div style="display:grid; grid-template-columns:1fr; gap:12px;">
-                <!-- Botão 1 -->
-                <div onclick="app.abrirSubTelaReman('conferir')" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px; text-align:left; box-shadow:0 4px 10px rgba(0,0,0,0.02); cursor:pointer; display:flex; align-items:center; gap:15px; transition:0.2s;">
-                    <div style="width:40px; text-align:center; flex-shrink:0;">
-                        <img src="img/icons/clipboard-check.svg" style="width:34px; height:34px;">
-                    </div>
-                    <div style="flex:1;">
-                        <b style="font-size:1.1em; color:#0f172a;">1. Remanejamentos Recebidos</b>
-                        <p style="margin:4px 0 0 0; font-size:0.85em; color:#64748b; line-height:1.4;">Consultar a lista de produtos que a loja precisa separar e enviar.</p>
-                    </div>
+        <div style="display:grid; grid-template-columns:1fr; gap:12px;">
+            <!-- Botão 1 -->
+            <div onclick="app.abrirSubTelaReman('conferir')" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px; text-align:left; box-shadow:0 4px 10px rgba(0,0,0,0.02); cursor:pointer; display:flex; align-items:center; gap:15px; transition:0.2s;">
+                <div style="width:40px; text-align:center; flex-shrink:0;">
+                    <img src="img/icons/clipboard-check.svg" style="width:34px; height:34px;">
                 </div>
-
-                <!-- Botão 2 -->
-                <div onclick="app.abrirSubTelaReman('bipar_possivel')" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px; text-align:left; box-shadow:0 4px 10px rgba(0,0,0,0.02); cursor:pointer; display:flex; align-items:center; gap:15px; transition:0.2s;">
-                    <div style="width:40px; text-align:center; flex-shrink:0;">
-                        <img src="img/icons/scan-barcode.svg" style="width:34px; height:34px;">
-                    </div>
-                    <div style="flex:1;">
-                        <b style="font-size:1.1em; color:#0f172a;">2. Mapeamento de Produtos</b>
-                        <p style="margin:4px 0 0 0; font-size:0.85em; color:#64748b; line-height:1.4;">Bipar os produtos disponíveis no estoque para identificar possíveis remanejamentos.</p>
-                    </div>
-                </div>
-
-                <!-- Botão 3 -->
-                <div onclick="app.abrirSubTelaReman('lista_possivel')" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px; text-align:left; box-shadow:0 4px 10px rgba(0,0,0,0.02); cursor:pointer; display:flex; align-items:center; gap:15px; transition:0.2s;">
-                    <div style="width:40px; text-align:center; flex-shrink:0;">
-                        <img src="img/icons/file-check.svg" style="width:34px; height:34px;">
-                    </div>
-                    <div style="flex:1;">
-                        <b style="font-size:1.1em; color:#0f172a;">3. Solicitações de Remanejamento</b>
-                        <p style="margin:4px 0 0 0; font-size:0.85em; color:#64748b; line-height:1.4;">Visualizar os produtos bipados, montar a solicitação e exportar a lista para análise e aprovação.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 2. CONFERIR MATRIZ (Subtela 1) -->
-        <div id="remanTelaConferir" style="display:none;">
-            <div style="background: white; padding: 12px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; box-sizing: border-box;">
-                <div style="display: flex; gap: 8px; align-items: center; height: 50px;">
-                    <div style="flex: 1; position: relative; height: 100%;">
-                        <input type="text" id="inputBipReman" placeholder="Bipar Ref ou EAN..." onchange="app.biparReman(this.value)" style="width: 100%; height: 100%; margin: 0; padding: 0 14px 0 40px; border-radius: 10px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: bold; color: #0f172a; box-sizing: border-box; outline: none; transition: 0.2s;">
-                        <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 5v14M8 5v14M12 5v14M16 5v14M20 5v14"></path></svg>
-                    </div>
-                    <button style="background: #2563eb; color: white; border: none; border-radius: 10px; width: 50px; height: 100%; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);" onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'reman')">
-                        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    </button>
-                    <button style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; border-radius: 10px; width: 50px; height: 100%; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;" onclick="app.exportarReman()" title="Exportar Excel">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    </button>
-                </div>
-                <div id="cardBipResultadoTop" style="display:none; margin-top:12px; padding:15px; border-radius:12px; border-left:6px solid #22c55e;">
-                    <div id="tagFeedbackTop" class="reman-tag"></div>
-                    <div id="corpoFeedbackTop" style="display:flex; flex-direction:column; gap:8px;"></div>
-                </div>
-            </div>
-            
-            <div id="remanListaSincronizada" class="reman-container-lista" style="width: 100%; max-width: 450px; margin: 0 auto; box-sizing: border-box;"></div>
-            
-            <button onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'reman')" 
-                    style="position: fixed; bottom: 80px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #2563eb; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9996; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s;">
-                <svg width="26" height="26" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-            </button>
-        </div>
-
-        <!-- 3. BIPAR POSSÍVEL REMAN (Subtela 2) -->
-        <div id="remanTelaPossivelBipar" style="display:none;">
-            <!-- Dashboard de Quantidades -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
-                <div style="background:#f1f5f9; border:1px solid #e2e8f0; padding:12px; border-radius:12px; text-align:center;">
-                    <span style="font-size:11px; color:#64748b; font-weight:800; text-transform:uppercase;">Modelos Salvos</span><br>
-                    <b id="lblTotalSkusPossivel" style="font-size:24px; color:#7c3aed;">0</b>
-                </div>
-                <div style="background:#f1f5f9; border:1px solid #e2e8f0; padding:12px; border-radius:12px; text-align:center;">
-                    <span style="font-size:11px; color:#64748b; font-weight:800; text-transform:uppercase;">Peças Totais</span><br>
-                    <b id="lblTotalItensPossivel" style="font-size:24px; color:#7c3aed;">0</b>
+                <div style="flex:1;">
+                    <b style="font-size:1.1em; color:#0f172a;">1. Remanejamentos Recebidos</b>
+                    <p style="margin:4px 0 0 0; font-size:0.85em; color:#64748b; line-height:1.4;">Consultar a lista de produtos que a loja precisa separar e enviar.</p>
                 </div>
             </div>
 
-            <!-- Área de Scan -->
-            <div style="background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px;">
-                <h4 style="color:#0f172a; margin-top:0; margin-bottom:15px; font-weight:900;">Bipar Produto</h4>
-                <div style="display: flex; gap: 8px; align-items: center; height: 50px; margin-bottom: 15px;">
-                    <div style="flex: 1; position: relative; height: 100%;">
-                        <input type="text" id="inputBipPossivelReman" placeholder="Bipar Ref ou EAN..." onchange="app.biparPossivelReman(this.value)" style="width: 100%; height: 100%; margin: 0; padding: 0 14px 0 40px; border-radius: 10px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: bold; color: #0f172a; box-sizing: border-box; outline: none; transition: 0.2s;">
-                        <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 5v14M8 5v14M12 5v14M16 5v14M20 5v14"></path></svg>
-                    </div>
-                    <button style="background: #7c3aed; color: white; border: none; border-radius: 10px; width: 50px; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);" onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'possivel_reman')">
-                        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    </button>
+            <!-- Botão 2 -->
+            <div onclick="app.abrirSubTelaReman('bipar_possivel')" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px; text-align:left; box-shadow:0 4px 10px rgba(0,0,0,0.02); cursor:pointer; display:flex; align-items:center; gap:15px; transition:0.2s;">
+                <div style="width:40px; text-align:center; flex-shrink:0;">
+                    <img src="img/icons/scan-barcode.svg" style="width:34px; height:34px;">
                 </div>
-                <div style="display:flex; align-items:center; gap:8px; background:#f8fafc; padding:10px 15px; border-radius:10px; border:1px solid #e2e8f0;">
-                    <input type="checkbox" id="chkRemanAuto" style="width:18px; height:18px; accent-color:#7c3aed; cursor:pointer;">
-                    <label for="chkRemanAuto" style="font-size:13px; font-weight:800; color:#475569; cursor:pointer;">
-                        Modo Automático <span style="font-weight:normal; font-size:11px;">(Adiciona direto)</span>
-                    </label>
+                <div style="flex:1;">
+                    <b style="font-size:1.1em; color:#0f172a;">2. Mapeamento de Produtos</b>
+                    <p style="margin:4px 0 0 0; font-size:0.85em; color:#64748b; line-height:1.4;">Bipar os produtos disponíveis no estoque para identificar possíveis remanejamentos.</p>
                 </div>
             </div>
 
-            <div id="resultadoPossivelReman"></div>
-            
-            <button onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'possivel_reman')" 
-                    style="position: fixed; bottom: 80px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #7c3aed; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9996; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s;">
-                <svg width="26" height="26" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-            </button>
-        </div>
-
-        <!-- 4. LISTA POSSÍVEL REMAN (Subtela 3) -->
-        <div id="remanTelaPossivelLista" style="display:none;">
-            <!-- Botão de exportar FIXO NO TOPO -->
-            <button class="btn-main" style="background:#10b981; margin-bottom:20px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="app.exportarPossivelReman()">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                EXPORTAR LISTA DE SUGESTÕES
-            </button>
-
-            <!-- Lista que pode crescer infinitamente para baixo -->
-            <div id="listaCompletaPossivelReman" style="padding-bottom:80px;"></div>
-        </div>
-
-        <!-- Pop-up Flutuante da Câmera (Compartilhado) -->
-        <div id="modalScannerReman" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; display:none; flex-direction:column; justify-content:center; align-items:center;">
-            <div style="background:white; padding:15px; border-radius:20px; width:90%; max-width:400px; text-align:center;">
-                <h3 style="margin-top:0; color:#0f172a; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:8px;">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    Escanear Produto
-                </h3>
-                <div id="readerReman" style="width: 100%; min-height: 250px; background: #000; border-radius: 12px; overflow: hidden; margin-bottom:15px;"></div>
-                <button style="background:#ef4444; color:white; width:100%; padding:14px; border:none; border-radius:12px; font-weight:900; cursor:pointer;" onclick="document.getElementById('modalScannerReman').style.display='none'; document.getElementById('readerReman').innerHTML='';">FECHAR CÂMERA</button>
+            <!-- Botão 3 -->
+            <div onclick="app.abrirSubTelaReman('lista_possivel')" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:20px; text-align:left; box-shadow:0 4px 10px rgba(0,0,0,0.02); cursor:pointer; display:flex; align-items:center; gap:15px; transition:0.2s;">
+                <div style="width:40px; text-align:center; flex-shrink:0;">
+                    <img src="img/icons/file-check.svg" style="width:34px; height:34px;">
+                </div>
+                <div style="flex:1;">
+                    <b style="font-size:1.1em; color:#0f172a;">3. Solicitações de Remanejamento</b>
+                    <p style="margin:4px 0 0 0; font-size:0.85em; color:#64748b; line-height:1.4;">Visualizar os produtos bipados, montar a solicitação e exportar a lista para análise e aprovação.</p>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- 2. CONFERIR MATRIZ (Subtela 1 - Lista de Separação) -->
+    <div id="remanTelaConferir" style="display:none; width: 100%;">
+        
+        <!-- Barra de Bipagem + Câmera + Excel -->
+        <div style="background: white; padding: 12px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 12px; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; box-sizing: border-box;">
+            <div style="display: flex; gap: 8px; align-items: center; height: 50px;">
+                <div style="flex: 1; position: relative; height: 100%;">
+                    <input type="text" id="inputBipReman" placeholder="Bipar Ref ou EAN..." onchange="app.biparReman(this.value)" style="width: 100%; height: 100%; margin: 0; padding: 0 14px 0 40px; border-radius: 10px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: bold; color: #0f172a; box-sizing: border-box; outline: none; transition: 0.2s;">
+                    <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 5v14M8 5v14M12 5v14M16 5v14M20 5v14"></path></svg>
+                </div>
+                <button style="background: #2563eb; color: white; border: none; border-radius: 10px; width: 50px; height: 100%; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);" onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'reman')">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                </button>
+                <button style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; border-radius: 10px; width: 50px; height: 100%; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;" onclick="app.exportarReman()" title="Exportar Excel">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </button>
+            </div>
+            <div id="cardBipResultadoTop" style="display:none; margin-top:12px; padding:15px; border-radius:12px; border-left:6px solid #22c55e;">
+                <div id="tagFeedbackTop" class="reman-tag"></div>
+                <div id="corpoFeedbackTop" style="display:flex; flex-direction:column; gap:8px;"></div>
+            </div>
+        </div>
+
+        <!-- NOVO PAINEL DE FILTROS E ORDENAÇÃO DO REMANEJAMENTO -->
+        <div class="reman-filtros-wrapper" style="width: 100%; max-width: 450px; margin: 0 auto 15px auto; box-sizing: border-box;">
+            <div class="reman-filtros-grid">
+                <!-- 1. Filtro de Categoria -->
+                <select id="filtroCatReman" onchange="app.aplicarFiltrosReman()">
+                    <option value="TODAS">📂 CATEGORIA: TODAS</option>
+                </select>
+
+                <!-- 2. Filtro de Marca -->
+                <select id="filtroMarcaReman" onchange="app.aplicarFiltrosReman()">
+                    <option value="TODAS">🏷️ MARCA: TODAS</option>
+                </select>
+
+                <!-- 3. Filtro de Tamanho -->
+                <select id="filtroTamReman" onchange="app.aplicarFiltrosReman()">
+                    <option value="TODOS">📏 TAMANHO: TODOS</option>
+                </select>
+
+                <!-- 4. Ordenação / Modo de Exibição -->
+                <select id="ordemReman" onchange="app.aplicarFiltrosReman()">
+                    <option value="NAO_COLETADOS">⏳ NÃO COLETADOS 1º</option>
+                    <option value="COLETADOS">✅ COLETADOS 1º</option>
+                    <option value="MAIOR_QTD">📦 MAIOR QTD</option>
+                    <option value="MENOR_QTD">📉 MENOR QTD</option>
+                    <option value="TAMANHO_ASC">🔢 TAMANHO (34,35 / P,M,G)</option>
+                    <option value="AZ">🔤 NOME (A - Z)</option>
+                </select>
+            </div>
+
+            <!-- Resumo + Botão Limpar -->
+            <div class="reman-filtros-status">
+                <span id="contadorFiltroReman">Exibindo todos os itens</span>
+                <button type="button" class="btn-limpar-filtros-reman" onclick="app.limparFiltrosReman()">Limpar Filtros</button>
+            </div>
+        </div>
+        
+        <!-- Lista de Separação do Reman -->
+        <div id="remanListaSincronizada" class="reman-container-lista" style="width: 100%; max-width: 450px; margin: 0 auto; box-sizing: border-box;"></div>
+        
+        <button onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'reman')" 
+                style="position: fixed; bottom: 80px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #2563eb; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9996; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s;">
+            <svg width="26" height="26" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        </button>
+    </div>
+
+    <!-- 3. BIPAR POSSÍVEL REMAN (Subtela 2) -->
+    <div id="remanTelaPossivelBipar" style="display:none;">
+        <!-- Dashboard de Quantidades -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+            <div style="background:#f1f5f9; border:1px solid #e2e8f0; padding:12px; border-radius:12px; text-align:center;">
+                <span style="font-size:11px; color:#64748b; font-weight:800; text-transform:uppercase;">Modelos Salvos</span><br>
+                <b id="lblTotalSkusPossivel" style="font-size:24px; color:#7c3aed;">0</b>
+            </div>
+            <div style="background:#f1f5f9; border:1px solid #e2e8f0; padding:12px; border-radius:12px; text-align:center;">
+                <span style="font-size:11px; color:#64748b; font-weight:800; text-transform:uppercase;">Peças Totais</span><br>
+                <b id="lblTotalItensPossivel" style="font-size:24px; color:#7c3aed;">0</b>
+            </div>
+        </div>
+
+        <!-- Área de Scan -->
+        <div style="background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px;">
+            <h4 style="color:#0f172a; margin-top:0; margin-bottom:15px; font-weight:900;">Bipar Produto</h4>
+            <div style="display: flex; gap: 8px; align-items: center; height: 50px; margin-bottom: 15px;">
+                <div style="flex: 1; position: relative; height: 100%;">
+                    <input type="text" id="inputBipPossivelReman" placeholder="Bipar Ref ou EAN..." onchange="app.biparPossivelReman(this.value)" style="width: 100%; height: 100%; margin: 0; padding: 0 14px 0 40px; border-radius: 10px; border: 2px solid #e2e8f0; font-size: 15px; font-weight: bold; color: #0f172a; box-sizing: border-box; outline: none; transition: 0.2s;">
+                    <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 5v14M8 5v14M12 5v14M16 5v14M20 5v14"></path></svg>
+                </div>
+                <button style="background: #7c3aed; color: white; border: none; border-radius: 10px; width: 50px; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);" onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'possivel_reman')">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                </button>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; background:#f8fafc; padding:10px 15px; border-radius:10px; border:1px solid #e2e8f0;">
+                <input type="checkbox" id="chkRemanAuto" style="width:18px; height:18px; accent-color:#7c3aed; cursor:pointer;">
+                <label for="chkRemanAuto" style="font-size:13px; font-weight:800; color:#475569; cursor:pointer;">
+                    Modo Automático <span style="font-weight:normal; font-size:11px;">(Adiciona direto)</span>
+                </label>
+            </div>
+        </div>
+
+        <div id="resultadoPossivelReman"></div>
+        
+        <button onclick="document.getElementById('modalScannerReman').style.display='flex'; app.iniciarCamera('readerReman', 'possivel_reman')" 
+                style="position: fixed; bottom: 80px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: #7c3aed; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9996; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s;">
+            <svg width="26" height="26" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        </button>
+    </div>
+
+    <!-- 4. LISTA POSSÍVEL REMAN (Subtela 3) -->
+    <div id="remanTelaPossivelLista" style="display:none;">
+        <!-- Botão de exportar FIXO NO TOPO -->
+        <button class="btn-main" style="background:#10b981; margin-bottom:20px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="app.exportarPossivelReman()">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            EXPORTAR LISTA DE SUGESTÕES
+        </button>
+
+        <!-- Lista que pode crescer infinitamente para baixo -->
+        <div id="listaCompletaPossivelReman" style="padding-bottom:80px;"></div>
+    </div>
+
+    <!-- Pop-up Flutuante da Câmera (Compartilhado) -->
+    <div id="modalScannerReman" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; display:none; flex-direction:column; justify-content:center; align-items:center;">
+        <div style="background:white; padding:15px; border-radius:20px; width:90%; max-width:400px; text-align:center;">
+            <h3 style="margin-top:0; color:#0f172a; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                Escanear Produto
+            </h3>
+            <div id="readerReman" style="width: 100%; min-height: 250px; background: #000; border-radius: 12px; overflow: hidden; margin-bottom:15px;"></div>
+            <button style="background:#ef4444; color:white; width:100%; padding:14px; border:none; border-radius:12px; font-weight:900; cursor:pointer;" onclick="document.getElementById('modalScannerReman').style.display='none'; document.getElementById('readerReman').innerHTML='';">FECHAR CÂMERA</button>
+        </div>
+    </div>
+    
+</div>
 
 <div id="viewEstoque" class="view-container">
     <div id="progressoEstoque" style="width: 100%; max-width: 450px; background: #e2e8f0; border-radius: 10px; height: 24px; margin-bottom: 15px; position: relative; overflow: hidden; display: none;">

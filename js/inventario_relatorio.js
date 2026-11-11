@@ -1,5 +1,5 @@
 // js/inventario_relatorio.js
-// StockFlow v3.0.0
+// StockFlow v3.0.1
 import { state, normalizarCodigo, getHoraCerta } from './state.js';
 import { database } from './firebase.js';
 

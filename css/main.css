@@ -1642,3 +1642,68 @@ input[type=number] {
     flex-shrink: 0 !important;
     cursor: pointer !important;
 }
+
+/* =========================================
+   FILTROS E ORDENAÇÃO - REMANEJAMENTO
+========================================= */
+.reman-filtros-wrapper {
+    width: 100%;
+    max-width: 900px;
+    background: #ffffff;
+    border: 1.5px solid #eadcff;
+    border-radius: 18px;
+    padding: 12px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 18px rgba(91, 22, 200, 0.06);
+}
+
+.reman-filtros-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+#viewReman .reman-filtros-grid select {
+    width: 100% !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 10px !important;
+    margin: 0 !important;
+    border-radius: 10px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    background-color: #f8fafc !important;
+    color: #25105f !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#viewReman .reman-filtros-grid select:focus {
+    border-color: #6d28d9 !important;
+    background-color: #ffffff !important;
+}
+
+.reman-filtros-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 11px;
+    font-weight: 800;
+    color: #64748b;
+}
+
+.btn-limpar-filtros-reman {
+    background: #f3e8ff;
+    color: #5b21b6;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 900;
+    cursor: pointer;
+}
