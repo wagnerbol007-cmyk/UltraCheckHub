@@ -1,5 +1,5 @@
 // js/inventario_core.js
-// StockFlow v3.0.1
+// StockFlow v3.0.2
 // Coletas separadas:
 // 1ª Busca  -> sinc_rfid_primeira/{loja}
 // 2ª Busca  -> sinc_rfid_segunda/{loja}

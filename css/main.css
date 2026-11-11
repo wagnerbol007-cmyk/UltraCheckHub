@@ -17,14 +17,14 @@ body {
    CONTROLE DAS TELAS (O SEGREDO DA NAVEGAÇÃO)
 -------------------------------------------- */
 .view-container { 
-    display: none; /* Esconde todas as telas por padrão */
+    display: none;
     padding: 15px; 
     flex-direction: column; 
     align-items: center; 
 }
 
 .active-view { 
-    display: flex !important; /* Mostra apenas a tela com essa classe */
+    display: flex !important;
 }
 
 /* -------------------------------------------
@@ -151,444 +151,10 @@ input {
 @keyframes spin { 
     100% { transform: rotate(360deg); } 
 }
-/* ================================
-   TEMA NOVO - AZUL PETRÓLEO
-   Cole no FINAL do css/main.css
-================================ */
-
-:root {
-    --primary: #0f172a;
-    --primary-light: #1e293b;
-    --accent: #2563eb;
-    --accent-soft: #dbeafe;
-    --bg: #f8fafc;
-    --card: #ffffff;
-    --text: #0f172a;
-    --muted: #64748b;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-
-    --centauro-red: #2563eb;
-    --dark-blue: #0f172a;
-}
-
-body {
-    background: linear-gradient(180deg, #eef4ff, #f8fafc);
-    color: var(--text);
-}
-
-/* HEADER */
-.header {
-    background: linear-gradient(135deg, #0f172a, #1e3a8a);
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.22);
-}
-
-.header h1 {
-    letter-spacing: 0.3px;
-}
-
-/* BOTÃO MENU / VOLTAR */
-.btn-menu-top {
-    background: rgba(255,255,255,0.16);
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 999px;
-    padding: 8px 14px;
-}
-
-/* CARDS INTERNOS */
-.card-internal {
-    border-radius: 24px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-    border: 1px solid #e2e8f0;
-}
-
-/* INPUTS */
-input {
-    border: 2px solid #e2e8f0;
-    background: #f8fafc;
-    color: var(--text);
-}
-
-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    background: white;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-}
-
-/* BOTÕES PRINCIPAIS */
-.btn-main {
-    background: linear-gradient(135deg, #2563eb, #1e40af);
-    border-radius: 16px;
-    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
-    transition: 0.2s ease;
-}
-
-.btn-main:active {
-    transform: scale(0.97);
-}
-
-/* MENU PRINCIPAL */
-.home-grid {
-    gap: 14px;
-}
-
-.home-card {
-    border-radius: 24px;
-    padding: 22px 14px;
-    border: 1px solid #e2e8f0 !important;
-    border-left: none !important;
-    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
-    transition: 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.home-card:active {
-    transform: scale(0.97);
-}
-
-.home-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, #2563eb, #38bdf8);
-}
-
-.home-card h4 {
-    margin: 6px 0 0;
-    font-size: 0.85em;
-    color: #0f172a;
-}
-
-.card-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
-    background: #dbeafe;
-    color: #2563eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.7em;
-    margin-bottom: 8px;
-}
-
-/* CARDS ESCUROS DO MENU */
-.home-card[style*="color:white"] h4,
-.home-card[style*="color: white"] h4 {
-    color: white;
-}
-
-.home-card[style*="background:#6200ee"],
-.home-card[style*="background:#334155"],
-.home-card[style*="background:#475569"] {
-    background: linear-gradient(135deg, #0f172a, #1e3a8a) !important;
-    color: white !important;
-}
-
-.home-card[style*="background:#6200ee"]::before,
-.home-card[style*="background:#334155"]::before,
-.home-card[style*="background:#475569"]::before {
-    background: linear-gradient(90deg, #38bdf8, #2563eb);
-}
-
-/* BADGE DA LOJA */
-.loja-badge {
-    border: 1px solid #bfdbfe !important;
-    background: white !important;
-    color: #0f172a !important;
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
-}
-
-/* TÍTULOS VERMELHOS DO HTML */
-h2,
-h3 {
-    color: #0f172a !important;
-}
-
-/* OVERLAY */
-#overlay p {
-    color: #2563eb !important;
-}
-
-/* SWIPE */
-.swipe-container {
-    background: #2563eb;
-}
-
-.swipe-content {
-    border-left-color: #2563eb;
-}
-
-/* REMAN MANTÉM ROXO, MAS MAIS MODERNO */
-.reman-tag,
-.btn-reman-check {
-    background: #4f46e5 !important;
-}
-
-.reman-card-item {
-    border-left-color: #4f46e5;
-}
-
-/* INVENTÁRIO / PREVENÇÃO */
-#viewMenuInventario h3,
-#viewNomeInv,
-#viewTamanhoInv {
-    color: #2563eb !important;
-}
-
-/* BOTÕES COM COR INLINE ANTIGA */
-button[style*="background:#7c3aed"],
-button[style*="background: #7c3aed"],
-button[style*="background:#6200ee"],
-button[style*="background: #6200ee"] {
-    background: linear-gradient(135deg, #2563eb, #1e40af) !important;
-}
-
-/* MOBILE */
-@media (max-width: 480px) {
-    .home-card {
-        padding: 20px 10px;
-    }
-
-    .card-icon {
-        width: 44px;
-        height: 44px;
-        font-size: 1.5em;
-    }
-
-    .home-card h4 {
-        font-size: 0.78em;
-    }
-}
-/* =================================
-   AJUSTE DO TOPO / MENU PRINCIPAL
-   Remove loja duplicada do cabeçalho
-================================= */
-
-/* Esconde "LOJA: 288" do cabeçalho */
-.header-info {
-    display: none !important;
-}
-
-/* Deixa o título centralizado e mais limpo */
-.header h1 {
-    font-size: 1.25em !important;
-    margin: 0 auto !important;
-}
-
-/* Deixa o badge de unidade mais discreto */
-.loja-badge {
-    font-size: 0.85em !important;
-    padding: 9px 12px !important;
-    border-radius: 18px !important;
-}
-
-/* Caso queira esconder também a linha UNIDADE/OPERADOR, descomente abaixo */
-/*
-.loja-badge {
-    display: none !important;
-}
-*/
-/* BOTÃO FIXO DA LISTA DE REPOSIÇÃO */
-.footer-action-estoque {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255,255,255,0.96);
-    padding: 14px 18px;
-    border-top: 1px solid #e2e8f0;
-    z-index: 900;
-    display: flex;
-    justify-content: center;
-}
-
-.footer-action-estoque .btn-main {
-    max-width: 450px;
-}
-
-/* MELHORA DO SWIPE */
-.swipe-content {
-    touch-action: pan-y;
-    will-change: transform;
-}
 
 /* ================================
-   MENU PREMIUM ROXO
-================================ */
-
-:root {
-    --purple-main: #5b16c8;
-    --purple-dark: #24105f;
-    --purple-soft: #f5efff;
-    --purple-border: #dfccff;
-    --purple-text: #25105f;
-}
-
-.header {
-    background: linear-gradient(135deg, #23005d, #6d19d8) !important;
-    height: 88px;
-    box-shadow: none;
-}
-
-.header h1 {
-    font-size: 1.45em !important;
-    font-weight: 900;
-}
-
-#viewMenu {
-    background: linear-gradient(180deg, #ffffff 0%, #fbf8ff 100%);
-    border-radius: 34px 34px 0 0;
-    margin-top: -8px;
-    padding: 26px 18px 18px;
-}
-
-.loja-badge {
-    background: white !important;
-    border: 1.5px solid var(--purple-border) !important;
-    color: var(--purple-text) !important;
-    border-radius: 18px !important;
-    box-shadow: 0 8px 25px rgba(91, 22, 200, 0.08);
-    font-size: 0.95em !important;
-}
-
-.badge-separator {
-    display: inline-block;
-    width: 1px;
-    height: 22px;
-    background: var(--purple-border);
-    margin: 0 18px;
-    vertical-align: middle;
-}
-
-.home-grid {
-    max-width: 900px;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
-}
-
-.home-card {
-    min-height: 175px;
-    align-items: flex-start;
-    text-align: left;
-    border-radius: 22px;
-    padding: 26px 26px 22px;
-    border: 1px solid #eee7ff !important;
-    box-shadow: 0 12px 32px rgba(91, 22, 200, 0.08);
-    position: relative;
-}
-
-.home-card::before {
-    display: none;
-}
-
-.card-icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: #f0e4ff;
-    color: var(--purple-main);
-    font-size: 2.1em;
-    margin-bottom: 18px;
-}
-
-.card-text h4 {
-    color: var(--purple-text);
-    font-size: 1.05em;
-    margin: 0 0 8px;
-}
-
-.card-text p {
-    color: #625b7c;
-    font-size: 0.9em;
-    line-height: 1.35;
-    margin: 0;
-}
-
-.card-arrow {
-    position: absolute;
-    right: 26px;
-    bottom: 28px;
-    color: #8b5cf6;
-    font-size: 2.2em;
-    font-weight: 300;
-}
-
-.small-card {
-    min-height: 120px;
-    flex-direction: row;
-    align-items: center;
-    gap: 18px;
-}
-
-.small-card .card-icon {
-    width: 58px;
-    height: 58px;
-    font-size: 1.7em;
-    margin-bottom: 0;
-}
-
-.btn-sair {
-    grid-column: span 2;
-    background: linear-gradient(135deg, #741ee8, #31046f);
-    color: white;
-    border: none;
-    border-radius: 16px;
-    padding: 18px;
-    font-size: 1em;
-    font-weight: 900;
-    box-shadow: 0 12px 28px rgba(91, 22, 200, 0.25);
-}
-
-.footer-copy {
-    margin-top: 18px;
-    color: #9b85c9;
-    font-size: 0.8em;
-    text-align: center;
-}
-
-@media (max-width: 520px) {
-    .home-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-
-    .home-card {
-        min-height: 160px;
-        padding: 20px 16px;
-    }
-
-    .card-icon {
-        width: 58px;
-        height: 58px;
-        font-size: 1.7em;
-    }
-
-    .card-text h4 {
-        font-size: 0.86em;
-    }
-
-    .card-text p {
-        font-size: 0.75em;
-    }
-
-    .card-arrow {
-        right: 16px;
-        bottom: 18px;
-    }
-}
-
-/* =====================================================
    TEMA GLOBAL ROXO PREMIUM - ULTRA CHECK HUB
-   Cole no FINAL do css/main.css
-===================================================== */
-
+================================ */
 :root {
     --uh-primary: #5b16c8;
     --uh-primary-dark: #23005d;
@@ -615,7 +181,6 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
-/* HEADER GLOBAL */
 .header {
     background: linear-gradient(135deg, var(--uh-primary-dark), var(--uh-primary)) !important;
     color: white !important;
@@ -625,6 +190,12 @@ body {
 .header h1 {
     color: white !important;
     font-weight: 900 !important;
+    font-size: 1.25em !important;
+    margin: 0 auto !important;
+}
+
+.header-info {
+    display: none !important;
 }
 
 .btn-menu-top {
@@ -634,12 +205,10 @@ body {
     border-radius: 999px !important;
 }
 
-/* TELAS */
 .view-container {
     background: transparent !important;
 }
 
-/* CARDS GERAIS */
 .card-internal,
 .reman-card-item,
 .swipe-content {
@@ -649,12 +218,10 @@ body {
     box-shadow: 0 12px 30px rgba(91, 22, 200, 0.08) !important;
 }
 
-/* TÍTULOS */
 h2, h3, h4 {
     color: var(--uh-text) !important;
 }
 
-/* INPUTS E SELECTS */
 input,
 select {
     background: white !important;
@@ -670,7 +237,6 @@ select:focus {
     box-shadow: 0 0 0 4px rgba(91, 22, 200, 0.12) !important;
 }
 
-/* BOTÕES */
 .btn-main {
     background: linear-gradient(135deg, var(--uh-primary-2), var(--uh-primary-dark)) !important;
     color: white !important;
@@ -684,423 +250,116 @@ select:focus {
     transform: scale(0.98);
 }
 
-/* BADGES */
 .loja-badge {
     background: white !important;
     color: var(--uh-text) !important;
     border: 1.5px solid var(--uh-border) !important;
     border-radius: 18px !important;
     box-shadow: 0 8px 25px rgba(91, 22, 200, 0.08) !important;
+    font-size: 0.85em !important;
+    padding: 9px 12px !important;
+}
+
+.badge-separator {
+    display: inline-block;
+    width: 1px;
+    height: 22px;
+    background: var(--uh-border);
+    margin: 0 18px;
+    vertical-align: middle;
 }
 
 /* MENU */
 .home-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 15px;
     background: white !important;
     color: var(--uh-text) !important;
     border: 1px solid var(--uh-border) !important;
-    border-left: none !important;
-    border-radius: 22px !important;
+    border-radius: 18px !important;
     box-shadow: 0 12px 32px rgba(91, 22, 200, 0.08) !important;
+    min-height: 130px;
+    box-sizing: border-box;
+    touch-action: manipulation;
 }
 
 .card-icon {
-    background: var(--uh-soft) !important;
+    width: 64px !important;
+    height: 64px !important;
+    min-width: 64px !important;
+    border-radius: 18px !important;
+    background: #f3e8ff !important;
     color: var(--uh-primary) !important;
-}
-
-/* REPOSIÇÃO / ESTOQUE */
-.swipe-container {
-    background: var(--uh-danger) !important;
-    border-radius: 22px !important;
-}
-
-.swipe-content {
-    border-left: 6px solid var(--uh-primary) !important;
-}
-
-.swipe-action {
-    background: var(--uh-danger) !important;
-}
-
-.tam-row,
-.reman-grade-linha,
-.grade-btn {
-    background: #fcfaff !important;
-    border: 2px solid var(--uh-border) !important;
-    color: var(--uh-text) !important;
-    border-radius: 16px !important;
-}
-
-.tam-row.coletado,
-.marcado-separado {
-    background: #f0fdf4 !important;
-    border-color: var(--uh-success) !important;
-    color: #166534 !important;
-}
-
-/* QR */
-.btn-qr-direct,
-.btn-reman-check {
-    background: var(--uh-primary) !important;
-    color: white !important;
-}
-
-/* TAGS */
-.reman-tag {
-    background: linear-gradient(135deg, var(--uh-primary-2), var(--uh-primary-dark)) !important;
-    color: white !important;
-}
-
-.cor-tag,
-.saldo-txt {
-    color: var(--uh-muted) !important;
-}
-
-.preco-tag {
-    background: var(--uh-primary-dark) !important;
-    color: white !important;
-}
-
-/* HISTÓRICO */
-#contHist > div,
-#histRelatorioInv,
-#listaAnalise > div,
-#listaPedidos > div {
-    border-radius: 22px !important;
-}
-
-/* INVENTÁRIO */
-#gestureZoneInv {
-    border-radius: 28px !important;
-}
-
-#viewNomeInv,
-#viewTamanhoInv,
-#viewSKUInv {
-    color: var(--uh-primary) !important;
-}
-
-#progressBarInv,
-#barFill {
-    background: linear-gradient(90deg, var(--uh-primary), var(--uh-primary-2)) !important;
-}
-
-/* UPLOAD */
-#viewUpload .card-internal {
-    background: white !important;
-}
-
-/* MODAIS */
-#modalFoto .card-internal,
-#modalQR .card-internal {
-    border-radius: 24px !important;
-    border: 1px solid var(--uh-border) !important;
-}
-
-/* LOADING */
-.spinner {
-    border-top-color: var(--uh-primary) !important;
-}
-
-#overlay p {
-    color: var(--uh-primary) !important;
-}
-
-/* BOTÃO FIXO DE SINC */
-.footer-action-estoque {
-    background: rgba(255,255,255,0.96) !important;
-    border-top: 1px solid var(--uh-border) !important;
-}
-
-/* MOBILE */
-@media (max-width: 520px) {
-    .card-internal {
-        padding: 20px !important;
-    }
-
-    .btn-main {
-        padding: 16px !important;
-        font-size: 0.85em !important;
-    }
-
-    input,
-    select {
-        padding: 14px !important;
-    }
-
-    .home-card {
-        border-radius: 20px !important;
-    }
-}
-
-/* STATUS REMAN */
-.reman-alerta {
-    background: linear-gradient(135deg, #f97316, #ea580c) !important;
-    color: white !important;
-    border: none !important;
-    box-shadow: 0 8px 22px rgba(249,115,22,0.25);
-}
-
-.reman-normal {
-    background: linear-gradient(135deg, #7c3aed, #23005d) !important;
-    color: white !important;
-}
-
-#tagFeedbackTop.reman-laranja {
-    background: linear-gradient(135deg, #f97316, #c2410c) !important;
-    color: #ffffff !important;
-    box-shadow: 0 10px 24px rgba(249,115,22,0.35) !important;
-    border: none !important;
-}
-
-/* CARD ESCURO - PRIMEIRA BUSCA */
-.home-card.card-dark,
-.menu-card-dark {
-    background: linear-gradient(135deg, #23005d, #233b8f) !important;
-    color: white !important;
-}
-
-.home-card.card-dark h3,
-.home-card.card-dark h4,
-.home-card.card-dark p,
-.menu-card-dark h3,
-.menu-card-dark h4,
-.menu-card-dark p {
-    color: white !important;
-}
-
-.home-card.card-dark .card-icon,
-.menu-card-dark .card-icon {
-    background: rgba(255,255,255,0.12) !important;
-    color: white !important;
-}
-
-/* AJUSTE CARD 1ª BUSCA RFID */
-.inventario-card-destaque {
-    background: linear-gradient(135deg, #23005d, #233b8f) !important;
-    color: white !important;
-    border: none !important;
-    min-height: 170px !important;
     display: flex !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     justify-content: center !important;
+    flex-shrink: 0 !important;
+    margin-bottom: 8px;
 }
 
-.inventario-card-destaque h4,
-.inventario-card-destaque p {
-    color: white !important;
+.menu-icon {
+    width: 36px !important;
+    height: 36px !important;
+    object-fit: contain !important;
+    display: block !important;
 }
 
-.inventario-card-destaque p {
-    font-size: 0.75em;
-    opacity: 0.9;
-    margin: 6px 0 0;
+.card-text h4 {
+    margin: 0 0 4px 0;
+    font-size: 0.85em;
+    color: #25105f;
+    line-height: 1.2;
+    padding-right: 15px;
 }
 
-.inventario-card-destaque .card-icon {
-    background: rgba(255,255,255,0.16) !important;
-    color: white !important;
+.card-text p {
+    margin: 0;
+    font-size: 0.7em;
+    color: #64748b;
+    line-height: 1.3;
+    padding-right: 15px;
 }
 
-/* MENU INVENTÁRIO ISOLADO */
-.inventario-menu-grid {
-    width: 100%;
-    max-width: 900px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+.card-arrow {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    color: #6200ee;
+    font-size: 1.5em;
+    line-height: 1;
+    font-weight: bold;
+}
+
+.small-card {
+    min-height: 120px;
+    flex-direction: row;
+    align-items: center;
     gap: 18px;
 }
 
-.inventario-card-principal {
+.btn-sair {
     grid-column: span 2;
-    background: linear-gradient(135deg, #23005d, #233b8f);
+    background: linear-gradient(135deg, #741ee8, #31046f);
     color: white;
-    border-radius: 24px;
-    padding: 28px;
-    min-height: 170px;
-    box-shadow: 0 14px 32px rgba(91, 22, 200, 0.18);
-    cursor: pointer;
-}
-
-.inventario-card-principal h4,
-.inventario-card-principal p {
-    color: white !important;
-    margin: 0;
-}
-
-.inventario-card-principal p {
-    margin-top: 8px;
-    opacity: 0.9;
-    font-size: 0.85em;
-}
-
-.inventario-card,
-.inventario-card-principal {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-}
-
-.inventario-card {
-    background: white;
-    color: #25105f;
-    border: 1px solid #eadcff;
-    border-radius: 22px;
-    padding: 24px;
-    min-height: 150px;
-    box-shadow: 0 12px 32px rgba(91, 22, 200, 0.08);
-    cursor: pointer;
-}
-
-.inventario-card h4 {
-    color: #25105f !important;
-    margin: 12px 0 0;
-}
-
-.inventario-icon {
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    background: #f2e9ff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8em;
-    margin-bottom: 12px;
-}
-
-.inventario-card-principal .inventario-icon {
-    background: rgba(255,255,255,0.16);
-}
-
-@media (max-width: 520px) {
-    .inventario-menu-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-
-    .inventario-card-principal {
-        min-height: 150px;
-        padding: 22px;
-    }
-
-    .inventario-card {
-        min-height: 135px;
-        padding: 18px;
-    }
-
-    .inventario-icon {
-        width: 54px;
-        height: 54px;
-        font-size: 1.5em;
-    }
-}
-
-/* =========================================
-   UPLOAD MODERNO
-========================================= */
-
-.upload-box {
-    width: 100%;
-    background: white;
-    border: 2px solid #eadcff;
-    border-radius: 22px;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 10px 28px rgba(91,22,200,0.06);
-}
-
-.upload-btn {
-    background: linear-gradient(135deg, #7c3aed, #23005d);
-    color: white;
+    border: none;
     border-radius: 16px;
-    padding: 14px;
+    padding: 18px;
+    font-size: 1em;
     font-weight: 900;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.15s ease;
+    box-shadow: 0 12px 28px rgba(91, 22, 200, 0.25);
 }
 
-.upload-btn:active {
-    transform: scale(0.98);
-}
-
-.upload-name {
-    background: #faf7ff;
-    border: 1px solid #eadcff;
-    border-radius: 14px;
-    padding: 12px;
+.footer-copy {
+    margin-top: 18px;
+    color: #9b85c9;
     font-size: 0.8em;
-    color: #25105f;
-    word-break: break-word;
     text-align: center;
 }
 
-/* =========================================
-   SOBRE
-========================================= */
-
-.sobre-bloco {
-    margin-bottom: 28px;
-}
-
-.sobre-bloco h3 {
-    color: #5b16c8;
-    margin-bottom: 12px;
-    font-size: 1.05em;
-}
-
-.sobre-bloco p {
-    color: #5b5570;
-    font-size: 0.9em;
-    margin-bottom: 14px;
-}
-
-.sobre-lista {
-    padding-left: 18px;
-    color: #5b5570;
-    font-size: 0.9em;
-}
-
-.sobre-lista li {
-    margin-bottom: 10px;
-}
-
-.sobre-dev {
-    margin-top: 35px;
-    padding: 24px;
-    border-radius: 24px;
-    background: linear-gradient(135deg, #23005d, #5b16c8);
-    color: white;
-    box-shadow: 0 14px 32px rgba(91,22,200,0.22);
-}
-
-.sobre-dev h3 {
-    color: white;
-    margin: 12px 0 8px;
-}
-
-.sobre-dev p {
-    color: rgba(255,255,255,0.88);
-    font-size: 0.88em;
-}
-
-.dev-badge {
-    display: inline-block;
-    background: rgba(255,255,255,0.16);
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-size: 0.75em;
-    font-weight: 900;
-}
-
-/* ================================
-   STOCKFLOW v2.4.1 - HEADER FINO
-================================ */
-
+/* HEADER FINO STOCKFLOW */
 .stockflow-header {
     height: 38px !important;
     min-height: 38px !important;
@@ -1112,33 +371,12 @@ select:focus {
     box-shadow: 0 4px 14px rgba(91,22,200,0.18) !important;
 }
 
-.stockflow-header .btn-menu-top {
-    position: static !important;
-    display: none;
-    width: 34px !important;
-    height: 28px !important;
-    padding: 0 !important;
-    border-radius: 10px !important;
-    font-size: 1.4em !important;
-    line-height: 1 !important;
-    background: rgba(255,255,255,0.16) !important;
-    color: white !important;
-    border: 1px solid rgba(255,255,255,0.25) !important;
-}
-
-.stockflow-header .header-info {
-    font-size: 0.68em !important;
-    color: rgba(255,255,255,0.9) !important;
-    font-weight: 800 !important;
-}
-
 .stockflow-title {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
     line-height: 1.1;
-
     color: white;
     font-size: 0.95em;
     font-weight: 900;
@@ -1151,50 +389,14 @@ select:focus {
     font-size: 0.75em;
 }
 
-.card-icon{
-    width:64px !important;
-    height:64px !important;
-    min-width:64px !important;
-    border-radius:18px !important;
-    background:#f3e8ff !important;
-    display:flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-    flex-shrink:0 !important;
-}
-
-.menu-icon{
-    width:36px !important;
-    height:36px !important;
-    object-fit:contain !important;
-    display:block !important;
-}
-
-#viewMasterBox,
-#viewMasterBox * {
-    pointer-events: auto !important;
-}
-
-#historicoMasters {
-    pointer-events: auto !important;
-}
-
-.home-card,
-.btn-main {
-    touch-action: manipulation;
-}
-
-/* =========================================
-   NOVAS CLASSES DE ARRASTE (SWIPE DUPLO)
-========================================= */
+/* SWIPE / ESTOQUE */
 .swipe-container {
-    background: #e2e8f0 !important; /* Fundo base */
+    background: #e2e8f0 !important;
     position: relative;
     overflow: hidden;
     border-radius: 24px !important;
 }
 
-/* Fundo da Esquerda e Direita que aparecem atrás do card */
 .swipe-action-dir, .swipe-action-esq {
     position: absolute;
     top: 0;
@@ -1226,81 +428,158 @@ select:focus {
     position: relative;
     z-index: 1;
     transition: transform 0.2s ease;
+    border-left: 6px solid var(--uh-primary) !important;
+    touch-action: pan-y;
+    will-change: transform;
 }
 
-/* Estilo do item dentro do Histórico na tela */
-.hist-local-item {
-    background: white;
-    border-radius: 14px;
-    padding: 12px;
-    font-size: 0.75em;
-    color: var(--uh-text);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
-    border-left: 5px solid var(--uh-success);
+.tam-row,
+.reman-grade-linha,
+.grade-btn {
+    background: #fcfaff !important;
+    border: 2px solid var(--uh-border) !important;
+    color: var(--uh-text) !important;
+    border-radius: 16px !important;
 }
 
-/* Correção do Menu StockFlow */
-.home-card {
-    position: relative;
+.tam-row.coletado,
+.marcado-separado {
+    background: #f0fdf4 !important;
+    border-color: var(--uh-success) !important;
+    color: #166534 !important;
+}
+
+.btn-qr-direct,
+.btn-reman-check {
+    background: var(--uh-primary) !important;
+    color: white !important;
+}
+
+.reman-tag {
+    background: linear-gradient(135deg, var(--uh-primary-2), var(--uh-primary-dark)) !important;
+    color: white !important;
+}
+
+#tagFeedbackTop.reman-laranja {
+    background: linear-gradient(135deg, #f97316, #c2410c) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 24px rgba(249,115,22,0.35) !important;
+    border: none !important;
+}
+
+.footer-action-estoque {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.96) !important;
+    padding: 14px 18px;
+    border-top: 1px solid var(--uh-border) !important;
+    z-index: 900;
+    display: flex;
+    justify-content: center;
+}
+
+.footer-action-estoque .btn-main {
+    max-width: 450px;
+}
+
+/* MENU INVENTÁRIO */
+.inventario-menu-grid {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.inventario-card-principal {
+    grid-column: span 2;
+    background: linear-gradient(135deg, #23005d, #233b8f);
+    color: white;
+    border-radius: 24px;
+    padding: 28px;
+    min-height: 170px;
+    box-shadow: 0 14px 32px rgba(91, 22, 200, 0.18);
+    cursor: pointer;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    padding: 15px;
-    background: white;
-    border-radius: 18px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-    border: 1px solid #f1f5f9;
-    min-height: 130px; /* Mantém todos com a mesma altura */
-    box-sizing: border-box;
+    align-items: flex-start;
+    justify-content: center;
 }
 
-.card-icon {
-    width: 40px;
-    height: 40px;
-    background: #f4f0ff;
-    border-radius: 10px;
+.inventario-card-principal h4,
+.inventario-card-principal p {
+    color: white !important;
+    margin: 0;
+}
+
+.inventario-card {
+    background: white;
+    color: #25105f;
+    border: 1px solid #eadcff;
+    border-radius: 22px;
+    padding: 24px;
+    min-height: 150px;
+    box-shadow: 0 12px 32px rgba(91, 22, 200, 0.08);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.inventario-icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: #f2e9ff;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px;
+    font-size: 1.8em;
+    margin-bottom: 12px;
 }
 
-.menu-icon {
-    width: 22px;
-    height: 22px;
+/* UPLOAD E SOBRE */
+.upload-box {
+    width: 100%;
+    background: white;
+    border: 2px solid #eadcff;
+    border-radius: 22px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 10px 28px rgba(91,22,200,0.06);
 }
 
-.card-text h4 {
-    margin: 0 0 4px 0;
-    font-size: 0.85em;
+.upload-btn {
+    background: linear-gradient(135deg, #7c3aed, #23005d);
+    color: white;
+    border-radius: 16px;
+    padding: 14px;
+    font-weight: 900;
+    text-align: center;
+    cursor: pointer;
+}
+
+.upload-name {
+    background: #faf7ff;
+    border: 1px solid #eadcff;
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 0.8em;
     color: #25105f;
-    line-height: 1.2;
-    padding-right: 15px; /* Libera espaço para a seta não encavalar */
+    word-break: break-word;
+    text-align: center;
 }
 
-.card-text p {
-    margin: 0;
-    font-size: 0.7em;
-    color: #64748b;
-    line-height: 1.3;
-    padding-right: 15px; /* Libera espaço para a seta não encavalar */
-}
-
-.card-arrow {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    color: #6200ee;
-    font-size: 1.5em;
-    line-height: 1;
-    font-weight: bold;
-}
-
-/* Layout Desktop - Auditoria de Inventário (2 Colunas) */
+/* AUDITORIA DESKTOP */
 @media (min-width: 1024px) {
     .audit-desktop-grid-2-cols {
         display: grid;
-        grid-template-columns: 280px 1fr; /* Esquerda (Menu Fixo) | Direita (Tabela Fluida) */
+        grid-template-columns: 280px 1fr;
         gap: 20px;
         align-items: start;
     }
@@ -1311,11 +590,10 @@ select:focus {
 
 .audit-table tr { cursor: pointer; transition: background 0.2s; }
 .audit-table tr:hover { background-color: #f1f5f9; }
-
 .audit-table th {
     position: sticky;
     top: 0;
-    background-color: #f8fafc; /* Fundo sólido impede a sobreposição da rolagem */
+    background-color: #f8fafc;
     padding: 12px 15px;
     font-size: 11px;
     color: #0f172a;
@@ -1326,10 +604,8 @@ select:focus {
 }
 
 /* =========================================
-   CORREÇÃO DEFINITIVA - INVENTÁRIO COMPACTO
+   APP INVENTÁRIO (MOBILE FIRST)
 ========================================= */
-
-/* Filtros com texto visível e finos */
 .inv-filtros-container {
     display: flex;
     gap: 8px;
@@ -1337,239 +613,10 @@ select:focus {
     width: 100%;
 }
 
-.inv-filtros-container select {
-    flex: 1;
-    width: 50%;
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e1;
-    background: #ffffff !important;
-    color: #25105f !important; /* Texto roxo escuro bem visível */
-    font-weight: 800;
-    font-size: 0.72em;
-    height: 34px;
-}
-
-/* Remove qualquer duplicação ou moldura extra em volta da quantidade */
-.inv-controle-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
-}
-
-.inv-controle-container > div {
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-}
-
-/* Apenas UMA caixa limpa para a quantidade */
-.inv-input-wrapper-clean {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: #ffffff;
-    border: 2px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 8px 12px;
-    height: 80px;
-    position: relative;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-}
-
-.inv-label-qtd {
-    font-size: 11px;
-    color: #64748b;
-    font-weight: 800;
-    margin-bottom: 2px;
-}
-
-.inv-input-qtd-clean {
-    width: 100%;
-    text-align: center;
-    font-size: 32px;
-    font-weight: 900;
-    color: #1e1b4b !important;
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-/* FORÇA A REMOÇÃO DE QUALQUER CONTINENTE DUPLICADO NA QUANTIDADE */
-#viewInventarioApp .inv-controle-container > div:not(:last-child),
-#viewInventarioApp div[style*="border-radius: 40px"],
-#viewInventarioApp div[style*="border-radius: 16px"]:has(.inv-input-wrapper-clean) {
-    display: none !important;
-}
-
-/* Garante que o input number não mostre setas nativas feias */
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-    -webkit-appearance: none; 
-    margin: 0; 
-}
-input[type=number] {
-    -moz-appearance: textfield;
-}
-
-/* FORÇA A REMOÇÃO DE QUALQUER CONTINENTE DUPLICADO NA QUANTIDADE */
-#viewInventarioApp .inv-controle-container > div:not(:last-child),
-#viewInventarioApp div[style*="border-radius: 40px"],
-#viewInventarioApp div[style*="border-radius: 16px"]:has(.inv-input-wrapper-clean) {
-    display: none !important;
-}
-
-/* Garante que o input number não mostre setas nativas feias */
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-    -webkit-appearance: none; 
-    margin: 0; 
-}
-input[type=number] {
-    -moz-appearance: textfield;
-}
-
-/* =========================================
-   MODAIS MODERNOS (FOTOS E QR CODES)
-========================================= */
-
-/* Fundo do Modal (Backdrop) */
-.modal-moderno {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(30, 41, 59, 0.95); /* Azul/Cinza muito escuro e sólido (estilo da foto) */
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    backdrop-filter: blur(5px);
-}
-
-/* Botão Fechar (X) no topo direito */
-.modal-btn-fechar {
-    position: absolute;
-    top: 30px;
-    right: 30px;
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 10px;
-    opacity: 0.8;
-    transition: opacity 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-btn-fechar:hover, .modal-btn-fechar:active {
-    opacity: 1;
-}
-
-/* Container do elemento principal (Imagem ou QR) */
-.modal-conteudo-wrapper {
-    background: transparent;
-    max-width: 90vw;
-    max-height: 70vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* A Imagem Ampliada em si */
-.modal-conteudo-wrapper img#imgGrande {
-    max-width: 100%;
-    max-height: 70vh;
-    object-fit: contain;
-    border-radius: 20px; /* Bordas bem arredondadas, como na foto */
-    background-color: #f8fafc; /* Fundo claro para contrastar produtos com transparência */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-/* Container específico para o QR Code (para ficar como um "cartão" limpo) */
-.modal-conteudo-wrapper.qr-wrapper {
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 24px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-/* Ajustes no interior do QR Code */
-#qrcode {
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-}
-
-.qr-info {
-    text-align: center;
-    color: #1e293b;
-}
-
-.qr-info h3 {
-    margin: 0 0 5px 0;
-    font-size: 14px;
-    font-weight: 900;
-    color: #4c1d95;
-}
-
-.qr-info p {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-
-/* Mensagem de dica na base */
-.modal-dica {
-    position: absolute;
-    bottom: 30px;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 12px;
-    text-align: center;
-    width: 100%;
-    font-weight: 500;
-    pointer-events: none; /* Garante que o clique passe pela dica e feche o modal */
-}
-
-/* Animação de Entrada Suave */
-@keyframes popIn {
-    0% { transform: scale(0.9); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-/* Ajustes Mobile */
-@media (max-width: 600px) {
-    .modal-btn-fechar {
-        top: 20px;
-        right: 20px;
-    }
-    
-    .modal-conteudo-wrapper img#imgGrande {
-        border-radius: 16px;
-    }
-}
-
-/* =========================================================
-   CORREÇÃO DEFINITIVA DE !IMPORTANT (FILTROS, QR E INPUT)
-========================================================= */
-
-/* 1. Desbloqueia o texto dos filtros no celular e deixa-os finos */
 #viewInventarioApp #filtroCategoria,
 #viewInventarioApp #filtroDivergencia {
+    flex: 1;
+    width: 50%;
     padding: 0 10px !important;
     height: 34px !important;
     min-height: 34px !important;
@@ -1583,7 +630,156 @@ input[type=number] {
     margin-bottom: 0 !important;
 }
 
-/* 2. Destrói a segunda caixa interna do input de quantidade */
+.inv-card-principal {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.inv-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.inv-badge-busca {
+    background: #f3e8ff;
+    color: #4c1d95;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.inv-contador {
+    font-size: 13px;
+    color: #0f172a;
+    font-weight: 900;
+}
+
+.inv-produto-container {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.inv-produto-img-wrapper {
+    position: relative;
+    width: 95px;
+    height: 110px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.inv-produto-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.inv-btn-ampliar {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: rgba(76, 29, 149, 0.85);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 9px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.inv-produto-dados {
+    flex: 1;
+    min-width: 0;
+}
+
+.inv-produto-titulo {
+    margin: 0 0 2px 0;
+    font-size: 13px;
+    font-weight: 900;
+    color: #2e1065;
+    line-height: 1.2;
+}
+
+.inv-produto-cor {
+    margin: 0;
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 700;
+}
+
+.inv-divisor {
+    border: 0;
+    height: 1px;
+    background: #f1f5f9;
+    margin: 8px 0;
+}
+
+.inv-produto-specs p {
+    margin: 0 0 3px 0;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.inv-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.inv-stat-box {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 10px 5px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.inv-stat-label {
+    font-size: 9px;
+    font-weight: 900;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.inv-stat-valor {
+    font-size: 20px;
+    font-weight: 900;
+    color: #1e1b4b;
+}
+
+.inv-stat-box.dif-negativa { 
+    background: #fff5f5; 
+    border-color: #fed7d7;
+    border-left: 4px solid #f97316;
+}
+.inv-stat-box.dif-negativa .inv-stat-valor { color: #dc2626; }
+.inv-stat-box.dif-negativa .inv-stat-label { color: #ea580c; }
+
+.inv-stat-box.dif-positiva { 
+    background: #eff6ff; 
+    border-color: #bfdbfe;
+    border-left: 4px solid #3b82f6;
+}
+.inv-stat-box.dif-positiva .inv-stat-valor { color: #2563eb; }
+
 #viewInventarioApp #inputAchadoInv {
     border: none !important;
     background: transparent !important;
@@ -1607,7 +803,6 @@ input[type=number] {
     margin: 0 !important;
 }
 
-/* 3. Caixa única externa da quantidade */
 #viewInventarioApp .inv-box-quantidade-unica {
     flex: 1;
     display: flex;
@@ -1622,7 +817,6 @@ input[type=number] {
     box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
 }
 
-/* 4. Botão QR SKU bem pequenininho e discreto */
 #viewInventarioApp .inv-btn-qr-mini {
     background: linear-gradient(135deg, #6d28d9, #4c1d95) !important;
     color: #ffffff !important;
@@ -1641,6 +835,52 @@ input[type=number] {
     box-shadow: 0 3px 8px rgba(76, 29, 149, 0.25) !important;
     flex-shrink: 0 !important;
     cursor: pointer !important;
+}
+
+.inv-progresso-texto {
+    font-size: 10px;
+    font-weight: 800;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.inv-progresso-bar-bg {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.inv-progresso-bar-fill {
+    height: 100%;
+    background: #6d28d9;
+    width: 0%;
+    border-radius: 10px;
+    transition: width 0.3s;
+}
+
+.inv-nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.inv-btn-voltar, .inv-btn-proximo {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 12px;
+    border: none;
+    color: white;
+}
+
+.inv-btn-voltar {
+    background: linear-gradient(135deg, #4c1d95, #2e1065);
+}
+
+.inv-btn-proximo {
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 /* =========================================
@@ -1706,4 +946,337 @@ input[type=number] {
     font-size: 10px;
     font-weight: 900;
     cursor: pointer;
+}
+
+/* =========================================================
+   MODAIS MODERNOS UNIFICADOS (FOTOS, QR CODES E SCANNER)
+========================================================= */
+
+/* Fundo escuro azulado com desfoque (Idêntico para Foto, QR e Câmera) */
+.modal-moderno {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(23, 33, 53, 0.92);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* Botão Fechar (X) no canto superior direito */
+.modal-btn-fechar {
+    position: absolute;
+    top: 26px;
+    right: 26px;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 10px;
+    opacity: 0.85;
+    transition: opacity 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+}
+
+.modal-btn-fechar:hover,
+.modal-btn-fechar:active {
+    opacity: 1;
+    transform: scale(1.08);
+}
+
+/* Container centralizado com animação suave */
+.modal-conteudo-wrapper {
+    background: transparent;
+    max-width: 90vw;
+    max-height: 75vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: popIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Foto Ampliada */
+.modal-conteudo-wrapper img#imgGrande {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 20px;
+    background-color: #f8fafc;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+}
+
+/* Cartão Branco do QR Code */
+.modal-conteudo-wrapper.qr-wrapper {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+}
+
+#qrcode {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.qr-info {
+    text-align: center;
+    color: #1e293b;
+}
+
+.qr-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    font-weight: 900;
+    color: #4c1d95;
+}
+
+.qr-info p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+/* =========================================================
+   CARTÃO BRANCO DO SCANNER (ESCANEAR PRODUTO)
+========================================================= */
+.modal-conteudo-wrapper.scanner-wrapper {
+    background-color: #ffffff;
+    width: 92vw;
+    max-width: 390px;
+    max-height: none;
+    padding: 22px 20px 20px 20px;
+    border-radius: 26px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.48);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Título com Ícone de Câmera em Roxo */
+.scanner-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.scanner-modal-header h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 900;
+    color: #2e1065 !important;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+/* Janela Arredondada da Câmera */
+.scanner-viewport-box {
+    position: relative;
+    width: 100%;
+    height: 255px;
+    background: #1e293b;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scanner-video-target {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* Garante que o <video> gerado pela biblioteca preencha o quadro arredondado */
+.scanner-video-target video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 18px !important;
+}
+
+/* Oculta bordas ou sombreamentos duplicados internos do html5-qrcode para usar a nossa moldura limpa */
+.scanner-video-target #qr-shaded-region {
+    display: none !important;
+}
+
+/* Moldura de Leitura (4 Cantoneiras + Linha Laser Roxa) */
+.scanner-overlay-guide {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.scanner-frame {
+    position: relative;
+    width: 62%;
+    height: 58%;
+    max-width: 210px;
+    max-height: 150px;
+}
+
+.scanner-frame .corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-color: rgba(255, 255, 255, 0.9);
+    border-style: solid;
+}
+
+.scanner-frame .corner.tl {
+    top: 0;
+    left: 0;
+    border-width: 4px 0 0 4px;
+    border-top-left-radius: 12px;
+}
+
+.scanner-frame .corner.tr {
+    top: 0;
+    right: 0;
+    border-width: 4px 4px 0 0;
+    border-top-right-radius: 12px;
+}
+
+.scanner-frame .corner.bl {
+    bottom: 0;
+    left: 0;
+    border-width: 0 0 4px 4px;
+    border-bottom-left-radius: 12px;
+}
+
+.scanner-frame .corner.br {
+    bottom: 0;
+    right: 0;
+    border-width: 0 4px 4px 0;
+    border-bottom-right-radius: 12px;
+}
+
+/* Linha Laser Roxa Brilhante */
+.scanner-laser-line {
+    position: absolute;
+    left: -12%;
+    right: -12%;
+    top: 50%;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(168, 85, 247, 0) 0%, #a855f7 25%, #d8b4fe 50%, #a855f7 75%, rgba(168, 85, 247, 0) 100%);
+    box-shadow: 0 0 12px 3px rgba(168, 85, 247, 0.85), 0 0 24px 6px rgba(124, 58, 237, 0.55);
+    border-radius: 999px;
+    transform: translateY(-50%);
+    animation: laserPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes laserPulse {
+    0%, 100% {
+        top: 22%;
+        opacity: 0.85;
+    }
+    50% {
+        top: 78%;
+        opacity: 1;
+    }
+}
+
+/* Rodapé Interno da Caixa do Scanner */
+.scanner-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 16px;
+    padding: 4px 6px 0 6px;
+    width: 100%;
+}
+
+.scanner-gun-icon {
+    flex-shrink: 0;
+    color: #3b0764;
+}
+
+.scanner-footer-divider {
+    width: 1.5px;
+    height: 34px;
+    background-color: #cbd5e1;
+    flex-shrink: 0;
+}
+
+.scanner-modal-footer p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.35;
+    color: #475569;
+    font-weight: 600;
+    text-align: left;
+}
+
+/* Dica externa na base da tela */
+.modal-dica {
+    position: absolute;
+    bottom: 26px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    text-align: center;
+    width: 100%;
+    font-weight: 500;
+    pointer-events: none;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.92); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 520px) {
+    .card-internal {
+        padding: 20px !important;
+    }
+
+    .btn-main {
+        padding: 16px !important;
+        font-size: 0.85em !important;
+    }
+
+    input,
+    select {
+        padding: 14px !important;
+    }
+
+    .home-card {
+        border-radius: 20px !important;
+    }
+
+    .modal-btn-fechar {
+        top: 18px;
+        right: 18px;
+    }
+
+    .modal-conteudo-wrapper.scanner-wrapper {
+        width: 90vw;
+        max-width: 360px;
+        padding: 20px 16px 18px 16px;
+        border-radius: 24px;
+    }
+
+    .scanner-viewport-box {
+        height: 235px;
+    }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StockFlow v3.0.1</title>
+    <title>StockFlow v3.0.2</title>
 
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
@@ -70,16 +70,57 @@
 
 <!-- SCRIPT PARA FECHAR AO CLICAR FORA OU NO ESC (Cole logo a seguir aos modais) -->
 <script>
-    function fecharModal(event, id) {
-        // Se o clique for exatamente no fundo (e não na imagem/qrcode), fecha.
-        if (event.target.id === id) {
-            document.getElementById(id).style.display = 'none';
+    // Desliga todas as tracks de vídeo ativas dentro do leitor e chama o stop() caso exista no app
+    function encerrarModalScanner(modalId = 'modalScannerReman', readerId = 'readerReman') {
+        const modal = document.getElementById(modalId);
+        if (modal) modal.style.display = 'none';
+
+        try {
+            if (window.app && typeof window.app.pararCamera === 'function') {
+                window.app.pararCamera();
+            } else if (window.app && typeof window.app.fecharCamera === 'function') {
+                window.app.fecharCamera();
+            }
+        } catch (e) {}
+
+        const readerEl = document.getElementById(readerId);
+        if (readerEl) {
+            const videos = readerEl.querySelectorAll('video');
+            videos.forEach(video => {
+                try {
+                    if (video.srcObject) {
+                        video.srcObject.getTracks().forEach(track => track.stop());
+                        video.srcObject = null;
+                    }
+                } catch (err) {}
+            });
+            readerEl.innerHTML = '';
         }
     }
 
-    // Ouve a tecla ESC para fechar qualquer modal moderno aberto
+    function fecharModalScanner(event, modalId, readerId) {
+        if (event.target.id === modalId) {
+            encerrarModalScanner(modalId, readerId);
+        }
+    }
+
+    function fecharModal(event, id) {
+        if (event.target.id === id) {
+            if (id === 'modalScannerReman') {
+                encerrarModalScanner('modalScannerReman', 'readerReman');
+            } else {
+                document.getElementById(id).style.display = 'none';
+            }
+        }
+    }
+
+    // Ouve a tecla ESC para fechar qualquer modal moderno aberto (e desligar a câmera se estiver ligada)
     document.addEventListener('keydown', function(event) {
         if (event.key === "Escape") {
+            const modalScanner = document.getElementById('modalScannerReman');
+            if (modalScanner && modalScanner.style.display !== 'none') {
+                encerrarModalScanner('modalScannerReman', 'readerReman');
+            }
             const modais = document.querySelectorAll('.modal-moderno');
             modais.forEach(modal => {
                 modal.style.display = 'none';
@@ -95,7 +136,7 @@
         LOJA: <span id="displayLoja"></span>
     </div>
 
-    <div class="stockflow-title">StockFlow <span>v3.0.1</span></div>
+    <div class="stockflow-title">StockFlow <span>v3.0.2</span></div>
 </div>
 
 <div id="viewLogin" class="view-container active-view">
@@ -194,7 +235,7 @@
 </button>
 
 <div class="footer-copy">
-    © StockFlow v3.0.1 • Desenvolvido por Wagner Gomes dos Santos
+    © StockFlow v3.0.2 • Desenvolvido por Wagner Gomes dos Santos
 </div>
         </div>
     </div>
@@ -288,25 +329,18 @@
             </div>
         </div>
 
-        <!-- NOVO PAINEL DE FILTROS E ORDENAÇÃO DO REMANEJAMENTO -->
+        <!-- PAINEL DE FILTROS E ORDENAÇÃO DO REMANEJAMENTO -->
         <div class="reman-filtros-wrapper" style="width: 100%; max-width: 450px; margin: 0 auto 15px auto; box-sizing: border-box;">
             <div class="reman-filtros-grid">
-                <!-- 1. Filtro de Categoria -->
                 <select id="filtroCatReman" onchange="app.aplicarFiltrosReman()">
                     <option value="TODAS">📂 CATEGORIA: TODAS</option>
                 </select>
-
-                <!-- 2. Filtro de Marca -->
                 <select id="filtroMarcaReman" onchange="app.aplicarFiltrosReman()">
                     <option value="TODAS">🏷️ MARCA: TODAS</option>
                 </select>
-
-                <!-- 3. Filtro de Tamanho -->
                 <select id="filtroTamReman" onchange="app.aplicarFiltrosReman()">
                     <option value="TODOS">📏 TAMANHO: TODOS</option>
                 </select>
-
-                <!-- 4. Ordenação / Modo de Exibição -->
                 <select id="ordemReman" onchange="app.aplicarFiltrosReman()">
                     <option value="NAO_COLETADOS">⏳ NÃO COLETADOS 1º</option>
                     <option value="COLETADOS">✅ COLETADOS 1º</option>
@@ -316,8 +350,6 @@
                     <option value="AZ">🔤 NOME (A - Z)</option>
                 </select>
             </div>
-
-            <!-- Resumo + Botão Limpar -->
             <div class="reman-filtros-status">
                 <span id="contadorFiltroReman">Exibindo todos os itens</span>
                 <button type="button" class="btn-limpar-filtros-reman" onclick="app.limparFiltrosReman()">Limpar Filtros</button>
@@ -335,7 +367,6 @@
 
     <!-- 3. BIPAR POSSÍVEL REMAN (Subtela 2) -->
     <div id="remanTelaPossivelBipar" style="display:none;">
-        <!-- Dashboard de Quantidades -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
             <div style="background:#f1f5f9; border:1px solid #e2e8f0; padding:12px; border-radius:12px; text-align:center;">
                 <span style="font-size:11px; color:#64748b; font-weight:800; text-transform:uppercase;">Modelos Salvos</span><br>
@@ -347,7 +378,6 @@
             </div>
         </div>
 
-        <!-- Área de Scan -->
         <div style="background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px;">
             <h4 style="color:#0f172a; margin-top:0; margin-bottom:15px; font-weight:900;">Bipar Produto</h4>
             <div style="display: flex; gap: 8px; align-items: center; height: 50px; margin-bottom: 15px;">
@@ -377,28 +407,73 @@
 
     <!-- 4. LISTA POSSÍVEL REMAN (Subtela 3) -->
     <div id="remanTelaPossivelLista" style="display:none;">
-        <!-- Botão de exportar FIXO NO TOPO -->
         <button class="btn-main" style="background:#10b981; margin-bottom:20px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="app.exportarPossivelReman()">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
             EXPORTAR LISTA DE SUGESTÕES
         </button>
-
-        <!-- Lista que pode crescer infinitamente para baixo -->
         <div id="listaCompletaPossivelReman" style="padding-bottom:80px;"></div>
     </div>
 
-    <!-- Pop-up Flutuante da Câmera (Compartilhado) -->
-    <div id="modalScannerReman" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; display:none; flex-direction:column; justify-content:center; align-items:center;">
-        <div style="background:white; padding:15px; border-radius:20px; width:90%; max-width:400px; text-align:center;">
-            <h3 style="margin-top:0; color:#0f172a; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:8px;">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                Escanear Produto
-            </h3>
-            <div id="readerReman" style="width: 100%; min-height: 250px; background: #000; border-radius: 12px; overflow: hidden; margin-bottom:15px;"></div>
-            <button style="background:#ef4444; color:white; width:100%; padding:14px; border:none; border-radius:12px; font-weight:900; cursor:pointer;" onclick="document.getElementById('modalScannerReman').style.display='none'; document.getElementById('readerReman').innerHTML='';">FECHAR CÂMERA</button>
+    <!-- ========================================================
+         NOVO MODAL ESCANEAR PRODUTO (PADRÃO VISUAL QR CODE)
+    ========================================================= -->
+    <div id="modalScannerReman" class="modal-moderno" onclick="fecharModalScanner(event, 'modalScannerReman', 'readerReman')" style="display:none;">
+        <!-- Botão X no canto superior direito (mesmo do QR Code) -->
+        <button type="button" class="modal-btn-fechar" onclick="encerrarModalScanner('modalScannerReman', 'readerReman')" aria-label="Fechar câmera">
+            <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+
+        <!-- Caixa Branca Centralizada (Mesma família do QR Code) -->
+        <div class="modal-conteudo-wrapper scanner-wrapper" onclick="event.stopPropagation()">
+            <!-- Cabeçalho com ícone de câmera e título em roxo -->
+            <div class="scanner-modal-header">
+                <svg width="24" height="24" fill="none" stroke="#3b0764" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <h3>ESCANEAR PRODUTO</h3>
+            </div>
+
+            <!-- Área de Vídeo com Cantoneiras e Linha Laser Roxa -->
+            <div class="scanner-viewport-box">
+                <div id="readerReman" class="scanner-video-target"></div>
+
+                <!-- Moldura sobreposta (Cantoneiras + Laser Roxo) -->
+                <div class="scanner-overlay-guide" aria-hidden="true">
+                    <div class="scanner-frame">
+                        <span class="corner tl"></span>
+                        <span class="corner tr"></span>
+                        <span class="corner bl"></span>
+                        <span class="corner br"></span>
+                        <div class="scanner-laser-line"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rodapé instrutivo dentro do card (igual à imagem de referência) -->
+            <div class="scanner-modal-footer">
+                <svg class="scanner-gun-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3b0764" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                    <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                    <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                    <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                    <line x1="7" y1="8" x2="7" y2="16"></line>
+                    <line x1="10" y1="8" x2="10" y2="16"></line>
+                    <line x1="13" y1="8" x2="13" y2="16"></line>
+                    <line x1="17" y1="8" x2="17" y2="16"></line>
+                </svg>
+                <div class="scanner-footer-divider"></div>
+                <p>Aponte a câmera para o<br>código de barras ou QR Code</p>
+            </div>
         </div>
+
+        <!-- Dica no rodapé externo igual ao modal de QR Code -->
+        <p class="modal-dica">Toque fora da caixa ou pressione ESC para fechar</p>
     </div>
-    
+
 </div>
 
 <div id="viewEstoque" class="view-container">
